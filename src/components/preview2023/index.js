@@ -1,0 +1,7 @@
+export { default as PreviewModelo2023 }    from './PreviewModelo2023'
+export { default as PaginaActividad }      from './PaginaActividad'
+export { default as BotonCopiarTabla }     from './BotonCopiarTabla'
+export { default as BloqueMomento }        from './BloqueMomento'
+export { default as BloqueDatosEspecifico } from './BloqueDatosEspecifico'
+export { default as BloqueRA }             from './BloqueRA'
+export { default as CabeceraPagina }       from './CabeceraPagina'

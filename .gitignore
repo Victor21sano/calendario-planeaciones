@@ -1,0 +1,43 @@
+# Dependencias
+node_modules/
+functions/node_modules/
+
+# Builds
+dist/
+build/
+
+# Variables de entorno con secretos (NUNCA subir)
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.production.local
+functions/.env
+
+# Credenciales de Service Account (scripts de admin)
+serviceAccount.json
+*serviceAccount*.json
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+*.log
+
+# Editor / SO
+.DS_Store
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+
+# Herramientas locales de agentes
+.agents/
+.claude/
+temp-impeccable/
+skills-lock.json
+
+# Misc
+.cache/
+coverage/

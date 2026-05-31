@@ -1,0 +1,109 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper: verificar si el usuario es administrador ──────────
+    // Lee /config/admins { uids: ["uid1", ...] } — escrito solo desde Firebase Console.
+    // El motor de reglas hace este get() internamente; no cuenta como lectura de cliente.
+    function esAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/config/admins)
+        && request.auth.uid in get(/databases/$(database)/documents/config/admins).data.uids;
+    }
+
+    // ── Configuración global (solo lectura para admins desde el cliente) ──
+    match /config/{doc} {
+      allow read:  if esAdmin();
+      allow write: if false; // solo desde Firebase Console
+    }
+
+    // ── Perfil del usuario ────────────────────────────────────────
+    match /users/{userId} {
+      // El usuario lee su propio perfil; el admin puede leer cualquiera
+      // (necesario para la query por email en el panel admin)
+      allow read: if request.auth != null
+        && (request.auth.uid == userId || esAdmin());
+
+      // El usuario crea su propio perfil sin creditos, o con creditos = 0.
+      // El admin puede crear documentos de usuario (si aún no existen).
+      allow create: if (request.auth != null && request.auth.uid == userId
+          && (!(request.resource.data.keys().hasAny(['creditos']))
+              || request.resource.data.creditos == 0))
+        || esAdmin();
+
+      // Caso A: perfil normal — sin tocar creditos ni campos protegidos
+      allow update: if request.auth != null && request.auth.uid == userId
+        && !request.resource.data.diff(resource.data).affectedKeys()
+             .hasAny(['creditos', 'comprasIds', 'rol', 'plan']);
+
+      // Caso B: usuario descuenta exactamente 1 crédito (consumo de generación IA).
+      // Único modo en que el cliente puede modificar creditos: decrementar en 1.
+      // Incrementar (reembolso) requiere al admin — protege contra abuso.
+      allow update: if request.auth != null && request.auth.uid == userId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['creditos'])
+        && request.resource.data.creditos is int
+        && resource.data.creditos is int
+        && resource.data.creditos > 0
+        && request.resource.data.creditos == resource.data.creditos - 1;
+
+      // Caso C: admin puede actualizar cualquier campo (acreditación manual, etc.)
+      allow update: if esAdmin();
+
+      allow delete: if false;
+
+      // ── Materias del usuario ──────────────────────────────────
+      match /materias/{materiaId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+
+        match /{document=**} {
+          allow read, write: if request.auth != null && request.auth.uid == userId;
+        }
+      }
+
+      // ── Historial de compras ──────────────────────────────────
+      match /compras/{compraId} {
+        allow read: if request.auth != null && request.auth.uid == userId;
+        allow write: if esAdmin(); // el admin acredita desde el cliente
+      }
+
+      // ── Historial de consumos ─────────────────────────────────
+      // El usuario solo puede crear registros de tipo 'generacion' (descuento).
+      // Los reembolsos los crea el admin manualmente — evita que el cliente
+      // recupere créditos por su cuenta registrando reembolsos falsos.
+      match /consumos/{consumoId} {
+        allow read:          if request.auth != null && request.auth.uid == userId || esAdmin();
+        allow create:        if request.auth != null && request.auth.uid == userId
+          && request.resource.data.keys().hasOnly(['timestamp', 'cantidad', 'tipo'])
+          && request.resource.data.cantidad == 1
+          && request.resource.data.tipo == 'generacion';
+        allow update, delete: if false;
+      }
+    }
+
+    // ── Acreditaciones manuales: admins leen y escriben ──────────
+    match /acreditacionesManual/{docId} {
+      allow read, write: if esAdmin();
+    }
+
+    // ── Caché de estructuras de módulo (por siglema) ─────────────
+    // Usuarios autenticados leen; escritura validada por shape.
+    // En Paso 3 la escritura está desactivada en el cliente; activar en Paso 4.
+    match /estructurasCache/{siglema} {
+      allow read:  if request.auth != null;
+      allow write: if request.auth != null
+        && request.resource.data.keys().hasOnly(['siglema', 'estructura', 'updatedAt'])
+        && request.resource.data.siglema is string;
+    }
+
+    // ── Pagos (idempotencia): bloqueado al cliente ────────────────
+    match /pagos/{paymentId} {
+      allow read, write: if false;
+    }
+
+    // ── Denegar todo lo no permitido explícitamente ───────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

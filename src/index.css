@@ -1,0 +1,381 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Design Tokens ──────────────────────────────────────────── */
+@layer base {
+  :root {
+    --surface-primary:   #ffffff;
+    --surface-elevated:  #f6f9f8;
+    --surface-sunken:    #edf5f4;
+    --border-default:    #dbe7e5;
+    --border-hover:      #b8cfca;
+    --accent-primary:    #0e7490;
+    --text-primary:      #0f172a;
+    --text-secondary:    #64748b;
+    --text-tertiary:     #94a3b8;
+    --radius-card:       1rem;
+    --shadow-card:       0 1px 3px 0 rgba(15,76,92,0.06), 0 1px 2px -1px rgba(0,0,0,0.04);
+    --shadow-card-hover: 0 8px 24px 0 rgba(14,116,144,0.11), 0 2px 8px 0 rgba(0,0,0,0.06);
+    --shadow-xl:         0 10px 40px 0 rgba(14,116,144,0.08);
+
+    /* Curvas de animación — disponibles como var() en CSS y como ease-* en Tailwind */
+    --spring:            cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-out-strong:   cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-inout-strong: cubic-bezier(0.77, 0, 0.175, 1);
+    --ease-drawer:       cubic-bezier(0.32, 0.72, 0, 1);
+    --ease-exit:         cubic-bezier(0.4, 0, 1, 1);
+  }
+
+  .dark {
+    --surface-primary:   #0f172a;
+    --surface-elevated:  #1e293b;
+    --surface-sunken:    #0f172a;
+    --border-default:    rgba(255,255,255,0.07);
+    --border-hover:      rgba(255,255,255,0.12);
+    --accent-primary:    #67e8f9;
+    --text-primary:      #f1f5f9;
+    --text-secondary:    #94a3b8;
+    --text-tertiary:     #475569;
+    --shadow-card:       0 1px 3px 0 rgba(0,0,0,0.3);
+    --shadow-card-hover: 0 8px 24px 0 rgba(34,211,238,0.16), 0 2px 8px 0 rgba(0,0,0,0.2);
+    --shadow-xl:         0 10px 40px 0 rgba(0,0,0,0.4);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+    background-color: var(--surface-elevated);
+    color: var(--text-primary);
+    color-scheme: light;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+
+  .dark body {
+    @apply bg-slate-900 text-slate-100;
+    color-scheme: dark;
+  }
+
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+
+  /*
+   * [1] TRANSICIÓN GLOBAL CORREGIDA
+   * Se aplica SOLO a propiedades de color/opacidad/sombra.
+   * `transform` queda EXCLUIDO deliberadamente: cada componente
+   * interactivo declara su propia transición de transform con la
+   * curva spring, evitando que el override global interfiera con
+   * los estados hover/active en botones y cards.
+   */
+  *, *::before, *::after {
+    transition-property: color, background-color, border-color,
+                         box-shadow, opacity, fill, stroke;
+    transition-duration: 150ms;
+    transition-timing-function: var(--spring);
+  }
+
+  /* Thin premium scrollbar */
+  ::-webkit-scrollbar        { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track  { background: transparent; }
+  ::-webkit-scrollbar-thumb  { @apply bg-slate-300 dark:bg-slate-600 rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-slate-400 dark:bg-slate-500; }
+}
+
+/* ─── Components ─────────────────────────────────────────────── */
+@layer components {
+
+  /*
+   * [3] CARDS CON LIFT FÍSICO
+   * transform se declara explícitamente aquí (fuera del * global)
+   * con la curva spring de 280ms para un overshoot sutil.
+   * box-shadow acompaña el movimiento para reforzar la profundidad.
+   */
+  .card {
+    background-color: var(--surface-primary);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+    transition: box-shadow  280ms var(--spring),
+                transform   280ms var(--spring),
+                border-color 150ms var(--spring);
+  }
+  /* Hover solo en dispositivos con puntero preciso (no touch) */
+  @media (hover: hover) and (pointer: fine) {
+    .card:hover {
+      box-shadow: var(--shadow-card-hover);
+      transform: translateY(-2px);
+    }
+  }
+
+  /*
+   * [5] INPUT CON FOCUS-VISIBLE
+   * focus:  queda sin anillo (el usuario de mouse no lo necesita).
+   * focus-visible: muestra anillo solo para navegación por teclado.
+   * Opacidad del ring subida de /40 → /70 para mayor contraste WCAG.
+   */
+  .input-base {
+    @apply w-full px-3 py-2.5 rounded-xl text-sm font-medium
+           border border-slate-200 dark:border-slate-700
+           bg-white dark:bg-slate-800
+           text-slate-900 dark:text-slate-100
+           placeholder-slate-400 dark:placeholder-slate-500
+           outline-none
+           focus-visible:ring-2 focus-visible:ring-brand-500/70
+           focus-visible:border-brand-500
+           dark:focus-visible:ring-brand-300/60
+           dark:focus-visible:border-brand-400;
+    transition: border-color 150ms var(--spring),
+                box-shadow   150ms var(--spring);
+  }
+  /* Borde tenue en hover (feedback pre-focus) */
+  .input-base:hover:not(:focus) {
+    border-color: var(--border-hover);
+  }
+
+  /*
+   * [2] BTN-PRIMARY — FÍSICA DE RESORTE COMPLETA
+   * Ciclo: hover → ligero scale-up + lift (1px)
+   *        active → compress (scale-down, sin lift)
+   * transition en transform declarado aquí, NO vía transition-all,
+   * para que la curva spring sea la correcta y no se mezcle con la global.
+   */
+  .btn-primary {
+    @apply inline-flex items-center gap-1.5
+           px-4 py-2 rounded-xl text-sm font-semibold text-white
+           bg-gradient-to-r from-brand-700 to-academic-600
+           hover:from-brand-600 hover:to-academic-500
+           shadow-sm hover:shadow-md hover:shadow-brand-200 dark:hover:shadow-brand-900/40
+           disabled:opacity-50 disabled:cursor-not-allowed
+           outline-none
+           focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2;
+    transition: transform  200ms var(--spring),
+                box-shadow 200ms var(--spring),
+                opacity    150ms linear;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .btn-primary:not(:disabled):hover  { transform: scale(1.025) translateY(-1px); }
+    .btn-secondary:not(:disabled):hover { transform: scale(1.01); }
+    .btn-ghost:hover  { transform: scale(1.01); }
+    .btn-danger:hover { transform: scale(1.01); }
+    .btn-icon-delete:hover { transform: scale(1.12); }
+  }
+  .btn-primary:not(:disabled):active { transform: scale(0.96); }
+
+  /*
+   * [2] BTN-SECONDARY — escala sutil (sin lift vertical para acciones secundarias)
+   */
+  .btn-secondary {
+    @apply inline-flex items-center gap-1.5
+           px-4 py-2 rounded-xl text-sm font-semibold
+           text-slate-700 dark:text-slate-200
+           bg-white dark:bg-slate-800
+           border border-slate-200 dark:border-slate-700
+           hover:bg-slate-50 dark:hover:bg-slate-700
+           hover:border-slate-300 dark:hover:border-slate-600
+           disabled:opacity-50 disabled:cursor-not-allowed
+           outline-none
+           focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2;
+    transition: transform      200ms var(--spring),
+                background-color 150ms var(--spring),
+                border-color    150ms var(--spring);
+  }
+  .btn-secondary:not(:disabled):active { transform: scale(0.97); }
+
+  /* [2] BTN-DANGER */
+  .btn-danger {
+    @apply inline-flex items-center gap-1.5
+           px-3 py-1.5 rounded-lg text-xs font-semibold
+           text-rose-600 dark:text-rose-400
+           bg-rose-50 dark:bg-rose-900/20
+           border border-rose-200 dark:border-rose-800/40
+           hover:bg-rose-100 dark:hover:bg-rose-900/40
+           outline-none
+           focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2;
+    transition: transform        200ms var(--spring),
+                background-color 150ms var(--spring);
+  }
+  .btn-danger:active { transform: scale(0.96); }
+
+  /* [2] BTN-GHOST */
+  .btn-ghost {
+    @apply inline-flex items-center gap-1.5
+           px-3 py-2 rounded-xl text-sm font-semibold
+           text-brand-700 dark:text-brand-300
+           hover:bg-brand-50 dark:hover:bg-brand-900/20
+           outline-none
+           focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2;
+    transition: transform        200ms var(--spring),
+                background-color 150ms var(--spring);
+  }
+  .btn-ghost:active { transform: scale(0.97); }
+
+  .pressable {
+    transition: transform 160ms var(--ease-out-strong),
+                background-color 150ms var(--spring),
+                border-color 150ms var(--spring),
+                box-shadow 180ms var(--spring),
+                color 150ms var(--spring);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .pressable:not(:disabled):hover {
+      transform: translateY(-1px);
+    }
+  }
+  .pressable:not(:disabled):active {
+    transform: scale(0.97);
+  }
+
+  .icon-button {
+    @apply inline-flex items-center justify-center rounded-lg outline-none
+           focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2;
+    transition: transform 150ms var(--ease-out-strong),
+                background-color 150ms var(--spring),
+                color 150ms var(--spring),
+                opacity 150ms var(--spring);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .icon-button:not(:disabled):hover {
+      transform: translateY(-1px);
+    }
+  }
+  .icon-button:not(:disabled):active {
+    transform: scale(0.92);
+  }
+
+  .selectable-card {
+    transition: transform 180ms var(--ease-out-strong),
+                border-color 160ms var(--spring),
+                background-color 160ms var(--spring),
+                box-shadow 180ms var(--spring);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .selectable-card:not(:disabled):hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.07);
+    }
+  }
+  .selectable-card:not(:disabled):active {
+    transform: scale(0.985);
+  }
+
+  .pdf-dropzone {
+    transition: transform 180ms var(--ease-out-strong),
+                border-color 160ms var(--spring),
+                background-color 160ms var(--spring),
+                box-shadow 180ms var(--spring);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .pdf-dropzone:not(.is-disabled):hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(14, 116, 144, 0.12);
+    }
+  }
+  .pdf-dropzone:not(.is-disabled):active {
+    transform: scale(0.99);
+  }
+
+  /* [2] BTN-ICON-DELETE — escala más pronunciada (acción destructiva = feedback claro) */
+  .btn-icon-delete {
+    @apply p-1.5 rounded-lg text-slate-400
+           hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20
+           opacity-0 group-hover:opacity-100
+           outline-none
+           focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-1;
+    transition: opacity          150ms var(--spring),
+                color            150ms var(--spring),
+                background-color 150ms var(--spring),
+                transform        200ms var(--spring);
+  }
+  .btn-icon-delete:active { transform: scale(0.92); }
+
+  /* Section title */
+  .section-title {
+    @apply text-base font-bold text-slate-800 dark:text-slate-100;
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold;
+  }
+}
+
+/*
+ * [4] PREFERS-REDUCED-MOTION
+ * Usuarios que han pedido reducción de movimiento en su SO reciben:
+ * - Duraciones colapsadas a 1ms (imperceptibles, pero no 0 para evitar
+ *   saltos abruptos en lectores de pantalla).
+ * - Transforms deshabilitados para cards y botones.
+ * - scroll-behavior: auto (sin scroll suave).
+ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration:        0.01ms !important;
+    animation-iteration-count: 1      !important;
+    transition-duration:       0.01ms !important;
+    scroll-behavior:           auto   !important;
+  }
+
+  .card:hover,
+  .btn-primary:not(:disabled):hover,
+  .btn-primary:not(:disabled):active,
+  .btn-secondary:not(:disabled):hover,
+  .btn-secondary:not(:disabled):active,
+  .btn-danger:hover, .btn-danger:active,
+  .btn-ghost:hover,  .btn-ghost:active,
+  .btn-icon-delete:hover, .btn-icon-delete:active {
+    transform: none !important;
+  }
+}
+
+/* ─── Preview 2023: salto de página por actividad ───────────── */
+@media print {
+  .preview-2023-pagina {
+    page-break-after: always;
+    break-after: page;
+  }
+  .preview-2023-pagina:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+}
+
+/* ─── Print Styles ───────────────────────────────────────────── */
+@media print {
+  header,
+  footer,
+  .no-print,
+  .btn-primary,
+  .btn-secondary,
+  .btn-danger,
+  .btn-ghost {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 11px !important;
+  }
+
+  .card {
+    box-shadow: none !important;
+    border: 1px solid #e2e8f0 !important;
+    break-inside: avoid;
+    transform: none !important;
+  }
+
+  table { page-break-inside: auto; }
+  tr    { page-break-inside: avoid; page-break-after: auto; }
+  thead { display: table-header-group; }
+
+  .print-full-width {
+    grid-column: 1 / -1 !important;
+    position: static !important;
+  }
+}
