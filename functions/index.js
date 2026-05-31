@@ -55,6 +55,24 @@ const MAX_PDF_B64_LEN  = 50_000_000 // ~37.5 MB en base64 ≈ ~28 MB de PDF orig
 // ── Sistema de créditos ────────────────────────────────────────
 const CREDITOS_POR_GENERACION = 1
 
+// ── Sesiones de generación 2023 ────────────────────────────────
+// El flujo 2023 hace muchas llamadas a la IA (estructura + N RAs) pero
+// cuesta 1 solo crédito. Para no cobrar por llamada ni dejar la función
+// abierta, el cliente abre una sesión (descuenta 1 crédito), pasa su id
+// en cada llamada y la cierra al terminar (confirma o reembolsa).
+// Techo de llamadas IA por sesión, SEGÚN EL TIPO DE FLUJO. Acota cuántos prompts
+// puede ejecutar 1 crédito y evita que, p. ej., una regeneración de 1 RA disponga
+// de decenas de llamadas. El límite se fija en el servidor al abrir la sesión y se
+// guarda en la propia sesión; el cliente solo declara el tipo de flujo.
+//   completa → 2018/2023 completo: estructura + N RAs (+ reintentos)
+//   regenRA  → regeneración de 1 RA (solo reintentos de esa llamada)
+const LIMITES_POR_FLUJO = {
+  completa: 60,
+  regenRA:  8,
+}
+const DEFAULT_MAX_LLAMADAS = LIMITES_POR_FLUJO.completa
+const SESION_TTL_MS        = 30 * 60_000 // 30 min: ventana de vida de una sesión activa
+
 // Emails de administrador con saldo infinito (delta=0 en cada transacción).
 // El check de admin ocurre SIEMPRE en el servidor usando el token verificado de Firebase;
 // el cliente no puede declararse admin por su cuenta.
@@ -121,7 +139,12 @@ exports.generarPlaneacion = onCall(
     const uid       = request.auth.uid
     const userRef   = db.collection('users').doc(uid)
 
-    const { systemPrompt, userPrompt, pdfPEBase64, pdfGPEBase64, temperature = 0.7 } = request.data || {}
+    const { systemPrompt, userPrompt, pdfPEBase64, pdfGPEBase64, temperature = 0.7, sessionId } = request.data || {}
+
+    // Si llega sessionId, el crédito ya se descontó en iniciarGeneracion: esta
+    // llamada solo consume un "tick" de la sesión (flujo multi-llamada → 1 crédito).
+    // Sin sessionId se mantiene el modo de 1 llamada = 1 crédito (p. ej. regeneración individual).
+    const usaSesion = Boolean(sessionId)
 
     // ── Validación de entrada ───────────────────────────────────
     if (!userPrompt)   throw new HttpsError('invalid-argument', 'Falta el prompt de usuario.')
@@ -140,12 +163,18 @@ exports.generarPlaneacion = onCall(
       throw new HttpsError('invalid-argument', 'La temperatura debe estar entre 0 y 1.')
     }
 
-    // ── Verificación de saldo (pre-check rápido antes de la transacción) ──
-    const userSnap    = await userRef.get()
-    const saldoActual = userSnap.data()?.creditos ?? 0
-
-    if (!adminUser && saldoActual < CREDITOS_POR_GENERACION) {
-      throw new HttpsError('failed-precondition', 'Saldo insuficiente. Adquiere más créditos para continuar.')
+    // ── Sesión ya pagada: validar y consumir un tick ───────────
+    let sessionRef = null
+    if (usaSesion) {
+      sessionRef = userRef.collection('sesionesGeneracion').doc(sessionId)
+      await consumirLlamadaSesion(sessionRef, ['completa'])
+    } else {
+      // ── Modo 1 llamada = 1 crédito: pre-check rápido de saldo ──
+      const userSnap    = await userRef.get()
+      const saldoActual = userSnap.data()?.creditos ?? 0
+      if (!adminUser && saldoActual < CREDITOS_POR_GENERACION) {
+        throw new HttpsError('failed-precondition', 'Saldo insuficiente. Adquiere más créditos para continuar.')
+      }
     }
 
     // ── Selección de proveedor: OpenAI > Gemini > Anthropic ─────
@@ -158,9 +187,9 @@ exports.generarPlaneacion = onCall(
       throw new HttpsError('failed-precondition', 'El servicio de IA no está configurado en el servidor.')
     }
 
-    // ── Descuento de crédito (transacción atómica) ──────────────
+    // ── Descuento de crédito (solo modo sin sesión; transacción atómica) ──
     // admin → delta = 0 (saldo intacto, pero la transacción corre igual)
-    const delta = await descontarCredito(userRef, adminUser)
+    const delta = usaSesion ? 0 : await descontarCredito(userRef, adminUser)
 
     // ── Llamada a la IA ─────────────────────────────────────────
     try {
@@ -173,16 +202,21 @@ exports.generarPlaneacion = onCall(
         text = await callAnthropic({ anthropicKey, systemPrompt, userPrompt, pdfPEBase64, pdfGPEBase64, temperature })
       }
 
-      // Registrar consumo exitoso (no crítico: no debe bloquear la respuesta)
-      registrarConsumo(userRef, adminUser, delta, 'generacion')
+      // Registrar consumo exitoso solo en modo sin sesión (la sesión ya lo registró en iniciar).
+      if (!usaSesion) registrarConsumo(userRef, adminUser, delta, 'generacion')
+      // Con sesión: marcar éxito (await) → habilita el cobro definitivo ANTES de responder.
+      else if (sessionRef) await marcarExitoSesion(sessionRef)
 
       return { text }
     } catch (err) {
       console.error('IA API error (uid=%s):', uid, err.message)
 
-      // Reembolsar crédito y registrar el reembolso (ambos no críticos)
-      const refundDelta = await reembolsarCredito(userRef, adminUser)
-      registrarConsumo(userRef, adminUser, refundDelta, 'reembolso')
+      // En modo sin sesión reembolsamos aquí; con sesión, el reembolso lo hace
+      // finalizarGeneracion(exito:false) una sola vez al cerrar el flujo completo.
+      if (!usaSesion) {
+        const refundDelta = await reembolsarCredito(userRef, adminUser)
+        registrarConsumo(userRef, adminUser, refundDelta, 'reembolso')
+      }
 
       throw new HttpsError('internal', 'Error al llamar al servicio de IA. Intenta de nuevo.')
     }
@@ -237,6 +271,132 @@ exports.extraerEstructura = onCall(
   }
 )
 
+// ── iniciarGeneracion: abre sesión y descuenta 1 crédito ───────
+// Descuento atómico + creación de la sesión en una sola transacción.
+// Devuelve { sessionId } que el cliente pasa en cada llamada de IA del flujo
+// (sirve tanto al Modelo 2018 como al 2023: ambos son multi-llamada y cuestan 1 crédito).
+exports.iniciarGeneracion = onCall({ cors: true }, async (request) => {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Debes iniciar sesion para usar esta funcion.')
+  }
+
+  const adminUser  = esAdmin(request.auth)
+  const uid        = request.auth.uid
+  const userRef    = db.collection('users').doc(uid)
+  const sessionRef = userRef.collection('sesionesGeneracion').doc()
+  const delta      = adminUser ? 0 : -CREDITOS_POR_GENERACION
+
+  // Tipo de flujo declarado por el cliente → fija el límite de llamadas en el servidor.
+  const tipoFlujo   = (request.data?.tipoFlujo === 'regenRA') ? 'regenRA' : 'completa'
+  const maxLlamadas = LIMITES_POR_FLUJO[tipoFlujo] ?? DEFAULT_MAX_LLAMADAS
+
+  await db.runTransaction(async (tx) => {
+    const snap   = await tx.get(userRef)
+    const actual = snap.data()?.creditos ?? 0
+    if (!adminUser && actual < CREDITOS_POR_GENERACION) {
+      throw new HttpsError('failed-precondition', 'Saldo insuficiente. Adquiere más créditos para continuar.')
+    }
+    tx.set(userRef, { creditos: actual + delta }, { merge: true })
+    tx.set(sessionRef, {
+      estado:            'activa',
+      admin:             adminUser,
+      creditoDescontado: !adminUser,
+      tipoFlujo,
+      maxLlamadas,       // límite fijado en servidor; el cliente no puede ampliarlo después
+      llamadas:          0, // intentos de IA (para el tope maxLlamadas)
+      exitos:            0, // respuestas de IA exitosas (decide el reembolso, no el cliente)
+      createdAt:         FieldValue.serverTimestamp(),
+    })
+  })
+
+  registrarConsumo(userRef, adminUser, delta, 'generacion')
+  return { sessionId: sessionRef.id }
+})
+
+// ── finalizarGeneracion: cierra la sesión ──────────────────────
+// IMPORTANTE: el reembolso NO depende de un flag del cliente. Reembolsamos solo
+// si la sesión no produjo NINGUNA salida de IA exitosa (ses.exitos === 0). Así
+// un usuario no puede generar su planeación completa y luego pedir el reembolso:
+// si la IA generó algo útil, el crédito se consume aunque el cliente diga 'exito:false'.
+// (El parámetro 'exito' del cliente solo se usa para etiquetar el estado final.)
+exports.finalizarGeneracion = onCall({ cors: true }, async (request) => {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Debes iniciar sesion para usar esta funcion.')
+  }
+
+  const { sessionId, exito = true } = request.data || {}
+  if (!sessionId || typeof sessionId !== 'string') {
+    throw new HttpsError('invalid-argument', 'Falta el identificador de sesión.')
+  }
+
+  const uid        = request.auth.uid
+  const userRef    = db.collection('users').doc(uid)
+  const sessionRef = userRef.collection('sesionesGeneracion').doc(sessionId)
+
+  let reembolsado = false
+  await db.runTransaction(async (tx) => {
+    const sesSnap = await tx.get(sessionRef)
+    if (!sesSnap.exists) throw new HttpsError('not-found', 'Sesión no encontrada.')
+    const ses = sesSnap.data()
+    if (ses.estado !== 'activa') return // ya cerrada: idempotente
+
+    // Reembolso server-owned: solo si no hubo ninguna generación exitosa.
+    const procedeReembolso = (ses.exitos ?? 0) === 0 && ses.creditoDescontado
+    if (procedeReembolso) {
+      const userSnap = await tx.get(userRef)
+      const actual   = userSnap.data()?.creditos ?? 0
+      tx.set(userRef, { creditos: actual + CREDITOS_POR_GENERACION }, { merge: true })
+    }
+    tx.update(sessionRef, {
+      estado:    procedeReembolso ? 'reembolsada' : (exito ? 'completada' : 'cerrada'),
+      closedAt:  FieldValue.serverTimestamp(),
+    })
+    reembolsado = procedeReembolso
+  })
+
+  if (reembolsado) registrarConsumo(userRef, false, CREDITOS_POR_GENERACION, 'reembolso')
+  return { ok: true, reembolsado }
+})
+
+// Valida que la sesión exista, sea del usuario, esté activa, no haya
+// expirado ni superado el cap de llamadas. Incrementa el contador.
+// Corre dentro de una transacción para evitar carreras entre llamadas concurrentes.
+async function consumirLlamadaSesion(sessionRef, flujosPermitidos) {
+  await db.runTransaction(async (tx) => {
+    const snap = await tx.get(sessionRef)
+    if (!snap.exists) throw new HttpsError('permission-denied', 'Sesión de generación inválida.')
+    const ses = snap.data()
+    if (ses.estado !== 'activa') {
+      throw new HttpsError('failed-precondition', 'La sesión de generación ya no está activa.')
+    }
+    // Candado por tipo de flujo: la sesión solo sirve contra los endpoints
+    // declarados para su tipoFlujo (p. ej. una sesión 'regenRA' no puede usarse
+    // contra el endpoint de generación completa 2018).
+    if (!flujosPermitidos.includes(ses.tipoFlujo ?? 'completa')) {
+      throw new HttpsError('permission-denied', 'La sesión no es válida para esta operación.')
+    }
+    const createdMs = ses.createdAt?.toMillis?.() ?? 0
+    if (createdMs && Date.now() - createdMs > SESION_TTL_MS) {
+      throw new HttpsError('deadline-exceeded', 'La sesión de generación expiró.')
+    }
+    const tope = ses.maxLlamadas ?? DEFAULT_MAX_LLAMADAS
+    if ((ses.llamadas ?? 0) >= tope) {
+      throw new HttpsError('resource-exhausted', 'Se superó el número de llamadas permitidas por generación.')
+    }
+    tx.update(sessionRef, { llamadas: (ses.llamadas ?? 0) + 1 })
+  })
+}
+
+// Marca una respuesta de IA exitosa en la sesión (incremento atómico).
+// CRÍTICO: NO es best-effort. Debe esperarse (await) y propagar el error ANTES
+// de devolver el texto al cliente. Así se cierra la condición de carrera: el
+// cliente no puede recibir la respuesta y llamar a finalizarGeneracion(exito:false)
+// antes de que 'exitos' quede escrito. Si el write falla, lanzamos y NO entregamos
+// el texto → el crédito queda reembolsable (no hubo entrega) y no hay abuso posible.
+async function marcarExitoSesion(sessionRef) {
+  await sessionRef.update({ exitos: FieldValue.increment(1) })
+}
+
 exports.generarGemini2023 = onCall(
   {
     timeoutSeconds: 540,
@@ -248,6 +408,15 @@ exports.generarGemini2023 = onCall(
     if (!request.auth) {
       throw new HttpsError('unauthenticated', 'Debes iniciar sesion para usar esta funcion.')
     }
+
+    // ── Validación de sesión pagada (saldo ya descontado en iniciarGeneracion2023) ──
+    const { sessionId } = request.data || {}
+    if (!sessionId || typeof sessionId !== 'string') {
+      throw new HttpsError('invalid-argument', 'Falta el identificador de sesión de generación.')
+    }
+    const sessionRef = db.collection('users').doc(request.auth.uid)
+      .collection('sesionesGeneracion').doc(sessionId)
+    await consumirLlamadaSesion(sessionRef, ['completa', 'regenRA'])
 
     const {
       systemPrompt = null,
@@ -315,6 +484,7 @@ exports.generarGemini2023 = onCall(
           maxOutputTokens,
         })
       }
+      await marcarExitoSesion(sessionRef) // habilita el cobro definitivo ANTES de responder
       return { text }
     } catch (err) {
       console.error('IA 2023 API error (uid=%s):', request.auth.uid, err.message)

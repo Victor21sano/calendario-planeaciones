@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { useAuth }                      from '../../contexts/AuthContext'
 import { generarActividadesParaRA2023 } from '../../services/ia/gemini2023'
-import { descontarCredito }             from '../../services/creditosService'
+import { iniciarSesionGeneracion, finalizarSesionGeneracion } from '../../services/creditosService'
 
 export default function BotonRegenerarRA({ ra, cabecera, pdfPE, pdfGPE, onRegenerado }) {
-  const { user, creditos, esAdmin } = useAuth()
+  const { creditos, esAdmin } = useAuth()
   const [generando,  setGenerando]  = useState(false)
   const [confirmar,  setConfirmar]  = useState(false)
   const [errorLocal, setErrorLocal] = useState('')
@@ -13,25 +13,39 @@ export default function BotonRegenerarRA({ ra, cabecera, pdfPE, pdfGPE, onRegene
     if (generando) return
     setGenerando(true)
     setErrorLocal('')
-    try {
-      if (!esAdmin) {
-        if ((creditos ?? 0) <= 0) {
-          setErrorLocal('Sin créditos. Adquiere créditos para regenerar.')
-          return
-        }
-        await descontarCredito(user.uid)
-      }
 
+    if (!esAdmin && (creditos ?? 0) <= 0) {
+      setErrorLocal('Sin créditos. Adquiere créditos para regenerar.')
+      setGenerando(false)
+      return
+    }
+
+    // Sesión propia para esta regeneración (1 crédito, descontado en el servidor).
+    let sessionId
+    try {
+      sessionId = await iniciarSesionGeneracion('regenRA')
+    } catch (err) {
+      setErrorLocal(err.code === 'functions/failed-precondition'
+        ? 'Sin créditos. Adquiere créditos para regenerar.'
+        : (err.message || 'Error al iniciar la regeneración.'))
+      setGenerando(false)
+      return
+    }
+
+    try {
       const actividades = await generarActividadesParaRA2023({
         pdfPE,
         pdfGPE,
         cabecera,
         raObjetivo:   ra,
         parametros:   { actividadesObjetivo: ra.actividadesEspecificas?.length || 2 },
+        sessionId,
       })
 
+      await finalizarSesionGeneracion(sessionId, true)
       onRegenerado(Array.isArray(actividades) ? actividades : [])
     } catch (err) {
+      await finalizarSesionGeneracion(sessionId, false)
       setErrorLocal(err.message || 'Error al regenerar.')
       console.error('[BotonRegenerarRA]', err)
     } finally {

@@ -1,49 +1,46 @@
-import { doc, collection, runTransaction, serverTimestamp } from 'firebase/firestore'
-import { db } from '../firebase'
+/**
+ * Servicio de créditos (cliente).
+ *
+ * El cliente YA NO modifica el saldo directamente: toda generación pagada
+ * abre una "sesión de generación" en el servidor, que descuenta 1 crédito de
+ * forma atómica, valida cada llamada de IA y reembolsa si el flujo falla.
+ * Las reglas de Firestore impiden que el cliente altere el campo `creditos`.
+ *
+ * Flujo de uso:
+ *   const sessionId = await iniciarSesionGeneracion()   // descuenta 1 crédito
+ *   ... generar (pasando sessionId a cada llamada de IA) ...
+ *   await finalizarSesionGeneracion(sessionId, exito)    // confirma o reembolsa
+ */
 
-const CREDITOS_POR_GENERACION = 1
+import { httpsCallable } from 'firebase/functions'
+import { functions } from '../firebase'
+
+const iniciarGeneracionFn   = httpsCallable(functions, 'iniciarGeneracion')
+const finalizarGeneracionFn = httpsCallable(functions, 'finalizarGeneracion')
 
 /**
- * Descuenta 1 crédito del usuario de forma atómica.
- * Lanza Error('SIN_CREDITOS') si el saldo es insuficiente.
- * Registra el consumo en users/{uid}/consumos con tipo 'generacion'.
- *
- * La regla de Firestore (Caso B) permite este update porque:
- *   - Solo afecta el campo 'creditos'.
- *   - El nuevo valor es exactamente saldoActual - 1.
- *   - El saldo actual es > 0.
+ * Abre una sesión de generación y descuenta 1 crédito en el servidor (atómico).
+ * Devuelve el sessionId a pasar en cada llamada de IA del flujo.
+ * Lanza HttpsError 'failed-precondition' si el saldo es insuficiente.
  */
-export async function descontarCredito(uid) {
-  const userRef = doc(db, 'users', uid)
-
-  await runTransaction(db, async (tx) => {
-    const snap        = await tx.get(userRef)
-    const saldoActual = snap.exists() ? (snap.data().creditos ?? 0) : 0
-
-    if (saldoActual < CREDITOS_POR_GENERACION) {
-      throw new Error('SIN_CREDITOS')
-    }
-
-    const consumoRef = doc(collection(db, 'users', uid, 'consumos'))
-
-    // tx.update solo modifica el campo creditos → satisface la regla Caso B
-    tx.update(userRef, { creditos: saldoActual - CREDITOS_POR_GENERACION })
-    tx.set(consumoRef, {
-      timestamp: serverTimestamp(),
-      cantidad:  CREDITOS_POR_GENERACION,
-      tipo:      'generacion',
-    })
-  })
+export async function iniciarSesionGeneracion(tipoFlujo = 'completa') {
+  const res = await iniciarGeneracionFn({ tipoFlujo })
+  return res.data?.sessionId
 }
 
 /**
- * Los reembolsos los hace el admin manualmente desde el panel /admin.
- * Las reglas de Firestore no permiten que el cliente incremente creditos
- * (previene abuso). Esta función es un no-op con aviso en consola.
+ * Cierra la sesión. El servidor decide el reembolso (solo si la sesión no
+ * produjo ninguna salida de IA exitosa); `exito` solo etiqueta el estado.
+ * Nunca lanza: el cierre no debe romper el flujo principal.
+ * Devuelve { ok, reembolsado } o null si el cierre falló.
  */
-export async function reembolsarCredito(uid) {
-  console.warn(
-    `[creditosService] Reembolso solicitado para uid=${uid}. ` +
-    'El cliente no puede incrementar créditos. Solicitar reembolso al administrador.'
-  )
+export async function finalizarSesionGeneracion(sessionId, exito) {
+  if (!sessionId) return null
+  try {
+    const res = await finalizarGeneracionFn({ sessionId, exito })
+    return res.data || null
+  } catch (err) {
+    console.error('[creditosService] Error al finalizar sesión:', err.message)
+    return null
+  }
 }

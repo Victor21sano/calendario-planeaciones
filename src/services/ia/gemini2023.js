@@ -12,7 +12,32 @@ import { PROMPT_ACTIVIDADES_2023 } from './prompts2023/promptActividades.js'
 
 const MODEL_ESTRUCTURA = import.meta.env.VITE_GEMINI_MODEL_ESTRUCTURA || 'gemini-2.5-flash'
 const MODEL_ACTIVIDADES = import.meta.env.VITE_GEMINI_MODEL_ACTIVIDADES || 'gemini-2.5-flash'
-const generarGemini2023Fn = httpsCallable(functions, 'generarGemini2023', { timeout: 540000 })
+const generarGemini2023Fn   = httpsCallable(functions, 'generarGemini2023',   { timeout: 540000 })
+const iniciarGeneracionFn   = httpsCallable(functions, 'iniciarGeneracion')
+const finalizarGeneracionFn = httpsCallable(functions, 'finalizarGeneracion')
+
+/**
+ * Abre una sesión de generación 2023 en el servidor (descuenta 1 crédito
+ * de forma atómica). Devuelve el sessionId que debe pasarse a cada llamada.
+ * Lanza HttpsError 'failed-precondition' si el saldo es insuficiente.
+ */
+export async function iniciarSesion2023() {
+  const res = await iniciarGeneracionFn({ tipoFlujo: 'completa' })
+  return res.data?.sessionId
+}
+
+/**
+ * Cierra la sesión. exito=false reembolsa el crédito en el servidor.
+ * No lanza: el cierre nunca debe romper el flujo principal.
+ */
+export async function finalizarSesion2023(sessionId, exito) {
+  if (!sessionId) return
+  try {
+    await finalizarGeneracionFn({ sessionId, exito })
+  } catch (err) {
+    console.error('[gemini2023] Error al finalizar sesión:', err.message)
+  }
+}
 
 async function fileToBase64(file) {
   return new Promise((resolve, reject) => {
@@ -37,6 +62,7 @@ async function llamarGemini({
   temperature,
   maxOutputTokens,
   modelo,
+  sessionId,
 }) {
   const modeloEfectivo = modelo || MODEL_ESTRUCTURA
   const MAX_INTENTOS = 5
@@ -57,6 +83,7 @@ async function llamarGemini({
         temperature,
         maxOutputTokens,
         model: modeloEfectivo,
+        sessionId,
       })
 
       const texto = res.data?.text || ''
@@ -82,7 +109,7 @@ async function llamarGemini({
  * @param {{ fechaInicioSemestre, fechaFinSemestre, diasNoLaborables }} calendario
  * @returns {Promise<Object>}
  */
-export async function extraerEstructura2023(pdfPE, pdfGPE, datosDocente, calendario) {
+export async function extraerEstructura2023(pdfPE, pdfGPE, datosDocente, calendario, sessionId) {
   const [b64PE, b64GPE] = await Promise.all([fileToBase64(pdfPE), fileToBase64(pdfGPE)])
 
   const contextoJSON = JSON.stringify({ docente: datosDocente, calendario }, null, 2)
@@ -94,6 +121,7 @@ export async function extraerEstructura2023(pdfPE, pdfGPE, datosDocente, calenda
     temperature: 0.2,
     maxOutputTokens: 8192,
     modelo: MODEL_ESTRUCTURA,
+    sessionId,
   })
 }
 
@@ -103,7 +131,7 @@ export async function extraerEstructura2023(pdfPE, pdfGPE, datosDocente, calenda
  * @param {{ pdfPE, pdfGPE, cabecera, raObjetivo, parametros }} opts
  * @returns {Promise<Array>}
  */
-export async function generarActividadesParaRA2023({ pdfPE, pdfGPE, cabecera, raObjetivo, parametros = {} }) {
+export async function generarActividadesParaRA2023({ pdfPE, pdfGPE, cabecera, raObjetivo, parametros = {}, sessionId }) {
   const [b64PE, b64GPE] = await Promise.all([fileToBase64(pdfPE), fileToBase64(pdfGPE)])
 
   const contexto = {
@@ -127,6 +155,7 @@ export async function generarActividadesParaRA2023({ pdfPE, pdfGPE, cabecera, ra
     temperature: 0.75,
     maxOutputTokens: 16384,
     modelo: MODEL_ACTIVIDADES,
+    sessionId,
   })
 
   if (Array.isArray(resultado)) return resultado

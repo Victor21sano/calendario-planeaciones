@@ -32,20 +32,13 @@ service cloud.firestore {
               || request.resource.data.creditos == 0))
         || esAdmin();
 
-      // Caso A: perfil normal — sin tocar creditos ni campos protegidos
+      // Caso A: perfil normal — sin tocar creditos ni campos protegidos.
+      // El cliente NUNCA modifica `creditos`: todo descuento/reembolso pasa por
+      // Cloud Functions (Admin SDK, que ignora estas reglas). Así el saldo solo
+      // cambia en el servidor, de forma atómica y auditable.
       allow update: if request.auth != null && request.auth.uid == userId
         && !request.resource.data.diff(resource.data).affectedKeys()
              .hasAny(['creditos', 'comprasIds', 'rol', 'plan']);
-
-      // Caso B: usuario descuenta exactamente 1 crédito (consumo de generación IA).
-      // Único modo en que el cliente puede modificar creditos: decrementar en 1.
-      // Incrementar (reembolso) requiere al admin — protege contra abuso.
-      allow update: if request.auth != null && request.auth.uid == userId
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['creditos'])
-        && request.resource.data.creditos is int
-        && resource.data.creditos is int
-        && resource.data.creditos > 0
-        && request.resource.data.creditos == resource.data.creditos - 1;
 
       // Caso C: admin puede actualizar cualquier campo (acreditación manual, etc.)
       allow update: if esAdmin();
@@ -68,16 +61,19 @@ service cloud.firestore {
       }
 
       // ── Historial de consumos ─────────────────────────────────
-      // El usuario solo puede crear registros de tipo 'generacion' (descuento).
-      // Los reembolsos los crea el admin manualmente — evita que el cliente
-      // recupere créditos por su cuenta registrando reembolsos falsos.
+      // Solo lectura para el dueño/admin. La escritura la hace exclusivamente
+      // el servidor (Admin SDK) al descontar/reembolsar: el cliente no puede
+      // fabricar registros de consumo ni de reembolso.
       match /consumos/{consumoId} {
-        allow read:          if request.auth != null && request.auth.uid == userId || esAdmin();
-        allow create:        if request.auth != null && request.auth.uid == userId
-          && request.resource.data.keys().hasOnly(['timestamp', 'cantidad', 'tipo'])
-          && request.resource.data.cantidad == 1
-          && request.resource.data.tipo == 'generacion';
-        allow update, delete: if false;
+        allow read:                  if request.auth != null && request.auth.uid == userId || esAdmin();
+        allow create, update, delete: if false;
+      }
+
+      // ── Sesiones de generación (créditos) ─────────────────────
+      // Gestionadas íntegramente por Cloud Functions (Admin SDK). El cliente
+      // nunca las lee ni escribe directamente.
+      match /sesionesGeneracion/{sesionId} {
+        allow read, write: if false;
       }
     }
 
@@ -87,13 +83,12 @@ service cloud.firestore {
     }
 
     // ── Caché de estructuras de módulo (por siglema) ─────────────
-    // Usuarios autenticados leen; escritura validada por shape.
-    // En Paso 3 la escritura está desactivada en el cliente; activar en Paso 4.
+    // Lectura para usuarios autenticados. La escritura es EXCLUSIVA del servidor
+    // (Cloud Functions / Admin SDK): evita que un cliente sobrescriba o infle
+    // la caché compartida de otros módulos con datos arbitrarios.
     match /estructurasCache/{siglema} {
       allow read:  if request.auth != null;
-      allow write: if request.auth != null
-        && request.resource.data.keys().hasOnly(['siglema', 'estructura', 'updatedAt'])
-        && request.resource.data.siglema is string;
+      allow write: if false;
     }
 
     // ── Pagos (idempotencia): bloqueado al cliente ────────────────

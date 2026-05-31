@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  frontend:
+    name: Frontend (build + audit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Build de producción
+        run: npm run build
+      - name: Auditoría de dependencias (prod)
+        run: npm audit --omit=dev
+
+  functions:
+    name: Cloud Functions (lint + audit)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: functions
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: functions/package-lock.json
+      - run: npm ci
+      - name: Lint
+        run: npm run lint
+      # Las vulnerabilidades restantes son transitivas de la cadena @google-cloud/*
+      # de firebase-admin (uuid <11.1.1) y hoy no tienen fix sin downgrade.
+      # continue-on-error mantiene la SEÑAL visible (el paso se marca como fallido
+      # y anotado) sin bloquear el merge, en vez de ocultarla con `|| true`.
+      # TODO(seguridad): revisar tras cada bump de firebase-admin/functions y
+      # cerrar cuando upstream actualice uuid. Seguimiento: abrir issue dedicado.
+      - name: Auditoría de dependencias (prod)
+        continue-on-error: true
+        run: npm audit --omit=dev

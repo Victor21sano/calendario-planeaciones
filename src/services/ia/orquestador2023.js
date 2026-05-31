@@ -9,7 +9,7 @@
  *   5. validarPlaneacionCompleta2023 → devolver resultado + errores
  */
 
-import { extraerEstructura2023, generarActividadesParaRA2023 } from './gemini2023.js'
+import { extraerEstructura2023, generarActividadesParaRA2023, iniciarSesion2023, finalizarSesion2023 } from './gemini2023.js'
 import { calcularFechas, validarEstructura2023, validarPlaneacionCompleta2023, actividadesSugeridasPorRA, distribuirHorasEntreActividades, calcularHorasSemana } from '../../modelos/2023/index.js'
 import { tieneDatosCompletos2023 } from '../userService.js'
 
@@ -68,12 +68,28 @@ export async function generarPlaneacion2023Completa({ pdfPE, pdfGPE, datosDocent
   const prog = (phase, message, current = 0, total = 100) =>
     onProgreso({ phase, message, current, total })
 
+  // ── Abrir sesión de generación (descuenta 1 crédito en el servidor) ──
+  // Todo el costo de la generación queda cubierto por esta única sesión.
+  // Si algo falla, finalizarSesion2023(sessionId, false) reembolsa el crédito.
+  const sessionId = await iniciarSesion2023()
+
+  try {
+    return await ejecutarGeneracion2023({ pdfPE, pdfGPE, datosDocente, calendario, prog, sessionId })
+  } catch (err) {
+    await finalizarSesion2023(sessionId, false)
+    throw err
+  }
+}
+
+// Cuerpo real de la generación; la sesión (crédito) la gestiona el wrapper.
+async function ejecutarGeneracion2023({ pdfPE, pdfGPE, datosDocente, calendario, prog, sessionId }) {
+
   // ── Paso 1: Extraer estructura ────────────────────────────
   prog('estructura', 'Extrayendo estructura del módulo desde el PE y GPE…', 0)
 
   let estructura
   try {
-    estructura = await extraerEstructura2023(pdfPE, pdfGPE, datosDocente, calendario)
+    estructura = await extraerEstructura2023(pdfPE, pdfGPE, datosDocente, calendario, sessionId)
   } catch (err) {
     throw new Error(`No se pudo extraer la estructura del módulo: ${err.message}`)
   }
@@ -144,6 +160,7 @@ export async function generarPlaneacion2023Completa({ pdfPE, pdfGPE, datosDocent
             distribucionHoras,          // guía obligatoria de horas por actividad
             horasMaximasPorActividad:  7,
           },
+          sessionId,
         })
         ra.actividadesEspecificas = Array.isArray(actividades) ? actividades : []
 
@@ -178,6 +195,9 @@ export async function generarPlaneacion2023Completa({ pdfPE, pdfGPE, datosDocent
   const valCompleta = validarPlaneacionCompleta2023(planeacionConFechas)
 
   prog('done', 'Planeación generada.', 100)
+
+  // Generación exitosa: confirma la sesión (consume el crédito definitivamente).
+  await finalizarSesion2023(sessionId, true)
 
   return {
     planeacion:             planeacionConFechas,

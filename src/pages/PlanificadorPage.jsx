@@ -18,7 +18,7 @@ import {
   fileToBase64,
 } from '../services/iaPlaneacion'
 import { extraerEstructura2023 } from '../services/ia/gemini2023'
-import { descontarCredito, reembolsarCredito } from '../services/creditosService'
+import { iniciarSesionGeneracion, finalizarSesionGeneracion } from '../services/creditosService'
 import { generarPlaneacion2023Completa, validarRequisitos2023 } from '../services/ia/orquestador2023'
 import { tieneDatosCompletos2023 } from '../services/userService'
 import { PreviewModelo2023 }                        from '../components/preview2023'
@@ -537,24 +537,12 @@ export default function PlanificadorPage() {
       }
     }
 
-    // Verificar crédito ANTES de procesar los PDFs
-    if (!esAdmin) {
-      if (creditos <= 0) {
-        setMostrarModalSinCreditos(true)
-        return
-      }
-      if (modelo !== MODELO_2023) {
-        try {
-          await descontarCredito(user.uid)
-        } catch (err) {
-          if (err.message === 'SIN_CREDITOS') {
-            setMostrarModalSinCreditos(true)
-          } else {
-            setGenError(err.message || 'Error al verificar el saldo.')
-          }
-          return
-        }
-      }
+    // Gate de UX: si no hay saldo, abrir modal antes de procesar los PDFs.
+    // El descuento real lo hace el servidor al abrir la sesión de generación
+    // (iniciarSesionGeneracion), de forma atómica y como única fuente de verdad.
+    if (!esAdmin && creditos <= 0) {
+      setMostrarModalSinCreditos(true)
+      return
     }
 
     setOnboardingFase('loading')
@@ -588,9 +576,9 @@ export default function PlanificadorPage() {
           await updateMateria(user.uid, materiaId, { nombre: nombreCorto })
         }
 
-        // Guardar en Firestore
+        // Guardar en Firestore. El crédito ya fue descontado por la sesión de
+        // generación que abre el orquestador 2023 (y reembolsado si hubiera fallado).
         await actualizarMateriaConPlaneacion2023(user.uid, materiaId, resultado.planeacion)
-        if (!esAdmin) await descontarCredito(user.uid)
 
         // Poblar Estructura y horasSemana para la Planeación Calculada.
         // horasSemana se calcula con la regla de 3 del Planificador (totalHoras ÷ semanas hábiles)
@@ -628,10 +616,20 @@ export default function PlanificadorPage() {
       return
     }
 
-    // ── Rama Modelo 2018 (código original intacto) ────────────────
+    // ── Rama Modelo 2018 ──────────────────────────────────────────
+    // Abrir una sola sesión de generación (1 crédito) que cubre extracción + RAs.
+    let sessionId
+    try {
+      sessionId = await iniciarSesionGeneracion()
+    } catch (err) {
+      if (err.code === 'functions/failed-precondition') setMostrarModalSinCreditos(true)
+      else setGenError(err.message || 'Error al iniciar la generación.')
+      setOnboardingFase('upload')
+      return
+    }
     try {
       // Paso 1: extraer estructura del PE
-      const estructura = await extraerEstructuraDesdeArchivos(pdfPE, pdfGPE, p => setGenProgress(p))
+      const estructura = await extraerEstructuraDesdeArchivos(pdfPE, pdfGPE, p => setGenProgress(p), sessionId)
 
       // Actualizar unidades, horas totales y calcular horasSemana con regla de 3
       const newUnidades   = buildUnidadesFromAI(estructura.unidades)
@@ -647,15 +645,18 @@ export default function PlanificadorPage() {
       })
 
       // Paso 2: generar todas las planeaciones
-      const { rasData, errors } = await generarRAsDesdeEstructura(estructura, p => setGenProgress(p))
+      const { rasData, errors } = await generarRAsDesdeEstructura(estructura, p => setGenProgress(p), sessionId)
       const result = { estructura, rasData, errors }
+
+      // Confirmar la sesión: el crédito se consume definitivamente.
+      await finalizarSesionGeneracion(sessionId, true)
 
       setGenResult(result)
       sessionStorage.setItem('planea_pro_splash', '1')
       setOnboardingFase('success')
     } catch (err) {
-      // Reembolsar si falló completamente (no bloqueante)
-      if (!esAdmin) reembolsarCredito(user.uid)
+      // Cerrar la sesión con fallo → el servidor reembolsa el crédito.
+      await finalizarSesionGeneracion(sessionId, false)
       setGenError(err.message)
       setOnboardingFase('upload')
     }
@@ -814,25 +815,28 @@ export default function PlanificadorPage() {
 
     // ── Modelo 2018: generar desde la estructura ya extraída ──
     if (!estado.estructuraIA) return
-    if (!esAdmin) {
-      try {
-        await descontarCredito(user.uid)
-      } catch (err) {
-        if (err.message === 'SIN_CREDITOS') { navigate('/comprar-creditos'); return }
-        setGenError(err.message || 'Error al verificar el saldo.')
-        return
-      }
+
+    // Abrir sesión (descuenta 1 crédito en el servidor, atómico).
+    let sessionId
+    try {
+      sessionId = await iniciarSesionGeneracion()
+    } catch (err) {
+      if (err.code === 'functions/failed-precondition') { navigate('/comprar-creditos'); return }
+      setGenError(err.message || 'Error al iniciar la generación.')
+      return
     }
+
     setGenerandoPagada(true)
     setOnboardingFase('loading')
     setGenProgress({ phase: 'structure', message: 'Generando tu planeación didáctica…', current: 0, total: 0 })
     try {
-      const { rasData, errors } = await generarRAsDesdeEstructura(estado.estructuraIA, p => setGenProgress(p))
+      const { rasData, errors } = await generarRAsDesdeEstructura(estado.estructuraIA, p => setGenProgress(p), sessionId)
+      await finalizarSesionGeneracion(sessionId, true)
       setGenResult({ estructura: estado.estructuraIA, rasData, errors })
       setEstado(prev => ({ ...prev, planGeneradaGratis: false }))
       setOnboardingFase('success')
     } catch (err) {
-      if (!esAdmin) reembolsarCredito(user.uid)
+      await finalizarSesionGeneracion(sessionId, false)
       setGenError(err.message || 'Error al generar la planeación.')
       setOnboardingFase('app')
       setMainTab('planeacion')

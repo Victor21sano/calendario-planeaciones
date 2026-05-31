@@ -8,7 +8,7 @@ import {
   fileSizeMB,
 } from '../services/iaPlaneacion'
 import { useAuth } from '../contexts/AuthContext'
-import { descontarCredito, reembolsarCredito } from '../services/creditosService'
+import { iniciarSesionGeneracion, finalizarSesionGeneracion } from '../services/creditosService'
 
 // ─── DropZone ─────────────────────────────────────────────────
 // onBloqueado: si se define, el clic llama a este callback en lugar de abrir el picker.
@@ -211,7 +211,7 @@ function EstructuraPreview({ estructura, hasExisting, onConfirm, onCancel }) {
 
 // ─── Main Component ───────────────────────────────────────────
 export default function GeneradorIA({ onGenerated, onUpdateUnidades, raList, onSinCreditos = () => {}, modelo = '2018' }) {
-  const { user, creditos, esAdmin, sinCreditosDisponibles: modoGratis } = useAuth()
+  const { creditos, esAdmin, sinCreditosDisponibles: modoGratis } = useAuth()
   const [pdfPE,  setPdfPE]  = useState(null)
   const [pdfGPE, setPdfGPE] = useState(null)
 
@@ -221,78 +221,90 @@ export default function GeneradorIA({ onGenerated, onUpdateUnidades, raList, onS
   const [estructura, setEstructura] = useState(null)
   const [progress,  setProgress]  = useState({ phase: 'idle', message: '', current: 0, total: 0 })
   const [lastResult, setLastResult] = useState(null)
+  const [sessionId, setSessionId] = useState(null)
   const [globalError, setGlobalError] = useState('')
   const [open, setOpen] = useState(true)
   const provider = getProviderInfo()
 
   const isRunning = uiStep === 'extracting' || uiStep === 'generating'
 
+  // Mensaje de error que refleja el reembolso REAL decidido por el servidor.
+  // res = { reembolsado } devuelto por finalizarSesionGeneracion (o null).
+  function mensajeError(msg, res) {
+    if (esAdmin) return msg
+    if (res?.reembolsado) return `${msg} — El crédito se reembolsó automáticamente.`
+    return `${msg} — La IA ya había generado contenido, así que el crédito se consumió. ` +
+           'Si consideras que es un error, contacta al administrador para un reembolso.'
+  }
+
   // ── Paso 1: extraer estructura ──
-  // El descuento ocurre AQUÍ — antes de procesar cualquier PDF.
-  // Una vez descontado, si la generación completa falla se reembolsa.
+  // Abre la sesión de generación AQUÍ (descuenta 1 crédito en el servidor).
+  // La misma sesión cubre la confirmación del usuario y el Paso 2; si el
+  // flujo falla o se cancela, el servidor reembolsa el crédito.
   async function handleExtraer() {
     if (!pdfPE || !pdfGPE) return
 
-    // Verificar y descontar crédito ANTES de procesar PDFs (admin siempre pasa)
-    if (!esAdmin) {
-      if (creditos <= 0) { onSinCreditos(); return }
-      try {
-        await descontarCredito(user.uid)
-      } catch (err) {
-        if (err.message === 'SIN_CREDITOS') {
-          onSinCreditos()
-        } else {
-          setGlobalError(err.message || 'No se pudo verificar el saldo. Intenta de nuevo.')
-        }
-        return
-      }
+    // Gate de UX (el descuento real es atómico en el servidor)
+    if (!esAdmin && creditos <= 0) { onSinCreditos(); return }
+
+    let sid
+    try {
+      sid = await iniciarSesionGeneracion()
+    } catch (err) {
+      if (err.code === 'functions/failed-precondition') onSinCreditos()
+      else setGlobalError(err.message || 'No se pudo iniciar la generación. Intenta de nuevo.')
+      return
     }
+    setSessionId(sid)
 
     setUiStep('extracting')
     setGlobalError('')
     setProgress({ phase: 'converting', message: 'Preparando PDFs…', current: 0, total: 0 })
 
     try {
-      const est = await extraerEstructuraDesdeArchivos(pdfPE, pdfGPE, p => setProgress(p))
+      const est = await extraerEstructuraDesdeArchivos(pdfPE, pdfGPE, p => setProgress(p), sid)
       try { onUpdateUnidades(buildUnidadesFromAI(est.unidades)) } catch {}
       setEstructura(est)
       setUiStep('confirming')
     } catch (err) {
+      const res = await finalizarSesionGeneracion(sid, false)
+      setSessionId(null)
       setUiStep('error')
-      setGlobalError(
-        !esAdmin
-          ? `${err.message} — Se descontó 1 crédito. Si el problema persiste, contacta al administrador para un reembolso manual.`
-          : err.message
-      )
+      setGlobalError(mensajeError(err.message, res))
       setProgress(p => ({ ...p, phase: 'error', message: 'Error al analizar el PE.' }))
     }
   }
 
   // ── Paso 2: generar RAs tras confirmación ──
-  // NO se descuenta aquí — el crédito ya fue descontado en handleExtraer.
+  // Reutiliza la sesión abierta en handleExtraer (no descuenta de nuevo).
   async function handleGenerarRAs() {
     if (!estructura) return
     setUiStep('generating')
     setProgress({ phase: 'ra', message: 'Iniciando generación de planeaciones…', current: 0, total: 0 })
 
     try {
-      const { rasData, errors } = await generarRAsDesdeEstructura(estructura, p => setProgress(p))
+      const { rasData, errors } = await generarRAsDesdeEstructura(estructura, p => setProgress(p), sessionId)
+      await finalizarSesionGeneracion(sessionId, true)
+      setSessionId(null)
       const result = { estructura, rasData, errors }
       setLastResult(result)
       setUiStep('done')
       onGenerated(result)
     } catch (err) {
+      const res = await finalizarSesionGeneracion(sessionId, false)
+      setSessionId(null)
       setUiStep('error')
-      setGlobalError(
-        !esAdmin
-          ? `${err.message} — Se descontó 1 crédito. Si el problema persiste, contacta al administrador para un reembolso manual.`
-          : err.message
-      )
+      setGlobalError(mensajeError(err.message, res))
       setProgress(p => ({ ...p, phase: 'error', message: 'Error durante la generación.' }))
     }
   }
 
   function handleCancelar() {
+    // El usuario canceló tras extraer: cerrar la sesión reembolsa el crédito.
+    if (sessionId) {
+      finalizarSesionGeneracion(sessionId, false)
+      setSessionId(null)
+    }
     setEstructura(null)
     setUiStep('idle')
     setProgress({ phase: 'idle', message: '' })

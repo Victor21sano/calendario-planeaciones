@@ -172,10 +172,12 @@ async function callAnthropicDirect({ systemPrompt, userPrompt, pdfPEBase64, pdfG
 }
 
 // ─── MODO A: Cloud Function (requiere créditos) ───────────────
-async function callViaCloudFunction({ systemPrompt, userPrompt, pdfPEBase64, pdfGPEBase64, temperature = 0.7 }) {
+// sessionId opcional: si se pasa, el crédito ya fue descontado por
+// iniciarGeneracion y esta llamada solo consume un tick de la sesión.
+async function callViaCloudFunction({ systemPrompt, userPrompt, pdfPEBase64, pdfGPEBase64, temperature = 0.7, sessionId }) {
   const fns = getFunctions(getApp(), 'us-central1')
   const fn  = httpsCallable(fns, 'generarPlaneacion', { timeout: 540000 })
-  const result = await fn({ systemPrompt, userPrompt, pdfPEBase64, pdfGPEBase64, temperature })
+  const result = await fn({ systemPrompt, userPrompt, pdfPEBase64, pdfGPEBase64, temperature, sessionId })
   return result.data.text
 }
 
@@ -188,18 +190,26 @@ async function callViaCloudFunctionGratis({ systemPrompt, userPrompt, pdfPEBase6
   return result.data.text
 }
 
+// ─── Modos directos con API key en el navegador ───────────────
+// SOLO se permiten en desarrollo local (import.meta.env.DEV). En el build de
+// producción, cualquier VITE_* queda expuesta en el bundle, así que se ignoran
+// y SIEMPRE se usa la Cloud Function (la key vive como secreto del servidor).
+const ALLOW_DIRECT_KEYS = import.meta.env.DEV
+const tieneGeminiDirecto    = () => ALLOW_DIRECT_KEYS && Boolean(import.meta.env.VITE_GEMINI_API_KEY)
+const tieneAnthropicDirecto = () => ALLOW_DIRECT_KEYS && Boolean(import.meta.env.VITE_ANTHROPIC_API_KEY)
+
 // ─── Selector de modo ─────────────────────────────────────────
 function getCallFn() {
-  if (import.meta.env.VITE_GEMINI_API_KEY)    return callGeminiAPI
-  if (import.meta.env.VITE_ANTHROPIC_API_KEY) return callAnthropicDirect
+  if (tieneGeminiDirecto())    return callGeminiAPI
+  if (tieneAnthropicDirecto()) return callAnthropicDirect
   return callViaCloudFunction
 }
 
 export function getProviderInfo() {
-  if (import.meta.env.VITE_GEMINI_API_KEY) {
+  if (tieneGeminiDirecto()) {
     return { name: 'Gemini', model: GEMINI_MODEL, mode: 'gemini', free: true }
   }
-  if (import.meta.env.VITE_ANTHROPIC_API_KEY) {
+  if (tieneAnthropicDirecto()) {
     return { name: 'Claude', model: ANTHROPIC_MODEL, mode: 'anthropic', free: false }
   }
   return { name: 'Cloud Function', model: ANTHROPIC_MODEL, mode: 'function', free: false }
@@ -208,9 +218,9 @@ export function getProviderInfo() {
 // ─── Extracción de estructura (1ª llamada) ────────────────────
 // temperature 0.4: extracción fiel del PE, no creatividad.
 // Incluye reintentos para 429 y 503 (sin countdown — la UI ya muestra loader).
-async function extractStructure(pdfPEBase64, pdfGPEBase64) {
+async function extractStructure(pdfPEBase64, pdfGPEBase64, sessionId) {
   const callFn    = getCallFn()
-  const useGemini = Boolean(import.meta.env.VITE_GEMINI_API_KEY)
+  const useGemini = tieneGeminiDirecto()
   const MAX_ATTEMPTS_STRUCTURE = 3
   let lastErr
 
@@ -222,6 +232,7 @@ async function extractStructure(pdfPEBase64, pdfGPEBase64) {
         pdfPEBase64,
         pdfGPEBase64,
         temperature: 0.4,
+        sessionId,
       })
       return parseJSON(text)
     } catch (err) {
@@ -245,12 +256,13 @@ async function extractStructure(pdfPEBase64, pdfGPEBase64) {
 // tokens-por-minuto del free tier y provoca errores 429 aleatorios.
 // temperature 0.7: favorece variación en redacción y actividades entre sesiones
 // sin sacrificar la estructura ni los términos técnicos del PE.
-async function generateRA(raInfo, moduloInfo, practiceOffset) {
+async function generateRA(raInfo, moduloInfo, practiceOffset, sessionId) {
   const callFn = getCallFn()
   const text = await callFn({
     systemPrompt: SYSTEM_PROMPT,
     userPrompt:   promptGenerarRA({ raInfo, moduloInfo, practiceOffset }),
     temperature: 0.7,
+    sessionId,
   })
   return parseJSON(text)
 }
@@ -296,7 +308,7 @@ async function delayWithCountdown(ms, onProgress, progressBase, errMsg = '') {
  * del Programa de Estudios y valida que tenga al menos un RA real.
  * Devuelve la estructura tal como viene de la IA (con modulo.horasTotales).
  */
-export async function extraerEstructuraDesdeArchivos(pdfPE, pdfGPE, onProgress) {
+export async function extraerEstructuraDesdeArchivos(pdfPE, pdfGPE, onProgress, sessionId) {
   const progress = (state) => { try { onProgress?.(state) } catch {} }
 
   const sizePE  = fileSizeMB(pdfPE)
@@ -314,7 +326,7 @@ export async function extraerEstructuraDesdeArchivos(pdfPE, pdfGPE, onProgress) 
   progress({ phase: 'structure', message: 'Analizando Programa de Estudios con IA...' })
   let estructura
   try {
-    estructura = await extractStructure(pdfPEBase64, pdfGPEBase64)
+    estructura = await extractStructure(pdfPEBase64, pdfGPEBase64, sessionId)
   } catch (err) {
     throw new Error(`Error al analizar el PE: ${err.message}`)
   }
@@ -359,9 +371,9 @@ export async function extraerEstructuraGratis(pdfPE, pdfGPE, onProgress) {
   progress({ phase: 'structure', message: 'Analizando Programa de Estudios...' })
 
   // En local (con key) usa el modo normal; en producción usa la Cloud Function gratuita.
-  const callFn = import.meta.env.VITE_GEMINI_API_KEY
+  const callFn = tieneGeminiDirecto()
     ? callGeminiAPI
-    : import.meta.env.VITE_ANTHROPIC_API_KEY
+    : tieneAnthropicDirecto()
       ? callAnthropicDirect
       : callViaCloudFunctionGratis
 
@@ -401,9 +413,9 @@ export async function extraerEstructuraGratis(pdfPE, pdfGPE, onProgress) {
  * - Durante la espera, llama a onProgress cada segundo con cuenta regresiva.
  * Devuelve { rasData, errors }.
  */
-export async function generarRAsDesdeEstructura(estructura, onProgress) {
+export async function generarRAsDesdeEstructura(estructura, onProgress, sessionId) {
   const progress = (state) => { try { onProgress?.(state) } catch {} }
-  const useGemini = Boolean(import.meta.env.VITE_GEMINI_API_KEY)
+  const useGemini = tieneGeminiDirecto()
 
   const allRAs = estructura.unidades.flatMap(u =>
     u.resultados.map(r => ({ ...r, unidadNombre: u.nombre, unidadNumero: u.numero, unidadProposito: u.proposito }))
@@ -459,7 +471,7 @@ export async function generarRAsDesdeEstructura(estructura, onProgress) {
       try {
         // Limpiar el mensaje de "esperando" antes de cada intento
         progress({ ...progressBase, message: `Generando resultado de aprendizaje ${i + 1} de ${total}…` })
-        raData = await generateRA(raInfo, moduloInfo, practiceCounter)
+        raData = await generateRA(raInfo, moduloInfo, practiceCounter, sessionId)
         lastErr = null
         break
       } catch (err) {
@@ -493,9 +505,9 @@ export async function generarRAsDesdeEstructura(estructura, onProgress) {
 }
 
 // ─── Función combinada (extracción + generación en un paso) ────
-export async function generarTodasLasPlaneaciones(pdfPE, pdfGPE, onProgress) {
-  const estructura = await extraerEstructuraDesdeArchivos(pdfPE, pdfGPE, onProgress)
-  const { rasData, errors } = await generarRAsDesdeEstructura(estructura, onProgress)
+export async function generarTodasLasPlaneaciones(pdfPE, pdfGPE, onProgress, sessionId) {
+  const estructura = await extraerEstructuraDesdeArchivos(pdfPE, pdfGPE, onProgress, sessionId)
+  const { rasData, errors } = await generarRAsDesdeEstructura(estructura, onProgress, sessionId)
   return { estructura, rasData, errors }
 }
 
@@ -522,5 +534,5 @@ export function buildUnidadesFromAI(aiUnidades) {
 
 // Compat — GeneradorIA lo usa para decidir el aviso de modo
 export function isDirectMode() {
-  return Boolean(import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_ANTHROPIC_API_KEY)
+  return tieneGeminiDirecto() || tieneAnthropicDirecto()
 }
