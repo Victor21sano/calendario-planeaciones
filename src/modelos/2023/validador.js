@@ -7,6 +7,26 @@ addFormats(ajv)
 
 const validateSchema = ajv.compile(schemaModelo2023)
 
+export function normalizarPlaneacion2023(planeacion) {
+  if (!planeacion || typeof planeacion !== 'object') return planeacion
+
+  const normalizada = JSON.parse(JSON.stringify(planeacion))
+
+  for (const unidad of (normalizada.unidades || [])) {
+    for (const ra of (unidad.ras || [])) {
+      if (!ra.nombre && ra.titulo) ra.nombre = ra.titulo
+      if (!ra.titulo && ra.nombre) ra.titulo = ra.nombre
+
+      const ev = ra.actividadEvaluacion || {}
+      if (!ev.nombre) ev.nombre = ev.descripcion || ev.codigo || 'Actividad de evaluacion'
+      if (!ev.instrumento) ev.instrumento = ev.evidencia || 'Rubrica'
+      ra.actividadEvaluacion = ev
+    }
+  }
+
+  return normalizada
+}
+
 // ─── Helpers internos ─────────────────────────────────────────
 function sumaPor(arr, campo) {
   return (arr || []).reduce((acc, item) => acc + (Number(item[campo]) || 0), 0)
@@ -34,6 +54,7 @@ function erroresAjv(errors) {
  * Devuelve { ok: boolean, errores: string[] }
  */
 export function validarEstructura2023(planeacion) {
+  planeacion = normalizarPlaneacion2023(planeacion)
   const errores = []
 
   // 1) JSON Schema
@@ -89,6 +110,7 @@ export function validarEstructura2023(planeacion) {
  *   - Actividades secuenciales sin traslapes
  */
 export function validarPlaneacionCompleta2023(planeacion) {
+  planeacion = normalizarPlaneacion2023(planeacion)
   // Primero la validación base
   const base = validarEstructura2023(planeacion)
   if (!base.ok) return base

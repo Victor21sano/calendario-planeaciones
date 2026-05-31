@@ -70,7 +70,7 @@ export const deleteMateria = async (uid, materiaId) => {
 }
 
 /** Guarda la planeación 2023 completa dentro del documento de la materia. */
-export const actualizarMateriaConPlaneacion2023 = async (uid, materiaId, planeacion) => {
+export const actualizarMateriaConPlaneacion2023 = async (uid, materiaId, planeacion, opciones = {}) => {
   if (!uid) throw new Error('Usuario no autenticado')
 
   // Advertencia preventiva: Firestore tiene límite de ~1 MB por documento
@@ -83,11 +83,13 @@ export const actualizarMateriaConPlaneacion2023 = async (uid, materiaId, planeac
   }
 
   const docRef = doc(db, `users/${uid}/materias/${materiaId}`)
-  await updateDoc(docRef, {
+  const data = {
     modelo:         MODELO_2023,
     planeacion2023: planeacion,
     updatedAt:      serverTimestamp(),
-  })
+  }
+  if (typeof opciones.pagada === 'boolean') data.pagada = opciones.pagada
+  await updateDoc(docRef, data)
 }
 
 export const duplicarMateria = async (uid, materiaId) => {

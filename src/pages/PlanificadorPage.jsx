@@ -206,6 +206,7 @@ export default function PlanificadorPage() {
     periodosVacacionales: [],
     unidades: [],
     modelo:       '2018',
+    pagada:       true,
     planeacion2023: null,
     planGeneradaGratis: false,
     estructuraIA: null,
@@ -318,6 +319,7 @@ export default function PlanificadorPage() {
           periodosVacacionales: periodosVac,
           unidades,
           modelo,
+          pagada: data.pagada !== false,
           planeacion2023,
           planGeneradaGratis: data.planGeneradaGratis || false,
           estructuraIA: data.estructuraIA || null,
@@ -433,6 +435,18 @@ export default function PlanificadorPage() {
       }
     }
     navigate('/')
+  }
+
+  async function marcarMateriaComoIA() {
+    setEstado(prev => {
+      if (prev.pagada === true && prev.planGeneradaGratis === false) return prev
+      return { ...prev, pagada: true, planGeneradaGratis: false }
+    })
+    try {
+      await updateMateria(user.uid, materiaId, { pagada: true, planGeneradaGratis: false })
+    } catch (err) {
+      console.error('Error marking materia as generated with IA', err)
+    }
   }
 
   // ── Guardado de fechas desde el modal ───────────────────────
@@ -578,7 +592,7 @@ export default function PlanificadorPage() {
 
         // Guardar en Firestore. El crédito ya fue descontado por la sesión de
         // generación que abre el orquestador 2023 (y reembolsado si hubiera fallado).
-        await actualizarMateriaConPlaneacion2023(user.uid, materiaId, resultado.planeacion)
+        await actualizarMateriaConPlaneacion2023(user.uid, materiaId, resultado.planeacion, { pagada: true })
 
         // Poblar Estructura y horasSemana para la Planeación Calculada.
         // horasSemana se calcula con la regla de 3 del Planificador (totalHoras ÷ semanas hábiles)
@@ -590,6 +604,7 @@ export default function PlanificadorPage() {
             ...(nombreCorto && debeAutonombrarMateria(prev.nombre) ? { nombre: nombreCorto } : {}),
             planeacion2023: resultado.planeacion,
             unidades: unidades2023,
+            pagada: true,
             planGeneradaGratis: false,
           }
           const hTotales = unidades2023.flatMap(u => u.subunidades || []).reduce((s, su) => s + (Number(su.horas) || 0), 0)
@@ -720,7 +735,7 @@ export default function PlanificadorPage() {
         const nombreCorto = nombreMateriaDesdeSiglema(estructura2023)
 
         // Persistir la estructura como planeacion2023 (RAs sin actividades aún)
-        await actualizarMateriaConPlaneacion2023(user.uid, materiaId, estructura2023)
+        await actualizarMateriaConPlaneacion2023(user.uid, materiaId, estructura2023, { pagada: false })
         if (nombreCorto && debeAutonombrarMateria(estado.nombre)) {
           await updateMateria(user.uid, materiaId, { nombre: nombreCorto })
         }
@@ -732,6 +747,7 @@ export default function PlanificadorPage() {
             planeacion2023: estructura2023,
             unidades: unidades2023,
             horasTotalesPrograma: hTotales,
+            pagada: false,
             planGeneradaGratis: true,
           }
           if (hTotales > 0 && sem?.fechaInicio && sem?.fechaFin) {
@@ -759,6 +775,7 @@ export default function PlanificadorPage() {
           ...prev,
           unidades: newUnidades,
           horasTotalesPrograma: horasTotales,
+          pagada: false,
           planGeneradaGratis: true,
           estructuraIA: estructura,   // guardada para generar al pagar (sin re-subir PDFs)
         }
@@ -773,6 +790,13 @@ export default function PlanificadorPage() {
           }
         }
         return next
+      })
+      await updateMateria(user.uid, materiaId, {
+        unidades: newUnidades,
+        horasTotalesPrograma: horasTotales,
+        pagada: false,
+        planGeneradaGratis: true,
+        estructuraIA: estructura,
       })
 
       sessionStorage.setItem('planea_pro_splash', '1')
@@ -832,8 +856,9 @@ export default function PlanificadorPage() {
     try {
       const { rasData, errors } = await generarRAsDesdeEstructura(estado.estructuraIA, p => setGenProgress(p), sessionId)
       await finalizarSesionGeneracion(sessionId, true)
+      await updateMateria(user.uid, materiaId, { pagada: true, planGeneradaGratis: false })
       setGenResult({ estructura: estado.estructuraIA, rasData, errors })
-      setEstado(prev => ({ ...prev, planGeneradaGratis: false }))
+      setEstado(prev => ({ ...prev, pagada: true, planGeneradaGratis: false }))
       setOnboardingFase('success')
     } catch (err) {
       await finalizarSesionGeneracion(sessionId, false)
@@ -1157,6 +1182,7 @@ export default function PlanificadorPage() {
                         onHorasSemana={() => {}}
                         pendingGenerationResult={null}
                         onPendingResultApplied={() => {}}
+                        onGeneratedComplete={() => {}}
                         modoManualInicial={true}
                         pagada={false}
                         modelo={estado.modelo || '2018'}
@@ -1300,6 +1326,7 @@ export default function PlanificadorPage() {
                 }}
                 pendingGenerationResult={pendingResult}
                 onPendingResultApplied={() => setPendingResult(null)}
+                onGeneratedComplete={marcarMateriaComoIA}
                 modoManualInicial={modoManualInicial}
                 pagada={estado.pagada !== false}
                 modelo={estado.modelo || '2018'}

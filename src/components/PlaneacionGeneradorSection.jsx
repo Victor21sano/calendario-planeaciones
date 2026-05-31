@@ -80,6 +80,7 @@ function getRangoFechas(resultado, subunidadId) {
 export default function PlaneacionGeneradorSection({
   materiaId, unidades, resultado, onUpdateUnidades, onHorasTotales, onHorasSemana,
   pendingGenerationResult, onPendingResultApplied,
+  onGeneratedComplete,
   modoManualInicial = false,
   pagada = true,
   modelo = '2018',
@@ -226,6 +227,7 @@ export default function PlaneacionGeneradorSection({
     setIaStatus(newIaStatus)
     setIaErrors(errors || {})
     setIaEstructura(estructura)
+    onGeneratedComplete?.()
 
     // Cambiar a la vista previa del primer RA generado con éxito
     const firstLabel = Object.keys(rasData).find(l => rasData[l] && raMap[l])

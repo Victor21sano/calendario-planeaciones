@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { exportarPlaneacion2023 } from '../../services/exportar2023'
-import { validarPlaneacionCompleta2023 } from '../../modelos/2023/validador.js'
+import { normalizarPlaneacion2023, validarPlaneacionCompleta2023 } from '../../modelos/2023/validador.js'
 
 /**
  * Botón "Descargar Word" para planeaciones Modelo 2023.
@@ -14,7 +14,8 @@ export default function BotonDescargarWord2023({ planeacion, className = '' }) {
     setDescargando(true)
     try {
       // Validación previa (no bloqueante — el usuario decide si continúa)
-      const { ok, errores } = validarPlaneacionCompleta2023(planeacion)
+      const planeacionNormalizada = normalizarPlaneacion2023(planeacion)
+      const { ok, errores } = validarPlaneacionCompleta2023(planeacionNormalizada)
       if (!ok && errores.length > 0) {
         const lista = errores.slice(0, 5).join('\n') + (errores.length > 5 ? `\n…y ${errores.length - 5} más.` : '')
         const continuar = window.confirm(
@@ -23,7 +24,7 @@ export default function BotonDescargarWord2023({ planeacion, className = '' }) {
         if (!continuar) return
       }
 
-      await exportarPlaneacion2023(planeacion)
+      await exportarPlaneacion2023(planeacionNormalizada)
     } catch (err) {
       console.error('[BotonDescargarWord2023]', err)
       window.alert('No se pudo generar el archivo Word: ' + err.message)
