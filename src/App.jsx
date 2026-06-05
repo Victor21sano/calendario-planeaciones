@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import ErrorBoundary from './components/ErrorBoundary'
 
@@ -24,10 +24,17 @@ function PageLoader() {
 }
 
 export default function App() {
+  const location = useLocation()
   return (
     <ErrorBoundary>
       <Suspense fallback={<PageLoader />}>
-        <Routes>
+        {/* Transición de ruta: fade de opacidad por pathname.
+            Solo opacidad a propósito — un transform/filter en este
+            wrapper rompería los position:fixed (fondos auth) y el
+            header sticky del dashboard. Respeta prefers-reduced-motion
+            vía el bloque global de index.css. */}
+        <div key={location.pathname} className="animate-fade-in">
+        <Routes location={location}>
           {/* Rutas públicas */}
           <Route path="/login"          element={<LoginPage />} />
           <Route path="/register"       element={<RegisterPage />} />
@@ -46,6 +53,7 @@ export default function App() {
             <Route path="/admin" element={<AdminPage />} />
           </Route>
         </Routes>
+        </div>
       </Suspense>
     </ErrorBoundary>
   )

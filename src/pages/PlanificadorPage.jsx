@@ -133,7 +133,7 @@ function Toast({ visible, message = 'Progreso guardado' }) {
   return (
     <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-300
       ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
-      <div className="flex items-center gap-2.5 px-5 py-3 bg-emerald-600 text-white rounded-2xl shadow-xl shadow-emerald-900/20">
+      <div className="flex items-center gap-2.5 px-5 py-3 bg-success-600 text-white rounded-2xl shadow-xl shadow-success-900/20">
         <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
         </svg>
@@ -147,18 +147,18 @@ function Toast({ visible, message = 'Progreso guardado' }) {
 function AlertBanner({ type, items, onDismiss }) {
   const config = {
     error: {
-      bg:    'bg-rose-50 dark:bg-rose-900/20',
-      border:'border-rose-200 dark:border-rose-800/40',
-      text:  'text-rose-800 dark:text-rose-300',
-      sub:   'text-rose-600 dark:text-rose-400',
+      bg:    'bg-danger-50 dark:bg-danger-900/20',
+      border:'border-danger-200 dark:border-danger-800/40',
+      text:  'text-danger-800 dark:text-danger-300',
+      sub:   'text-danger-600 dark:text-danger-400',
       icon:  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />,
       label: 'Errores de validación',
     },
     warning: {
-      bg:    'bg-amber-50 dark:bg-amber-900/20',
-      border:'border-amber-200 dark:border-amber-800/40',
-      text:  'text-amber-800 dark:text-amber-300',
-      sub:   'text-amber-700 dark:text-amber-400',
+      bg:    'bg-warning-50 dark:bg-warning-900/20',
+      border:'border-warning-200 dark:border-warning-800/40',
+      text:  'text-warning-800 dark:text-warning-300',
+      sub:   'text-warning-700 dark:text-warning-400',
       icon:  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />,
       label: 'Advertencias',
     },
@@ -582,6 +582,7 @@ export default function PlanificadorPage() {
           pdfGPE,
           datosDocente,
           calendario,
+          materiaId,
           onProgreso: p => setGenProgress(p),
         })
 
@@ -635,7 +636,7 @@ export default function PlanificadorPage() {
     // Abrir una sola sesión de generación (1 crédito) que cubre extracción + RAs.
     let sessionId
     try {
-      sessionId = await iniciarSesionGeneracion()
+      sessionId = await iniciarSesionGeneracion('completa', materiaId)
     } catch (err) {
       if (err.code === 'functions/failed-precondition') setMostrarModalSinCreditos(true)
       else setGenError(err.message || 'Error al iniciar la generación.')
@@ -683,10 +684,13 @@ export default function PlanificadorPage() {
     setMainTab('planeacion')
   }
 
-  // ── Modo gratuito: extrae solo la estructura del PE sin gastar crédito ──
+  // ── Modo horario: extrae solo la estructura del PE (cuesta 25 créditos) ──
+  // El servidor lo registra como anticipo: al generar la planeación completa
+  // de esta materia solo se cobra la diferencia (50).
   // semestreOverride: cuando se guardan fechas desde el modal (evita state stale)
   async function handleFreeExtract(pdfPE, pdfGPE, semestreOverride = null) {
     const semestreActual = semestreOverride || estado.semestre
+    const modelo = estado.modelo || '2018'
 
     // Pedir fechas del semestre si faltan (igual que el flujo de pago)
     if (!semestreOverride && (!semestreActual?.fechaInicio || !semestreActual?.fechaFin)) {
@@ -701,13 +705,24 @@ export default function PlanificadorPage() {
     setMostrarModalSinCreditos(false)
     setGenProgress({ phase: 'converting', message: 'Extrayendo estructura del PE…', current: 0, total: 0 })
 
-    const modelo = estado.modelo || '2018'
     if (modelo === MODELO_2023 && !tieneDatosCompletos2023(perfilDocente)) {
       await continuarTrasCompletarPerfil('gratis', pdfPE, pdfGPE, semestreActual)
       return
     }
     const sem    = semestreOverride || estado.semestre
     const vac    = estado.periodosVacacionales || []
+
+    // Abrir sesión de horario (descuenta 25 créditos; el servidor lo registra
+    // como anticipo de la planeación completa de esta materia).
+    let sessionId
+    try {
+      sessionId = await iniciarSesionGeneracion('horario', materiaId)
+    } catch (err) {
+      if (err.code === 'functions/failed-precondition') setMostrarModalSinCreditos(true)
+      else setGenError(err.message || 'Error al iniciar el horario.')
+      setOnboardingFase('upload')
+      return
+    }
 
     try {
       // Guardar los PDFs en sessionStorage para poder generar al pagar sin re-subir
@@ -727,7 +742,10 @@ export default function PlanificadorPage() {
           fechaFinSemestre:    sem?.fechaFin    || '',
           diasNoLaborables:    expandirPeriodosVacacionales(vac),
         }
-        const estructura2023 = await extraerEstructura2023(pdfPE, pdfGPE, datosDocente, calendario)
+        // Extrae la estructura 2023 cobrando la sesión de horario (25 créditos).
+        const estructura2023 = await extraerEstructura2023(
+          pdfPE, pdfGPE, datosDocente, calendario, sessionId,
+        )
         if (estructura2023?.cabecera) estructura2023.cabecera.calendario = calendario
 
         const unidades2023 = extraerUnidadesDesde2023(estructura2023)
@@ -758,6 +776,9 @@ export default function PlanificadorPage() {
           return next
         })
 
+        // Confirmar la sesión de horario (consume los 25 créditos definitivamente).
+        await finalizarSesionGeneracion(sessionId, true)
+
         sessionStorage.setItem('planea_pro_splash', '1')
         setOnboardingFase('app')
         setMainTab('planificador')
@@ -765,7 +786,7 @@ export default function PlanificadorPage() {
       }
 
       // ── Rama Modelo 2018 ──
-      const estructura = await extraerEstructuraGratis(pdfPE, pdfGPE, p => setGenProgress(p))
+      const estructura = await extraerEstructuraDesdeArchivos(pdfPE, pdfGPE, p => setGenProgress(p), sessionId)
       const newUnidades   = buildUnidadesFromAI(estructura.unidades)
       const horasDesdeRAs = newUnidades.flatMap(u => u.subunidades || []).reduce((s, su) => s + (Number(su.horas) || 0), 0)
       const horasTotales  = horasDesdeRAs || estructura.modulo?.horasTotales || 0
@@ -799,10 +820,15 @@ export default function PlanificadorPage() {
         estructuraIA: estructura,
       })
 
+      // Confirmar la sesión de horario (consume los 25 créditos definitivamente).
+      await finalizarSesionGeneracion(sessionId, true)
+
       sessionStorage.setItem('planea_pro_splash', '1')
       setOnboardingFase('app')
       setMainTab('planificador')   // mostrar el Planificador ya lleno
     } catch (err) {
+      // Cerrar la sesión con fallo → el servidor reembolsa los 25 créditos.
+      await finalizarSesionGeneracion(sessionId, false)
       setGenError(err.message)
       setOnboardingFase('upload')
     }
@@ -843,7 +869,7 @@ export default function PlanificadorPage() {
     // Abrir sesión (descuenta 1 crédito en el servidor, atómico).
     let sessionId
     try {
-      sessionId = await iniciarSesionGeneracion()
+      sessionId = await iniciarSesionGeneracion('completa', materiaId)
     } catch (err) {
       if (err.code === 'functions/failed-precondition') { navigate('/comprar-creditos'); return }
       setGenError(err.message || 'Error al iniciar la generación.')
@@ -936,7 +962,7 @@ export default function PlanificadorPage() {
   }
 
   if (onboardingFase === 'upload') {
-    const skipToManual = () => { setOnboardingFase('app'); setMainTab('planeacion') }
+    const skipToManual = () => { setOnboardingFase('app'); setMainTab('planificador') }
     const sinCreditos  = !esAdmin && creditos !== null && creditos <= 0
     return (
       <>
@@ -946,7 +972,7 @@ export default function PlanificadorPage() {
           onSkip={skipToManual}
           error={genError}
           bloqueado={sinCreditos}
-          modelo={estado.modelo || '2018'}
+          modoSoloPlanificador={modoManualInicial}
         />
         {mostrarModalSinCreditos && (
           <ModalSinCreditos
@@ -1031,7 +1057,7 @@ export default function PlanificadorPage() {
             {esAdmin && (
               <Link
                 to="/admin"
-                className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-900/20 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors"
+                className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-info-600 dark:text-info-400 bg-info-50 dark:bg-info-900/20 hover:bg-info-100 dark:hover:bg-info-900/30 transition-colors"
                 title="Panel de administración"
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1131,7 +1157,7 @@ export default function PlanificadorPage() {
                   <div className="flex items-center gap-2 no-print">
                     <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300
                       ${step3Done
-                        ? 'bg-gradient-to-br from-primary-500 to-violet-600 text-white shadow-sm shadow-primary-200 dark:shadow-primary-900/40'
+                        ? 'bg-gradient-to-br from-primary-500 to-info-600 text-white shadow-sm shadow-primary-200 dark:shadow-primary-900/40'
                         : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
                       }`}>
                       {step3Done ? (
@@ -1151,7 +1177,7 @@ export default function PlanificadorPage() {
               <div className="mt-6 flex items-center justify-center no-print">
                 <button
                   onClick={() => setMainTab('planeacion')}
-                  className="btn-primary gap-2"
+                  className="btn-accent gap-2"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -1194,16 +1220,16 @@ export default function PlanificadorPage() {
                 <div className="absolute inset-0 flex items-start justify-center pt-8 sm:pt-20 z-10">
                   <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 sm:p-8 max-w-md mx-4 text-center space-y-5 animate-scale-in">
                     <div className="relative inline-flex">
-                      <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-primary-500 to-violet-600 flex items-center justify-center shadow-lg shadow-primary-500/30">
+                      <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-primary-500 to-info-600 flex items-center justify-center shadow-lg shadow-primary-500/30">
                         <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
                       </div>
-                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-amber-400 rounded-full animate-pulse" />
+                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-warning-400 rounded-full animate-pulse" />
                     </div>
 
                     <div>
-                      <h2 className="text-xl font-extrabold text-slate-800 dark:text-slate-100 mb-1.5">
+                      <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-800 dark:text-slate-100 mb-1.5">
                         Contenido bloqueado
                       </h2>
                       <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
@@ -1218,7 +1244,7 @@ export default function PlanificadorPage() {
                       ? (
                         <button
                           onClick={() => navigate('/comprar-creditos')}
-                          className="btn-primary w-full justify-center py-3 text-base gap-2"
+                          className="btn-accent w-full justify-center py-3 text-base gap-2"
                         >
                           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
@@ -1230,7 +1256,7 @@ export default function PlanificadorPage() {
                         <button
                           onClick={handleGenerarDesdeEstructura}
                           disabled={generandoPagada}
-                          className="btn-primary w-full justify-center py-3 text-base gap-2 disabled:opacity-60"
+                          className="btn-accent w-full justify-center py-3 text-base gap-2 disabled:opacity-60"
                         >
                           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />

@@ -11,9 +11,9 @@ export default function SaldoCreditos({ className = '' }) {
       to="/comprar-creditos"
       className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl border transition-colors
         ${esAdmin
-          ? 'bg-violet-50 dark:bg-violet-900/20 border-violet-200 dark:border-violet-800/40 hover:bg-violet-100 dark:hover:bg-violet-900/30'
+          ? 'bg-info-50 dark:bg-info-900/20 border-info-200 dark:border-info-800/40 hover:bg-info-100 dark:hover:bg-info-900/30'
           : sinCreditosDisponibles
-            ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700/40 hover:bg-amber-100 dark:hover:bg-amber-900/30'
+            ? 'bg-warning-50 dark:bg-warning-900/20 border-warning-200 dark:border-warning-700/40 hover:bg-warning-100 dark:hover:bg-warning-900/30'
             : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
         } ${className}`}
       title={
@@ -26,7 +26,7 @@ export default function SaldoCreditos({ className = '' }) {
     >
       {/* Icono de moneda */}
       <svg
-        className={`w-3.5 h-3.5 flex-shrink-0 ${esAdmin ? 'text-violet-500' : sinCreditosDisponibles ? 'text-amber-500' : 'text-emerald-500'}`}
+        className={`w-3.5 h-3.5 flex-shrink-0 ${esAdmin ? 'text-info-500' : sinCreditosDisponibles ? 'text-warning-500' : 'text-success-500'}`}
         fill="currentColor"
         viewBox="0 0 20 20"
       >
@@ -39,18 +39,18 @@ export default function SaldoCreditos({ className = '' }) {
 
       {/* Saldo */}
       <span className={`text-xs font-bold ${
-        esAdmin ? 'text-violet-700 dark:text-violet-300'
-        : sinCreditosDisponibles ? 'text-amber-700 dark:text-amber-300'
+        esAdmin ? 'text-info-700 dark:text-info-300'
+        : sinCreditosDisponibles ? 'text-warning-700 dark:text-warning-300'
         : 'text-slate-700 dark:text-slate-200'
       }`}>
         {esAdmin ? '∞' : (creditos === null ? '…' : creditos)}
       </span>
 
       {esAdmin && (
-        <span className="text-[10px] font-semibold text-violet-600 dark:text-violet-400 leading-none">Admin</span>
+        <span className="text-[10px] font-semibold text-info-600 dark:text-info-400 leading-none">Admin</span>
       )}
       {sinCreditosDisponibles && (
-        <span className="text-[10px] font-semibold text-amber-600 dark:text-amber-400 leading-none">Comprar</span>
+        <span className="text-[10px] font-semibold text-warning-600 dark:text-warning-400 leading-none">Comprar</span>
       )}
     </Link>
   )

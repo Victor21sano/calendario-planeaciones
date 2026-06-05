@@ -5,19 +5,19 @@
 /* ─── Design Tokens ──────────────────────────────────────────── */
 @layer base {
   :root {
-    --surface-primary:   #ffffff;
-    --surface-elevated:  #f6f9f8;
-    --surface-sunken:    #edf5f4;
-    --border-default:    #dbe7e5;
-    --border-hover:      #b8cfca;
-    --accent-primary:    #0e7490;
-    --text-primary:      #0f172a;
-    --text-secondary:    #64748b;
-    --text-tertiary:     #94a3b8;
+    --surface-primary:   #fffdf8;
+    --surface-elevated:  #f7f3ea;
+    --surface-sunken:    #ece7dd;
+    --border-default:    #e6dfd0;
+    --border-hover:      #d3c8b2;
+    --accent-primary:    #0f766e;
+    --text-primary:      #17201d;
+    --text-secondary:    #5c655f;
+    --text-tertiary:     #8a8f86;
     --radius-card:       1rem;
-    --shadow-card:       0 1px 3px 0 rgba(15,76,92,0.06), 0 1px 2px -1px rgba(0,0,0,0.04);
-    --shadow-card-hover: 0 8px 24px 0 rgba(14,116,144,0.11), 0 2px 8px 0 rgba(0,0,0,0.06);
-    --shadow-xl:         0 10px 40px 0 rgba(14,116,144,0.08);
+    --shadow-card:       0 1px 3px 0 rgba(28,40,36,0.06), 0 1px 2px -1px rgba(0,0,0,0.04);
+    --shadow-card-hover: 0 8px 24px 0 rgba(15,118,110,0.12), 0 2px 8px 0 rgba(28,40,36,0.06);
+    --shadow-xl:         0 10px 40px 0 rgba(15,118,110,0.08);
 
     /* Curvas de animación — disponibles como var() en CSS y como ease-* en Tailwind */
     --spring:            cubic-bezier(0.16, 1, 0.3, 1);
@@ -28,17 +28,17 @@
   }
 
   .dark {
-    --surface-primary:   #0f172a;
-    --surface-elevated:  #1e293b;
-    --surface-sunken:    #0f172a;
-    --border-default:    rgba(255,255,255,0.07);
-    --border-hover:      rgba(255,255,255,0.12);
-    --accent-primary:    #67e8f9;
-    --text-primary:      #f1f5f9;
-    --text-secondary:    #94a3b8;
-    --text-tertiary:     #475569;
+    --surface-primary:   #182420;
+    --surface-elevated:  #20302b;
+    --surface-sunken:    #111a18;
+    --border-default:    rgba(255,255,255,0.08);
+    --border-hover:      rgba(255,255,255,0.14);
+    --accent-primary:    #5eead4;
+    --text-primary:      #f1f5f2;
+    --text-secondary:    #9aa7a0;
+    --text-tertiary:     #5a6862;
     --shadow-card:       0 1px 3px 0 rgba(0,0,0,0.3);
-    --shadow-card-hover: 0 8px 24px 0 rgba(34,211,238,0.16), 0 2px 8px 0 rgba(0,0,0,0.2);
+    --shadow-card-hover: 0 8px 24px 0 rgba(94,234,212,0.16), 0 2px 8px 0 rgba(0,0,0,0.2);
     --shadow-xl:         0 10px 40px 0 rgba(0,0,0,0.4);
   }
 
@@ -166,6 +166,28 @@
     .btn-icon-delete:hover { transform: scale(1.12); }
   }
   .btn-primary:not(:disabled):active { transform: scale(0.96); }
+
+  /*
+   * BTN-ACCENT — CTA primario cálido (coral). Reservado para LA acción
+   * principal de cada vista (Archivo Vivo). Misma física que btn-primary.
+   */
+  .btn-accent {
+    @apply inline-flex items-center gap-1.5
+           px-4 py-2 rounded-xl text-sm font-semibold text-white
+           bg-gradient-to-r from-accent-600 to-accent-700
+           hover:from-accent-500 hover:to-accent-600
+           shadow-sm hover:shadow-md hover:shadow-accent-200 dark:hover:shadow-accent-900/40
+           disabled:opacity-50 disabled:cursor-not-allowed
+           outline-none
+           focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2;
+    transition: transform  200ms var(--spring),
+                box-shadow 200ms var(--spring),
+                opacity    150ms linear;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .btn-accent:not(:disabled):hover { transform: scale(1.025) translateY(-1px); }
+  }
+  .btn-accent:not(:disabled):active { transform: scale(0.96); }
 
   /*
    * [2] BTN-SECONDARY — escala sutil (sin lift vertical para acciones secundarias)
@@ -324,6 +346,8 @@
   .card:hover,
   .btn-primary:not(:disabled):hover,
   .btn-primary:not(:disabled):active,
+  .btn-accent:not(:disabled):hover,
+  .btn-accent:not(:disabled):active,
   .btn-secondary:not(:disabled):hover,
   .btn-secondary:not(:disabled):active,
   .btn-danger:hover, .btn-danger:active,
@@ -351,6 +375,7 @@
   footer,
   .no-print,
   .btn-primary,
+  .btn-accent,
   .btn-secondary,
   .btn-danger,
   .btn-ghost {

@@ -4,12 +4,12 @@ import { calcularHorasSemanaAuto } from '../utils/calculos'
 // ─── Vacation Period Card ─────────────────────────────────────
 function PeriodoVacacional({ periodo, onChange, onDelete }) {
   return (
-    <div className="group relative flex flex-wrap gap-3 items-end p-4 bg-amber-50 dark:bg-amber-900/10 rounded-xl border border-amber-200 dark:border-amber-800/40 animate-scale-in">
+    <div className="group relative flex flex-wrap gap-3 items-end p-4 bg-warning-50 dark:bg-warning-900/10 rounded-xl border border-warning-200 dark:border-warning-800/40 animate-scale-in">
       {/* Left accent bar */}
-      <div className="absolute left-0 top-3 bottom-3 w-0.5 bg-amber-400 rounded-full" />
+      <div className="absolute left-0 top-3 bottom-3 w-0.5 bg-warning-400 rounded-full" />
 
       <div className="flex-1 min-w-[140px]">
-        <label className="block text-xs font-semibold text-amber-700 dark:text-amber-400 mb-1.5">
+        <label className="block text-xs font-semibold text-warning-700 dark:text-warning-400 mb-1.5">
           Nombre del período
         </label>
         <input
@@ -21,7 +21,7 @@ function PeriodoVacacional({ periodo, onChange, onDelete }) {
       </div>
 
       <div className="flex-1 min-w-[140px]">
-        <label className="block text-xs font-semibold text-amber-700 dark:text-amber-400 mb-1.5 flex items-center gap-1">
+        <label className="block text-xs font-semibold text-warning-700 dark:text-warning-400 mb-1.5 flex items-center gap-1">
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
           </svg>
@@ -36,7 +36,7 @@ function PeriodoVacacional({ periodo, onChange, onDelete }) {
       </div>
 
       <div className="flex-1 min-w-[140px]">
-        <label className="block text-xs font-semibold text-amber-700 dark:text-amber-400 mb-1.5 flex items-center gap-1">
+        <label className="block text-xs font-semibold text-warning-700 dark:text-warning-400 mb-1.5 flex items-center gap-1">
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
           </svg>
@@ -53,7 +53,7 @@ function PeriodoVacacional({ periodo, onChange, onDelete }) {
       <button
         onClick={onDelete}
         title="Eliminar período"
-        className="p-2 rounded-xl text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all duration-200 self-end mb-0.5">
+        className="p-2 rounded-xl text-slate-400 hover:text-danger-500 hover:bg-danger-50 dark:hover:bg-danger-900/20 transition-all duration-200 self-end mb-0.5">
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
         </svg>
@@ -94,7 +94,7 @@ export default function CalendarioForm({
     <div className="card p-5 sm:p-6 animate-fade-in">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-violet-600 rounded-xl flex items-center justify-center shadow-sm shadow-primary-200 dark:shadow-primary-900/40 flex-shrink-0">
+        <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-info-600 rounded-xl flex items-center justify-center shadow-sm shadow-primary-200 dark:shadow-primary-900/40 flex-shrink-0">
           <span className="text-xs font-bold text-white">1</span>
         </div>
         <div>
@@ -104,7 +104,7 @@ export default function CalendarioForm({
       </div>
 
       {/* Top accent line */}
-      <div className="absolute top-0 left-6 right-6 h-0.5 bg-gradient-to-r from-primary-500 to-violet-500 rounded-full opacity-60" style={{top: 0}}/>
+      <div className="absolute top-0 left-6 right-6 h-0.5 bg-gradient-to-r from-primary-500 to-info-500 rounded-full opacity-60" style={{top: 0}}/>
 
       {/* Date & Hours Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
@@ -161,14 +161,14 @@ export default function CalendarioForm({
           {/* Auto-calculo horas/semana (Parte C) */}
           {autoCalc && onHorasSemanaAuto && (
             autoCalc.requiereManual ? (
-              <div className="mt-2 p-2.5 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40">
-                <p className="text-xs text-amber-800 dark:text-amber-300">
+              <div className="mt-2 p-2.5 rounded-xl bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-800/40">
+                <p className="text-xs text-warning-800 dark:text-warning-300">
                   El calculo da <strong>{autoCalc.exact.toFixed(2)} h/sem</strong>. Captura un numero manualmente.
                 </p>
               </div>
             ) : (
-              <div className="mt-2 flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/40">
-                <div className="flex items-center gap-1.5 text-xs text-emerald-700 dark:text-emerald-300">
+              <div className="mt-2 flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-success-50 dark:bg-success-900/20 border border-success-200 dark:border-success-800/40">
+                <div className="flex items-center gap-1.5 text-xs text-success-700 dark:text-success-300">
                   <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/>
                   </svg>
@@ -195,7 +195,7 @@ export default function CalendarioForm({
           <div>
             <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Períodos vacacionales</label>
             {periodosVacacionales.length > 0 && (
-              <span className="ml-2 badge bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">
+              <span className="ml-2 badge bg-warning-100 dark:bg-warning-900/30 text-warning-700 dark:text-warning-400">
                 {periodosVacacionales.length}
               </span>
             )}
@@ -210,8 +210,8 @@ export default function CalendarioForm({
 
         {periodosVacacionales.length === 0 ? (
           <div className="flex items-center gap-3 p-4 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
-            <div className="w-8 h-8 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
-              <svg className="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="w-8 h-8 bg-warning-100 dark:bg-warning-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
+              <svg className="w-4 h-4 text-warning-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>
               </svg>
             </div>

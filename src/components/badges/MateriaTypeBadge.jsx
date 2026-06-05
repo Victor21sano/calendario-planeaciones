@@ -16,7 +16,7 @@ export default function MateriaTypeBadge({ pagada = true, size = 'sm' }) {
     return (
       <span
         className={`inline-flex items-center rounded-full font-semibold tracking-wide
-          bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300
+          bg-info-100 dark:bg-info-900/40 text-info-700 dark:text-info-300
           ${sizeClass}`}
       >
         {/* Lightning bolt */}

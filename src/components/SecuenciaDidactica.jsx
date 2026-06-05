@@ -3,20 +3,20 @@ import { useState } from 'react'
 const PHASE_CONFIG = {
   apertura: {
     label: 'APERTURA',
-    color: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800/40',
-    headerColor: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300',
+    color: 'bg-info-50 dark:bg-info-900/20 border-info-200 dark:border-info-800/40',
+    headerColor: 'bg-info-100 dark:bg-info-900/30 text-info-800 dark:text-info-300',
     defaultEval: 'Diagnóstica. Autoevaluación.',
   },
   desarrollo: {
     label: 'DESARROLLO',
-    color: 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800/40',
-    headerColor: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300',
+    color: 'bg-success-50 dark:bg-success-900/20 border-success-200 dark:border-success-800/40',
+    headerColor: 'bg-success-100 dark:bg-success-900/30 text-success-800 dark:text-success-300',
     defaultEval: 'Formativa. Heteroevaluación.',
   },
   cierre: {
     label: 'CIERRE',
-    color: 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800/40',
-    headerColor: 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300',
+    color: 'bg-warning-50 dark:bg-warning-900/20 border-warning-200 dark:border-warning-800/40',
+    headerColor: 'bg-warning-100 dark:bg-warning-900/30 text-warning-800 dark:text-warning-300',
     defaultEval: 'Sumativa. Heteroevaluación.',
   },
 }

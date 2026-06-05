@@ -16,7 +16,7 @@ export default function BrandMark({ className = 'w-10 h-10', compact = false }) 
         <path d="m17 28.1 1.5 1.4 3.3-3.4" stroke="#0B3A46" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
       {!compact && (
-        <span className="absolute -right-1 -top-1 h-3.5 w-3.5 rounded-full bg-amber-300 ring-2 ring-white dark:ring-slate-950" />
+        <span className="absolute -right-1 -top-1 h-3.5 w-3.5 rounded-full bg-warning-300 ring-2 ring-white dark:ring-slate-950" />
       )}
     </div>
   )

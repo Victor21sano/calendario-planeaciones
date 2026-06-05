@@ -63,7 +63,7 @@ function MateriaCard({ materia, idx, onNavigate, onDuplicate, onDelete }) {
             </svg>
           </button>
           <button onClick={() => onDelete(materia.id)} title="Eliminar" aria-label={`Eliminar ${materia.nombre}`}
-            className="icon-button w-7 h-7 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20">
+            className="icon-button w-7 h-7 text-slate-400 hover:text-danger-600 dark:hover:text-danger-400 hover:bg-danger-50 dark:hover:bg-danger-900/20">
             <svg aria-hidden="true" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
@@ -79,7 +79,7 @@ function MateriaCard({ materia, idx, onNavigate, onDuplicate, onDelete }) {
 
         {/* Modelo badge */}
         {materia.modelo && materia.modelo !== MODELO_2018 && (
-          <span className="inline-block mb-2 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
+          <span className="inline-block mb-2 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300">
             Modelo {materia.modelo}
           </span>
         )}
@@ -100,8 +100,8 @@ function MateriaCard({ materia, idx, onNavigate, onDuplicate, onDelete }) {
           <div className="mt-auto space-y-1.5">
             <div className="flex items-center justify-between">
               {progreso.estado === 'activo' && (
-                <span className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="flex items-center gap-1.5 text-[11px] font-medium text-success-600 dark:text-success-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse" />
                   Activo
                 </span>
               )}
@@ -109,7 +109,7 @@ function MateriaCard({ materia, idx, onNavigate, onDuplicate, onDelete }) {
                 <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500">Finalizado</span>
               )}
               {progreso.estado === 'pendiente' && (
-                <span className="text-[11px] font-medium text-amber-500 dark:text-amber-400">{progreso.label}</span>
+                <span className="text-[11px] font-medium text-warning-600 dark:text-warning-400">{progreso.label}</span>
               )}
               <span className="text-[11px] text-slate-400 dark:text-slate-500 ml-auto">
                 {progreso.estado !== 'pendiente' && progreso.label}
@@ -117,7 +117,7 @@ function MateriaCard({ materia, idx, onNavigate, onDuplicate, onDelete }) {
             </div>
             <div className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-slate-700/60 overflow-hidden">
               <div className={`h-full rounded-full transition-[width,background-color] duration-700 ease-out-strong
-                  ${progreso.estado === 'finalizado' ? 'bg-emerald-400' : 'bg-violet-500 dark:bg-violet-400'}`}
+                  ${progreso.estado === 'finalizado' ? 'bg-success-400' : 'bg-accent-500 dark:bg-accent-400'}`}
                 style={{ width: `${progreso.pct}%` }} />
             </div>
           </div>
@@ -162,10 +162,35 @@ export default function DashboardPage() {
 
   useEffect(() => { loadMaterias() }, [user])
 
+  // Una materia recién creada que el usuario abandonó sin generar ni capturar
+  // nada (regresó desde la pantalla de subida) se considera un borrador vacío.
+  function esBorradorVacio(m) {
+    const sinUnidades = !m.unidades || m.unidades.length === 0
+    const sinFechas   = !m.semestre?.fechaInicio && !m.semestre?.fechaFin
+    const sinPlan     = !m.planeacion2023 && !m.estructuraIA
+    const nombre      = String(m.nombre || '').trim().toLowerCase()
+    const nombreDefault = nombre === '' || nombre === 'nueva materia'
+    return sinUnidades && sinFechas && sinPlan && nombreDefault
+  }
+
   async function loadMaterias() {
     try {
       setLoading(true)
-      const data = await fetchMaterias(user.uid)
+      let data = await fetchMaterias(user.uid)
+
+      // Limpieza de borrador abandonado: si se creó una materia nueva y el usuario
+      // volvió al panel sin generar ni capturar nada, se elimina para no dejar
+      // materias vacías. Solo afecta al borrador recién creado (no a las demás).
+      const borradorId = sessionStorage.getItem('planea_borrador_id')
+      if (borradorId) {
+        const borrador = data.find(m => m.id === borradorId)
+        if (borrador && esBorradorVacio(borrador)) {
+          try { await deleteMateria(user.uid, borradorId) } catch {}
+          data = data.filter(m => m.id !== borradorId)
+        }
+        sessionStorage.removeItem('planea_borrador_id')
+      }
+
       setMaterias(data)
     } catch (err) { console.error('Error loading materias:', err) }
     finally { setLoading(false) }
@@ -214,6 +239,9 @@ export default function DashboardPage() {
         pagada: conIA,
       }
       const newId = await addMateria(user.uid, defaultMateria)
+      // Marcar como borrador: si el usuario regresa sin usarla, se limpia al
+      // volver al panel (ver loadMaterias / esBorradorVacio).
+      sessionStorage.setItem('planea_borrador_id', newId)
       navigate(`/materia/${newId}`, !conIA ? { state: { modoManual: true } } : undefined)
     } catch (err) { console.error('Error creating materia', err) }
   }
@@ -248,10 +276,10 @@ export default function DashboardPage() {
   }, [materias, searchTerm])
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
+    <div className="min-h-screen bg-[var(--surface-sunken)] flex flex-col">
 
       {/* ── Header ── */}
-      <header className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-white/5">
+      <header className="sticky top-0 z-40 bg-[#fffdf8]/80 dark:bg-[#182420]/80 backdrop-blur-xl border-b border-brand-100/60 dark:border-white/5">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-4">
           <BrandLogo className="flex-shrink-0" markClassName="w-8 h-8" />
 
@@ -280,7 +308,7 @@ export default function DashboardPage() {
             </Link>
             <button
               onClick={handleLogout}
-              className="text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 px-2.5 py-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
+              className="text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-danger-600 dark:hover:text-danger-400 px-2.5 py-1.5 rounded-lg hover:bg-danger-50 dark:hover:bg-danger-900/20 transition-colors"
             >
               Salir
             </button>
@@ -298,7 +326,7 @@ export default function DashboardPage() {
               <p className="mb-1 text-xs font-bold uppercase tracking-[0.18em] text-brand-700 dark:text-brand-300">
                 Centro de trabajo docente
               </p>
-              <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">Tus planeaciones recientes</h2>
+              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">Tus planeaciones recientes</h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 {materias.length} {materias.length === 1 ? 'planeación' : 'planeaciones'}
                 {' · '}{totalConIA} con IA, {totalManuales} manuales
@@ -319,7 +347,7 @@ export default function DashboardPage() {
                   onChange={e => setSearchTerm(e.target.value)}
                 />
               </div>
-              <button onClick={abrirModalCrear} className="btn-primary text-xs h-9 gap-1.5 flex-shrink-0">
+              <button onClick={abrirModalCrear} className="btn-accent text-xs h-9 gap-1.5 flex-shrink-0">
                 <svg aria-hidden="true" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>

@@ -5,9 +5,9 @@ import { acreditarCreditoManual, listarAcreditaciones } from '../services/adminS
 
 // ─── Constantes ───────────────────────────────────────────────
 const METODOS = [
-  { value: 'efectivo',      label: 'Efectivo',       color: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300' },
-  { value: 'transferencia', label: 'Transferencia',  color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' },
-  { value: 'cortesia',      label: 'Cortesía',       color: 'bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300' },
+  { value: 'efectivo',      label: 'Efectivo',       color: 'bg-success-100 dark:bg-success-900/30 text-success-700 dark:text-success-300' },
+  { value: 'transferencia', label: 'Transferencia',  color: 'bg-info-100 dark:bg-info-900/30 text-info-700 dark:text-info-300' },
+  { value: 'cortesia',      label: 'Cortesía',       color: 'bg-info-100 dark:bg-info-900/30 text-info-700 dark:text-info-300' },
   { value: 'otro',          label: 'Otro',            color: 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400' },
 ]
 
@@ -30,17 +30,17 @@ function ConfirmModal({ data, onConfirm, onCancel, loading }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
       <div className="w-full max-w-sm card p-6 space-y-5 animate-scale-in">
-        <div className={`flex items-center gap-3 p-4 rounded-xl ${esNegativo ? 'bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800/40' : 'bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800/40'}`}>
-          <svg className={`w-8 h-8 flex-shrink-0 ${esNegativo ? 'text-rose-500' : 'text-primary-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className={`flex items-center gap-3 p-4 rounded-xl ${esNegativo ? 'bg-danger-50 dark:bg-danger-900/20 border border-danger-200 dark:border-danger-800/40' : 'bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800/40'}`}>
+          <svg className={`w-8 h-8 flex-shrink-0 ${esNegativo ? 'text-danger-500' : 'text-primary-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
             {esNegativo
               ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
               : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>}
           </svg>
           <div>
-            <p className={`text-sm font-bold ${esNegativo ? 'text-rose-800 dark:text-rose-200' : 'text-primary-800 dark:text-primary-200'}`}>
+            <p className={`text-sm font-bold ${esNegativo ? 'text-danger-800 dark:text-danger-200' : 'text-primary-800 dark:text-primary-200'}`}>
               {esNegativo ? 'REVERSAR — Quitar créditos' : 'Confirmar acreditación'}
             </p>
-            <p className={`text-xs mt-0.5 ${esNegativo ? 'text-rose-600 dark:text-rose-400' : 'text-primary-600 dark:text-primary-400'}`}>
+            <p className={`text-xs mt-0.5 ${esNegativo ? 'text-danger-600 dark:text-danger-400' : 'text-primary-600 dark:text-primary-400'}`}>
               {data.creditos > 0 ? '+' : ''}{data.creditos} crédito{Math.abs(data.creditos) !== 1 ? 's' : ''} a {data.emailDestino}
             </p>
           </div>
@@ -185,7 +185,7 @@ function FormAcreditar({ onSuccess }) {
               onChange={e => setCreditos(Number(e.target.value))}
               min={-50}
               max={50}
-              className={`input-base w-28 text-center font-bold text-lg ${esNegativo ? 'border-rose-300 dark:border-rose-700 text-rose-700 dark:text-rose-400' : ''}`}
+              className={`input-base w-28 text-center font-bold text-lg ${esNegativo ? 'border-danger-300 dark:border-danger-700 text-danger-700 dark:text-danger-400' : ''}`}
             />
             <div className="flex gap-1.5">
               {CREDITOS_RAPIDOS.map(n => (
@@ -205,7 +205,7 @@ function FormAcreditar({ onSuccess }) {
             </div>
           </div>
           {esNegativo && (
-            <p className="mt-1.5 text-xs font-semibold text-rose-600 dark:text-rose-400 flex items-center gap-1">
+            <p className="mt-1.5 text-xs font-semibold text-danger-600 dark:text-danger-400 flex items-center gap-1">
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
               Reversa: se quitarán {Math.abs(creditos)} crédito(s). Nota obligatoria.
             </p>
@@ -243,7 +243,7 @@ function FormAcreditar({ onSuccess }) {
         {/* Nota */}
         <div>
           <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5 ml-1">
-            Nota {esNegativo && <span className="text-rose-500">*</span>}
+            Nota {esNegativo && <span className="text-danger-500">*</span>}
             <span className="ml-1 font-normal text-slate-400">(comprobante, motivo, etc.)</span>
           </label>
           <textarea
@@ -259,12 +259,12 @@ function FormAcreditar({ onSuccess }) {
 
         {/* Errores / Éxito */}
         {error && (
-          <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800/40 text-xs font-medium text-rose-700 dark:text-rose-300 animate-slide-down">
+          <div className="p-3 rounded-xl bg-danger-50 dark:bg-danger-900/20 border border-danger-200 dark:border-danger-800/40 text-xs font-medium text-danger-700 dark:text-danger-300 animate-slide-down">
             {error}
           </div>
         )}
         {success && (
-          <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/40 text-xs font-medium text-emerald-700 dark:text-emerald-300 animate-slide-down">
+          <div className="p-3 rounded-xl bg-success-50 dark:bg-success-900/20 border border-success-200 dark:border-success-800/40 text-xs font-medium text-success-700 dark:text-success-300 animate-slide-down">
             {success}
           </div>
         )}
@@ -369,7 +369,7 @@ function Historial({ refreshSignal }) {
         </div>
       )}
       {error && (
-        <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-900/20 border border-rose-200 text-xs text-rose-700 dark:text-rose-300">{error}</div>
+        <div className="p-3 rounded-xl bg-danger-50 dark:bg-danger-900/20 border border-danger-200 text-xs text-danger-700 dark:text-danger-300">{error}</div>
       )}
 
       {/* Tabla */}
@@ -397,7 +397,7 @@ function Historial({ refreshSignal }) {
                   >
                     <td className="px-3 py-2.5 whitespace-nowrap text-slate-500 dark:text-slate-400">{fmt(item.fecha)}</td>
                     <td className="px-3 py-2.5 font-medium text-slate-700 dark:text-slate-300 max-w-[160px] truncate" title={item.destinoEmail}>{item.destinoEmail}</td>
-                    <td className={`px-3 py-2.5 font-bold text-center ${item.creditos > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                    <td className={`px-3 py-2.5 font-bold text-center ${item.creditos > 0 ? 'text-success-600 dark:text-success-400' : 'text-danger-600 dark:text-danger-400'}`}>
                       {item.creditos > 0 ? '+' : ''}{item.creditos}
                     </td>
                     <td className="px-3 py-2.5">
@@ -440,7 +440,7 @@ export default function AdminPage() {
               </svg>
             </Link>
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-primary-600 flex items-center justify-center">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-info-500 to-primary-600 flex items-center justify-center">
                 <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                 </svg>
@@ -457,7 +457,7 @@ export default function AdminPage() {
         {/* ── Formulario ── */}
         <section>
           <div className="mb-4">
-            <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">Acreditar créditos</h2>
+            <h2 className="font-display text-lg font-semibold text-slate-900 dark:text-white">Acreditar créditos</h2>
             <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
               Venta en persona (efectivo o transferencia). El docente ve el saldo actualizado al instante.
             </p>
@@ -470,7 +470,7 @@ export default function AdminPage() {
         {/* ── Historial ── */}
         <section>
           <div className="mb-4">
-            <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">Historial de acreditaciones</h2>
+            <h2 className="font-display text-lg font-semibold text-slate-900 dark:text-white">Historial de acreditaciones</h2>
             <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
               Últimas 100 operaciones manuales ordenadas por fecha.
             </p>

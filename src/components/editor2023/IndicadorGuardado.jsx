@@ -31,10 +31,10 @@ const IconAlert = () => (
 )
 
 const ESTADOS = {
-  sincronizado: { Icono: IconCheck,   texto: 'Guardado',          color: 'text-emerald-600 dark:text-emerald-400' },
-  guardando:    { Icono: IconSpinner, texto: 'Guardando…',        color: 'text-violet-600 dark:text-violet-400' },
-  sin_guardar:  { Icono: IconDot,     texto: 'Sin guardar',       color: 'text-amber-600 dark:text-amber-400' },
-  error:        { Icono: IconAlert,   texto: 'Error al guardar',  color: 'text-rose-600 dark:text-rose-400' },
+  sincronizado: { Icono: IconCheck,   texto: 'Guardado',          color: 'text-success-600 dark:text-success-400' },
+  guardando:    { Icono: IconSpinner, texto: 'Guardando…',        color: 'text-info-600 dark:text-info-400' },
+  sin_guardar:  { Icono: IconDot,     texto: 'Sin guardar',       color: 'text-warning-600 dark:text-warning-400' },
+  error:        { Icono: IconAlert,   texto: 'Error al guardar',  color: 'text-danger-600 dark:text-danger-400' },
 }
 
 export default function IndicadorGuardado({ estado, ultimoGuardado }) {

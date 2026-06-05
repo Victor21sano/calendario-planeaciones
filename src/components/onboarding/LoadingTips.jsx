@@ -85,19 +85,34 @@ export default function LoadingTips({ progress, onCancel }) {
 
         {is2023 && (
           <div className="mb-6">
-            <p className="mb-1 text-sm font-bold text-slate-700 dark:text-slate-200">
+            <p className="mb-3 text-sm font-bold text-slate-700 dark:text-slate-200">
               {isEstructura ? 'Leyendo estructura del modulo...' : ''}
               {isActividades ? 'Organizando actividades didacticas...' : ''}
               {isFechas ? 'Calculando calendario del semestre...' : ''}
             </p>
-            {progress.current > 0 && (
-              <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
-                <div
-                  className="h-2 rounded-full bg-gradient-to-r from-brand-600 to-academic-500 transition-[width] duration-700"
-                  style={{ width: `${Math.min(100, progress.current)}%` }}
-                />
+            <div className="mx-auto w-full max-w-md">
+              {progress.message && (
+                <div className="mb-2 flex justify-between text-xs font-semibold text-slate-400 dark:text-slate-500">
+                  <span>{progress.message}</span>
+                  {progress.current > 0 && (
+                    <span className="tabular-nums">{Math.min(100, Math.round(progress.current))}%</span>
+                  )}
+                </div>
+              )}
+              <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                {progress.current > 0 ? (
+                  <div
+                    className="h-2 rounded-full bg-gradient-to-r from-brand-600 to-academic-500 transition-[width] duration-700"
+                    style={{ width: `${Math.min(100, progress.current)}%` }}
+                  />
+                ) : (
+                  <div
+                    className="h-2 rounded-full bg-gradient-to-r from-brand-600 to-academic-500"
+                    style={{ animation: 'indeterminate 1.5s ease-in-out infinite', width: '40%' }}
+                  />
+                )}
               </div>
-            )}
+            </div>
           </div>
         )}
 
@@ -133,9 +148,13 @@ export default function LoadingTips({ progress, onCancel }) {
           </div>
         )}
 
-        <div className="mb-10">
-          <ProgressBar progress={progress} />
-        </div>
+        {/* Barra genérica solo para fases que NO son del Modelo 2023
+            (el bloque is2023 ya muestra su propia barra → evita duplicarla). */}
+        {!is2023 && (
+          <div className="mb-10">
+            <ProgressBar progress={progress} />
+          </div>
+        )}
 
         <div className="relative flex h-28 items-center justify-center">
           <div

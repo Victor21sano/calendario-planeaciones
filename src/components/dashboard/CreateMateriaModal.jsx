@@ -35,9 +35,9 @@ export default function CreateMateriaModal({ onIA, onManual, onCerrar, sinCredit
           <button
             onClick={onIA}
             disabled={sinCreditosDisponibles}
-            className="selectable-card w-full flex items-center gap-4 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-violet-300 dark:hover:border-violet-700 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 text-left disabled:opacity-50 disabled:cursor-not-allowed"
+            className="selectable-card w-full flex items-center gap-4 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-info-300 dark:hover:border-info-700 hover:bg-info-50/50 dark:hover:bg-info-900/10 text-left disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-primary-600 flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-info-500 to-primary-600 flex items-center justify-center flex-shrink-0">
               <svg aria-hidden="true" className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" />
               </svg>

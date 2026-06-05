@@ -40,7 +40,7 @@ const OPENAI_API_KEY_SECRET = defineSecret('OPENAI_API_KEY')
 
 const ANTHROPIC_MODEL = 'claude-opus-4-7'
 const GEMINI_MODEL    = 'gemini-2.5-flash'
-const OPENAI_MODEL    = 'gpt-4o-mini'
+const OPENAI_MODEL    = 'gpt-4.1-mini'
 const MAX_TOKENS      = 16000
 const GEMINI_2023_MODELS = new Set([
   'gemini-2.5-flash',
@@ -53,7 +53,17 @@ const MAX_PROMPT_CHARS = 100_000   // ~25 k tokens sistema+usuario, margen gener
 const MAX_PDF_B64_LEN  = 50_000_000 // ~37.5 MB en base64 ≈ ~28 MB de PDF original
 
 // ── Sistema de créditos ────────────────────────────────────────
-const CREDITOS_POR_GENERACION = 1
+// 1 crédito = 1 peso. El costo depende del tipo de flujo.
+const CREDITOS_POR_GENERACION = 1 // legacy (modo sin sesión / compatibilidad)
+
+// Costo en créditos por tipo de flujo.
+//   completa → planeación didáctica completa (75)
+//   horario  → solo planificador de horarios / estructura (25)
+//   regenRA  → regeneración de 1 RA individual (gratis)
+const COSTO_POR_FLUJO = { completa: 75, horario: 25, regenRA: 0 }
+// El horario (25) funciona como anticipo: si el docente ya pagó el horario de una
+// materia, la planeación completa solo cobra la diferencia (75 - 25 = 50).
+const DESCUENTO_HORARIO_PREVIO = 25
 
 // ── Sesiones de generación 2023 ────────────────────────────────
 // El flujo 2023 hace muchas llamadas a la IA (estructura + N RAs) pero
@@ -68,6 +78,7 @@ const CREDITOS_POR_GENERACION = 1
 //   regenRA  → regeneración de 1 RA (solo reintentos de esa llamada)
 const LIMITES_POR_FLUJO = {
   completa: 60,
+  horario:  8,  // solo extrae la estructura (pocas llamadas)
   regenRA:  8,
 }
 const DEFAULT_MAX_LLAMADAS = LIMITES_POR_FLUJO.completa
@@ -115,7 +126,7 @@ async function reembolsarCredito(userRef, adminUser) {
 async function registrarConsumo(userRef, adminUser, delta, tipo) {
   userRef.collection('consumos').add({
     timestamp: FieldValue.serverTimestamp(),
-    cantidad:  CREDITOS_POR_GENERACION,
+    cantidad:  Math.abs(delta),
     delta,
     admin:     adminUser,
     tipo,
@@ -167,7 +178,7 @@ exports.generarPlaneacion = onCall(
     let sessionRef = null
     if (usaSesion) {
       sessionRef = userRef.collection('sesionesGeneracion').doc(sessionId)
-      await consumirLlamadaSesion(sessionRef, ['completa'])
+      await consumirLlamadaSesion(sessionRef, ['completa', 'horario'])
     } else {
       // ── Modo 1 llamada = 1 crédito: pre-check rápido de saldo ──
       const userSnap    = await userRef.get()
@@ -284,24 +295,43 @@ exports.iniciarGeneracion = onCall({ cors: true }, async (request) => {
   const uid        = request.auth.uid
   const userRef    = db.collection('users').doc(uid)
   const sessionRef = userRef.collection('sesionesGeneracion').doc()
-  const delta      = adminUser ? 0 : -CREDITOS_POR_GENERACION
 
-  // Tipo de flujo declarado por el cliente → fija el límite de llamadas en el servidor.
-  const tipoFlujo   = (request.data?.tipoFlujo === 'regenRA') ? 'regenRA' : 'completa'
-  const maxLlamadas = LIMITES_POR_FLUJO[tipoFlujo] ?? DEFAULT_MAX_LLAMADAS
+  // Tipo de flujo declarado por el cliente → fija el límite de llamadas y el costo.
+  const tiposValidos = ['completa', 'horario', 'regenRA']
+  const tipoFlujo    = tiposValidos.includes(request.data?.tipoFlujo) ? request.data.tipoFlujo : 'completa'
+  const materiaId    = typeof request.data?.materiaId === 'string' ? request.data.materiaId : null
+  const maxLlamadas  = LIMITES_POR_FLUJO[tipoFlujo] ?? DEFAULT_MAX_LLAMADAS
 
+  let delta = 0
+  let costoCobrado = 0
   await db.runTransaction(async (tx) => {
+    // Costo base por flujo. La planeación completa aplica el anticipo del horario
+    // (si esta materia ya pagó su horario y aún no se ha pagado la completa).
+    let costo = COSTO_POR_FLUJO[tipoFlujo] ?? COSTO_POR_FLUJO.completa
+    if (tipoFlujo === 'completa' && materiaId) {
+      const ledgerSnap = await tx.get(userRef.collection('cobrosMateria').doc(materiaId))
+      const led = ledgerSnap.data() || {}
+      if (led.horarioPagado === true && led.completaPagada !== true) {
+        costo = Math.max(0, costo - DESCUENTO_HORARIO_PREVIO)
+      }
+    }
+
+    const cobra = !adminUser && costo > 0
     const snap   = await tx.get(userRef)
     const actual = snap.data()?.creditos ?? 0
-    if (!adminUser && actual < CREDITOS_POR_GENERACION) {
+    if (cobra && actual < costo) {
       throw new HttpsError('failed-precondition', 'Saldo insuficiente. Adquiere más créditos para continuar.')
     }
-    tx.set(userRef, { creditos: actual + delta }, { merge: true })
+    delta        = cobra ? -costo : 0
+    costoCobrado = cobra ? costo : 0
+    if (delta !== 0) tx.set(userRef, { creditos: actual + delta }, { merge: true })
     tx.set(sessionRef, {
       estado:            'activa',
       admin:             adminUser,
-      creditoDescontado: !adminUser,
+      creditoDescontado: cobra,
+      costo:             costoCobrado, // monto exacto a reembolsar si la sesión falla
       tipoFlujo,
+      materiaId,
       maxLlamadas,       // límite fijado en servidor; el cliente no puede ampliarlo después
       llamadas:          0, // intentos de IA (para el tope maxLlamadas)
       exitos:            0, // respuestas de IA exitosas (decide el reembolso, no el cliente)
@@ -309,7 +339,7 @@ exports.iniciarGeneracion = onCall({ cors: true }, async (request) => {
     })
   })
 
-  registrarConsumo(userRef, adminUser, delta, 'generacion')
+  if (delta !== 0) registrarConsumo(userRef, adminUser, delta, 'generacion')
   return { sessionId: sessionRef.id }
 })
 
@@ -334,27 +364,42 @@ exports.finalizarGeneracion = onCall({ cors: true }, async (request) => {
   const sessionRef = userRef.collection('sesionesGeneracion').doc(sessionId)
 
   let reembolsado = false
+  let montoReembolso = 0
   await db.runTransaction(async (tx) => {
     const sesSnap = await tx.get(sessionRef)
     if (!sesSnap.exists) throw new HttpsError('not-found', 'Sesión no encontrada.')
     const ses = sesSnap.data()
     if (ses.estado !== 'activa') return // ya cerrada: idempotente
 
+    const monto = ses.costo ?? 0
     // Reembolso server-owned: solo si no hubo ninguna generación exitosa.
-    const procedeReembolso = (ses.exitos ?? 0) === 0 && ses.creditoDescontado
+    const procedeReembolso = (ses.exitos ?? 0) === 0 && ses.creditoDescontado && monto > 0
     if (procedeReembolso) {
       const userSnap = await tx.get(userRef)
       const actual   = userSnap.data()?.creditos ?? 0
-      tx.set(userRef, { creditos: actual + CREDITOS_POR_GENERACION }, { merge: true })
+      tx.set(userRef, { creditos: actual + monto }, { merge: true })
     }
     tx.update(sessionRef, {
       estado:    procedeReembolso ? 'reembolsada' : (exito ? 'completada' : 'cerrada'),
       closedAt:  FieldValue.serverTimestamp(),
     })
-    reembolsado = procedeReembolso
+
+    // Si la generación fue exitosa (no reembolsada), registrar el cobro de la
+    // materia en el ledger server-only. Permite el anticipo: horario → completa = 50.
+    if (!procedeReembolso && ses.materiaId && ses.creditoDescontado) {
+      const ledgerRef = userRef.collection('cobrosMateria').doc(ses.materiaId)
+      if (ses.tipoFlujo === 'horario') {
+        tx.set(ledgerRef, { horarioPagado: true, updatedAt: FieldValue.serverTimestamp() }, { merge: true })
+      } else if (ses.tipoFlujo === 'completa') {
+        tx.set(ledgerRef, { completaPagada: true, updatedAt: FieldValue.serverTimestamp() }, { merge: true })
+      }
+    }
+
+    reembolsado    = procedeReembolso
+    montoReembolso = procedeReembolso ? monto : 0
   })
 
-  if (reembolsado) registrarConsumo(userRef, false, CREDITOS_POR_GENERACION, 'reembolso')
+  if (reembolsado) registrarConsumo(userRef, false, montoReembolso, 'reembolso')
   return { ok: true, reembolsado }
 })
 
@@ -416,7 +461,7 @@ exports.generarGemini2023 = onCall(
     }
     const sessionRef = db.collection('users').doc(request.auth.uid)
       .collection('sesionesGeneracion').doc(sessionId)
-    await consumirLlamadaSesion(sessionRef, ['completa', 'regenRA'])
+    await consumirLlamadaSesion(sessionRef, ['completa', 'regenRA', 'horario'])
 
     const {
       systemPrompt = null,
@@ -488,6 +533,96 @@ exports.generarGemini2023 = onCall(
       return { text }
     } catch (err) {
       console.error('IA 2023 API error (uid=%s):', request.auth.uid, err.message)
+      throw new HttpsError('internal', err.message || 'Error al llamar a la IA.')
+    }
+  }
+)
+
+// ── extraerEstructura2023Gratis: extracción de estructura 2023 SIN cobrar ──
+// Equivalente gratuito de generarGemini2023, igual que `extraerEstructura` lo es
+// del flujo 2018. Solo requiere auth: NO abre sesión ni descuenta créditos.
+// Pensado exclusivamente para el "Planificador de horarios" (estructura/RAs sin
+// actividades). La planeación didáctica completa sigue pasando por la ruta de pago.
+exports.extraerEstructura2023Gratis = onCall(
+  {
+    timeoutSeconds: 120,
+    memory: '512MiB',
+    secrets: [GEMINI_API_KEY_SECRET, OPENAI_API_KEY_SECRET],
+    cors: true,
+  },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError('unauthenticated', 'Debes iniciar sesion para usar esta funcion.')
+    }
+
+    const {
+      systemPrompt = null,
+      userPrompt,
+      pdfPEBase64,
+      pdfGPEBase64,
+      temperature = 0.2,
+      maxOutputTokens = 8192,
+      model = 'gemini-2.5-flash',
+    } = request.data || {}
+
+    if (!userPrompt || typeof userPrompt !== 'string') {
+      throw new HttpsError('invalid-argument', 'Falta el prompt de usuario.')
+    }
+    if (systemPrompt !== null && typeof systemPrompt !== 'string') {
+      throw new HttpsError('invalid-argument', 'El prompt del sistema no es valido.')
+    }
+    if (!GEMINI_2023_MODELS.has(model)) {
+      throw new HttpsError('invalid-argument', 'Modelo Gemini no permitido.')
+    }
+    if (typeof temperature !== 'number' || temperature < 0 || temperature > 1) {
+      throw new HttpsError('invalid-argument', 'La temperatura debe estar entre 0 y 1.')
+    }
+    if (!Number.isInteger(maxOutputTokens) || maxOutputTokens < 512 || maxOutputTokens > 65536) {
+      throw new HttpsError('invalid-argument', 'maxOutputTokens no es valido.')
+    }
+    if ((systemPrompt?.length || 0) + userPrompt.length > MAX_PROMPT_CHARS) {
+      throw new HttpsError('invalid-argument', 'Los prompts superan el tamano maximo permitido.')
+    }
+    if (pdfPEBase64 && pdfPEBase64.length > MAX_PDF_B64_LEN) {
+      throw new HttpsError('invalid-argument', 'El PDF del PE supera el tamano maximo.')
+    }
+    if (pdfGPEBase64 && pdfGPEBase64.length > MAX_PDF_B64_LEN) {
+      throw new HttpsError('invalid-argument', 'El PDF de la GPE supera el tamano maximo.')
+    }
+
+    const openaiKey = OPENAI_API_KEY_SECRET.value() || process.env.OPENAI_API_KEY
+    const geminiKey = GEMINI_API_KEY_SECRET.value() || process.env.GEMINI_API_KEY
+    if (!openaiKey && !geminiKey) {
+      throw new HttpsError('failed-precondition', 'No hay API key de IA configurada (OPENAI_API_KEY o GEMINI_API_KEY).')
+    }
+
+    try {
+      let text
+      if (openaiKey) {
+        text = await callOpenAI({
+          openaiKey,
+          systemPrompt,
+          userPrompt,
+          pdfPEBase64,
+          pdfGPEBase64,
+          temperature,
+          maxTokens: maxOutputTokens,
+        })
+      } else {
+        text = await callGemini({
+          geminiKey,
+          systemPrompt,
+          userPrompt,
+          pdfPEBase64,
+          pdfGPEBase64,
+          temperature,
+          model,
+          maxOutputTokens,
+        })
+      }
+      return { text }
+    } catch (err) {
+      console.error('extraerEstructura2023Gratis IA error (uid=%s):', request.auth.uid, err.message)
       throw new HttpsError('internal', err.message || 'Error al llamar a la IA.')
     }
   }

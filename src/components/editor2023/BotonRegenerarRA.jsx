@@ -65,9 +65,9 @@ export default function BotonRegenerarRA({ ra, cabecera, pdfPE, pdfGPE, onRegene
 
   if (confirmar) {
     return (
-      <div className="flex flex-wrap items-center gap-2 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900">
+      <div className="flex flex-wrap items-center gap-2 p-3 rounded-xl bg-warning-50 dark:bg-warning-950/30 border border-warning-200 dark:border-warning-900">
         {/* Warning icon */}
-        <svg className="w-4 h-4 text-amber-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="w-4 h-4 text-warning-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
             d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
         </svg>
@@ -77,7 +77,7 @@ export default function BotonRegenerarRA({ ra, cabecera, pdfPE, pdfGPE, onRegene
         <button
           onClick={handleRegenerar}
           disabled={generando}
-          className="text-xs px-3 py-1 rounded-lg bg-violet-600 text-white hover:opacity-90 disabled:opacity-50"
+          className="text-xs px-3 py-1 rounded-lg bg-info-600 text-white hover:opacity-90 disabled:opacity-50"
         >
           {generando ? 'Regenerando…' : 'Sí, regenerar'}
         </button>
@@ -87,7 +87,7 @@ export default function BotonRegenerarRA({ ra, cabecera, pdfPE, pdfGPE, onRegene
         >
           Cancelar
         </button>
-        {errorLocal && <p className="w-full text-xs text-rose-600 dark:text-rose-400">{errorLocal}</p>}
+        {errorLocal && <p className="w-full text-xs text-danger-600 dark:text-danger-400">{errorLocal}</p>}
       </div>
     )
   }
@@ -96,8 +96,8 @@ export default function BotonRegenerarRA({ ra, cabecera, pdfPE, pdfGPE, onRegene
     <button
       onClick={() => setConfirmar(true)}
       className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg
-                 bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300
-                 hover:bg-violet-100 dark:hover:bg-violet-900/50 transition"
+                 bg-info-50 dark:bg-info-900/30 text-info-700 dark:text-info-300
+                 hover:bg-info-100 dark:hover:bg-info-900/50 transition"
     >
       {/* Sparkles icon */}
       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

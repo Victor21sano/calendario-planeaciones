@@ -197,7 +197,7 @@ export default function PaginaActividad({ cabecera, unidad, ra, actividad, numer
         </div>
 
         {/* Título oficial */}
-        <div className="border-b-2 border-emerald-600 pb-2">
+        <div className="border-b-2 border-success-600 pb-2">
           <p className="text-lg font-light text-slate-800 dark:text-slate-100">
             Formato de Planeación Didáctica
           </p>
@@ -219,15 +219,15 @@ export default function PaginaActividad({ cabecera, unidad, ra, actividad, numer
                         flex items-center justify-center rounded-xl">
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700
                           p-6 max-w-sm mx-4 text-center space-y-4 animate-scale-in">
-            <div className="w-12 h-12 mx-auto rounded-full bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center">
-              <svg className="w-6 h-6 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="w-12 h-12 mx-auto rounded-full bg-info-100 dark:bg-info-900/40 flex items-center justify-center">
+              <svg className="w-6 h-6 text-info-600 dark:text-info-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                   d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
             <p className="font-semibold text-slate-800 dark:text-slate-100">Contenido bloqueado</p>
             <p className="text-sm text-slate-500">Adquiere créditos para desbloquear todas las actividades.</p>
-            <a href="/comprar-creditos" className="btn-primary w-full justify-center py-2.5 text-sm">Adquirir créditos</a>
+            <a href="/comprar-creditos" className="btn-accent w-full justify-center py-2.5 text-sm">Adquirir créditos</a>
           </div>
         </div>
       )}

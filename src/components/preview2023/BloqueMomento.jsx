@@ -3,9 +3,9 @@ import BotonCopiarTabla from './BotonCopiarTabla'
 const esc = s => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
 
 const CONFIG = {
-  inicio:     { titulo: 'Inicio',     bg: 'bg-violet-50 dark:bg-violet-950/20',   border: 'border-violet-200 dark:border-violet-900/50' },
-  desarrollo: { titulo: 'Desarrollo', bg: 'bg-emerald-50 dark:bg-emerald-950/20', border: 'border-emerald-200 dark:border-emerald-900/50' },
-  cierre:     { titulo: 'Cierre',     bg: 'bg-amber-50 dark:bg-amber-950/20',     border: 'border-amber-200 dark:border-amber-900/50' },
+  inicio:     { titulo: 'Inicio',     bg: 'bg-info-50 dark:bg-info-950/20',   border: 'border-info-200 dark:border-info-900/50' },
+  desarrollo: { titulo: 'Desarrollo', bg: 'bg-success-50 dark:bg-success-950/20', border: 'border-success-200 dark:border-success-900/50' },
+  cierre:     { titulo: 'Cierre',     bg: 'bg-warning-50 dark:bg-warning-950/20',     border: 'border-warning-200 dark:border-warning-900/50' },
 }
 
 const CAMPOS = [

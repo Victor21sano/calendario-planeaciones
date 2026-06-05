@@ -54,9 +54,9 @@ function CopyButton({ elementId, label = 'Copiar tabla' }) {
       title={modoGratis ? 'Compra créditos para copiar este contenido' : undefined}
       className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 no-print
         ${blocked
-          ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-700'
+          ? 'bg-warning-50 dark:bg-warning-900/20 text-warning-700 dark:text-warning-300 border border-warning-300 dark:border-warning-700'
           : copied
-            ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700'
+            ? 'bg-success-100 dark:bg-success-900/30 text-success-700 dark:text-success-300 border border-success-300 dark:border-success-700'
             : modoGratis
               ? 'bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-600 cursor-not-allowed'
               : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 hover:border-primary-400 hover:text-primary-600 dark:hover:text-primary-400'
@@ -212,8 +212,8 @@ export default function PlaneacionPreview({
           onClick={copyAll}
           title={modoGratis ? 'Compra créditos para copiar las tablas' : undefined}
           className={`btn-primary gap-2 no-print ${
-            blockedAll ? 'from-amber-500 to-amber-600'
-            : copiedAll ? 'from-emerald-600 to-emerald-700'
+            blockedAll ? 'from-warning-500 to-warning-600'
+            : copiedAll ? 'from-success-600 to-success-700'
             : modoGratis ? 'opacity-60 cursor-not-allowed'
             : ''
           }`}
@@ -236,17 +236,17 @@ export default function PlaneacionPreview({
 
       {/* Banner modo gratis */}
       {modoGratis && (
-        <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 no-print">
-          <svg className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="flex items-start gap-3 p-4 rounded-xl bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-800/40 no-print">
+          <svg className="w-5 h-5 text-warning-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
           </svg>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">Vista previa — Modo Gratis</p>
-            <p className="text-xs text-amber-700 dark:text-amber-300 mt-0.5">
+            <p className="text-sm font-semibold text-warning-800 dark:text-warning-200">Vista previa — Modo Gratis</p>
+            <p className="text-xs text-warning-700 dark:text-warning-300 mt-0.5">
               Esta es una vista previa de la planeación. Compra créditos para generar el contenido completo con IA y copiarlo a tu formato.
             </p>
           </div>
-          <a href="/comprar-creditos" className="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold transition-colors">
+          <a href="/comprar-creditos" className="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-warning-500 hover:bg-warning-600 text-white text-xs font-semibold transition-colors">
             Comprar créditos
           </a>
         </div>

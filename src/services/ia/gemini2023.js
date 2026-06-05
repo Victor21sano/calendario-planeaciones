@@ -12,7 +12,8 @@ import { PROMPT_ACTIVIDADES_2023 } from './prompts2023/promptActividades.js'
 
 const MODEL_ESTRUCTURA = import.meta.env.VITE_GEMINI_MODEL_ESTRUCTURA || 'gemini-2.5-flash'
 const MODEL_ACTIVIDADES = import.meta.env.VITE_GEMINI_MODEL_ACTIVIDADES || 'gemini-2.5-flash'
-const generarGemini2023Fn   = httpsCallable(functions, 'generarGemini2023',   { timeout: 540000 })
+const generarGemini2023Fn       = httpsCallable(functions, 'generarGemini2023',        { timeout: 540000 })
+const extraerEstructuraGratisFn = httpsCallable(functions, 'extraerEstructura2023Gratis', { timeout: 120000 })
 const iniciarGeneracionFn   = httpsCallable(functions, 'iniciarGeneracion')
 const finalizarGeneracionFn = httpsCallable(functions, 'finalizarGeneracion')
 
@@ -21,8 +22,8 @@ const finalizarGeneracionFn = httpsCallable(functions, 'finalizarGeneracion')
  * de forma atómica). Devuelve el sessionId que debe pasarse a cada llamada.
  * Lanza HttpsError 'failed-precondition' si el saldo es insuficiente.
  */
-export async function iniciarSesion2023() {
-  const res = await iniciarGeneracionFn({ tipoFlujo: 'completa' })
+export async function iniciarSesion2023(materiaId = null) {
+  const res = await iniciarGeneracionFn({ tipoFlujo: 'completa', materiaId })
   return res.data?.sessionId
 }
 
@@ -63,10 +64,15 @@ async function llamarGemini({
   maxOutputTokens,
   modelo,
   sessionId,
+  gratis = false,
 }) {
   const modeloEfectivo = modelo || MODEL_ESTRUCTURA
   const MAX_INTENTOS = 5
   let lastErr
+
+  // En modo gratis se usa la función sin créditos (extraerEstructura2023Gratis),
+  // que no requiere sessionId. El flujo de pago sigue usando generarGemini2023.
+  const fn = gratis ? extraerEstructuraGratisFn : generarGemini2023Fn
 
   for (let intento = 0; intento < MAX_INTENTOS; intento++) {
     if (intento > 0) {
@@ -75,7 +81,7 @@ async function llamarGemini({
     }
 
     try {
-      const res = await generarGemini2023Fn({
+      const res = await fn({
         systemPrompt: sistemPrompt,
         userPrompt: textoPrompt,
         pdfPEBase64: partesInlineData[0] || null,
@@ -83,7 +89,7 @@ async function llamarGemini({
         temperature,
         maxOutputTokens,
         model: modeloEfectivo,
-        sessionId,
+        ...(gratis ? {} : { sessionId }),
       })
 
       const texto = res.data?.text || ''
@@ -109,7 +115,7 @@ async function llamarGemini({
  * @param {{ fechaInicioSemestre, fechaFinSemestre, diasNoLaborables }} calendario
  * @returns {Promise<Object>}
  */
-export async function extraerEstructura2023(pdfPE, pdfGPE, datosDocente, calendario, sessionId) {
+export async function extraerEstructura2023(pdfPE, pdfGPE, datosDocente, calendario, sessionId, { gratis = false } = {}) {
   const [b64PE, b64GPE] = await Promise.all([fileToBase64(pdfPE), fileToBase64(pdfGPE)])
 
   const contextoJSON = JSON.stringify({ docente: datosDocente, calendario }, null, 2)
@@ -122,6 +128,7 @@ export async function extraerEstructura2023(pdfPE, pdfGPE, datosDocente, calenda
     maxOutputTokens: 8192,
     modelo: MODEL_ESTRUCTURA,
     sessionId,
+    gratis,
   })
 }
 

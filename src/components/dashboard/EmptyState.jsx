@@ -17,7 +17,7 @@ export default function EmptyState({ onCrear, sinCreditosDisponibles }) {
         <p className="mb-2 text-sm font-bold uppercase tracking-[0.18em] text-brand-700 dark:text-brand-300">
           Bienvenido a Planea-Pro
         </p>
-        <h2 className="text-3xl font-black tracking-tight text-slate-950 dark:text-white">
+        <h2 className="font-display text-[2.1rem] font-semibold leading-[1.1] tracking-tight text-slate-950 dark:text-white">
           Empieza tu primera planeacion con una ruta clara.
         </h2>
         <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-slate-500 dark:text-slate-400">
@@ -45,7 +45,7 @@ export default function EmptyState({ onCrear, sinCreditosDisponibles }) {
             1 credito por modulo
           </span>
           {sinCreditosDisponibles && (
-            <p className="mt-2 text-[11px] font-medium text-document-700 dark:text-document-300">
+            <p className="mt-2 text-[11px] font-medium text-warning-700 dark:text-warning-300">
               Necesitas credito para la generacion completa.
             </p>
           )}

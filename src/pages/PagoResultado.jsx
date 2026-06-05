@@ -4,11 +4,11 @@ import { useAuth } from '../contexts/AuthContext'
 const CONFIGS = {
   exito: {
     icon: (
-      <svg className="w-12 h-12 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg className="w-12 h-12 text-success-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     ),
-    bg:    'bg-emerald-50 dark:bg-emerald-900/20',
+    bg:    'bg-success-50 dark:bg-success-900/20',
     title: '¡Pago exitoso!',
     body:  'Tus créditos ya están disponibles en tu cuenta. Puedes empezar a generar planeaciones de inmediato.',
     cta:   'Ir a generar planeaciones',
@@ -17,11 +17,11 @@ const CONFIGS = {
   },
   pendiente: {
     icon: (
-      <svg className="w-12 h-12 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg className="w-12 h-12 text-warning-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     ),
-    bg:    'bg-amber-50 dark:bg-amber-900/20',
+    bg:    'bg-warning-50 dark:bg-warning-900/20',
     title: 'Pago pendiente',
     body:  'Tu pago está en proceso. Si pagaste con OXXO o SPEI, tus créditos se acreditarán automáticamente al confirmarse el pago (puede tardar hasta 48 horas). No necesitas hacer nada más — el saldo se actualizará solo en cuanto se confirme.',
     cta:   'Volver al inicio',
@@ -30,11 +30,11 @@ const CONFIGS = {
   },
   error: {
     icon: (
-      <svg className="w-12 h-12 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg className="w-12 h-12 text-danger-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     ),
-    bg:    'bg-rose-50 dark:bg-rose-900/20',
+    bg:    'bg-danger-50 dark:bg-danger-900/20',
     title: 'El pago no se completó',
     body:  'Hubo un problema con el pago. No se realizó ningún cargo. Puedes intentarlo de nuevo con el mismo u otro método de pago.',
     cta:   'Intentar de nuevo',
@@ -62,7 +62,7 @@ export default function PagoResultado() {
           </div>
 
           {/* Título */}
-          <h1 className="text-xl font-extrabold text-slate-900 dark:text-white mb-3">
+          <h1 className="font-display text-xl font-semibold text-slate-900 dark:text-white mb-3">
             {config.title}
           </h1>
 
@@ -73,8 +73,8 @@ export default function PagoResultado() {
 
           {/* Saldo actualizado (si exitoso) */}
           {resultado === 'exito' && creditos !== null && (
-            <div className="mb-6 px-4 py-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/40">
-              <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
+            <div className="mb-6 px-4 py-3 rounded-xl bg-success-50 dark:bg-success-900/20 border border-success-200 dark:border-success-800/40">
+              <p className="text-xs text-success-600 dark:text-success-400 font-semibold">
                 Saldo actual: {creditos} {creditos === 1 ? 'crédito' : 'créditos'}
               </p>
             </div>

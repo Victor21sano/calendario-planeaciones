@@ -3,12 +3,12 @@ import PaginaActividad from './PaginaActividad'
 
 // ─── Colores de RA (igual paleta que los stagger del 2018) ────
 const PALETA_RA = [
-  'bg-violet-500 dark:bg-violet-600',
-  'bg-emerald-500 dark:bg-emerald-600',
-  'bg-amber-500 dark:bg-amber-600',
+  'bg-info-500 dark:bg-info-600',
+  'bg-success-500 dark:bg-success-600',
+  'bg-warning-500 dark:bg-warning-600',
   'bg-pink-500 dark:bg-pink-600',
-  'bg-sky-500 dark:bg-sky-600',
-  'bg-rose-500 dark:bg-rose-600',
+  'bg-info-500 dark:bg-info-600',
+  'bg-danger-500 dark:bg-danger-600',
 ]
 
 /**
@@ -86,7 +86,7 @@ export default function PreviewModelo2023({ planeacion, pagada = true, esAdmin =
                   <span className={`w-1.5 h-1.5 rounded-full ${activo ? color : 'bg-slate-300 dark:bg-slate-600'}`} />
                 )}
                 {!tieneActiv && (
-                  <span className="text-[10px] text-amber-500">⚠</span>
+                  <span className="text-[10px] text-warning-500">⚠</span>
                 )}
               </button>
             )

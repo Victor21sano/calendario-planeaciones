@@ -22,13 +22,13 @@ const METODOS = [
   {
     id: 'ia',
     nombre: 'Planeacion completa',
-    desc: 'Sube PE y GPE, Planea-Pro prepara la base editable - 1 credito',
+    desc: 'Sube PE y GPE, Planea-Pro genera todo - 75 créditos',
     icon: 'M13 10V3L4 14h7v7l9-11h-7z',
   },
   {
     id: 'manual',
-    nombre: 'Captura manual',
-    desc: 'Llenas cada campo a tu ritmo - Gratis',
+    nombre: 'Horario o manual',
+    desc: 'Horario automático: 25 créditos · Captura 100% manual: gratis',
     icon: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z',
   },
 ]
@@ -153,7 +153,7 @@ export default function ModeloMateriaModal({ onConfirmar, onCerrar, sinCreditosD
         <button
           onClick={handleConfirmar}
           disabled={!puedeContinuar}
-          className="btn-primary w-full justify-center py-2.5 disabled:cursor-not-allowed disabled:opacity-40"
+          className="btn-accent w-full justify-center py-2.5 disabled:cursor-not-allowed disabled:opacity-40"
         >
           Continuar con esta ruta
           <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

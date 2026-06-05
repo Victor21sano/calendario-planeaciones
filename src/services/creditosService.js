@@ -23,8 +23,8 @@ const finalizarGeneracionFn = httpsCallable(functions, 'finalizarGeneracion')
  * Devuelve el sessionId a pasar en cada llamada de IA del flujo.
  * Lanza HttpsError 'failed-precondition' si el saldo es insuficiente.
  */
-export async function iniciarSesionGeneracion(tipoFlujo = 'completa') {
-  const res = await iniciarGeneracionFn({ tipoFlujo })
+export async function iniciarSesionGeneracion(tipoFlujo = 'completa', materiaId = null) {
+  const res = await iniciarGeneracionFn({ tipoFlujo, materiaId })
   return res.data?.sessionId
 }
 

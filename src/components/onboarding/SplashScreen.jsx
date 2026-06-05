@@ -21,7 +21,7 @@ export default function SplashScreen({ onComplete }) {
     <div
       onClick={handleComplete}
       className={`fixed inset-0 z-50 flex flex-col items-center justify-center
-        bg-gradient-to-br from-primary-600 via-primary-700 to-violet-800
+        bg-gradient-to-br from-primary-600 via-primary-700 to-brand-800
         cursor-pointer select-none
         ${exiting ? 'animate-fade-out' : 'animate-fade-in'}`}
     >
@@ -37,7 +37,7 @@ export default function SplashScreen({ onComplete }) {
 
       {/* ── Title ── */}
       <div className={`text-center ${reduced() ? '' : 'animate-slide-up'}`} style={{ animationDelay: '80ms' }}>
-        <h1 className="text-5xl font-black text-white tracking-tight leading-none mb-3">
+        <h1 className="font-display text-5xl font-semibold text-white tracking-tight leading-none mb-3">
           PLANEA<span className="text-primary-200">-</span>PRO
         </h1>
         <p className="text-white/65 text-xl font-medium tracking-wide">
@@ -48,7 +48,7 @@ export default function SplashScreen({ onComplete }) {
       {/* ── Tagline ── */}
       <div className={`mt-12 ${reduced() ? '' : 'animate-fade-in'}`} style={{ animationDelay: '500ms' }}>
         <div className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="w-1.5 h-1.5 rounded-full bg-success-400 animate-pulse" />
           <span className="text-white/60 text-xs font-semibold tracking-widest uppercase">
             CONALEP · Planeación Didáctica
           </span>

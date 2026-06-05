@@ -99,7 +99,7 @@ function DropZone({ label, sublabel, icon, file, onFile, disabled, name }) {
             type="button"
             onClick={e => { e.stopPropagation(); onFile(null) }}
             aria-label={`Quitar ${label}`}
-            className="icon-button absolute right-3 top-3 h-7 w-7 rounded-full bg-rose-100 text-xs font-bold text-rose-500 hover:bg-rose-200 dark:bg-rose-900/40"
+            className="icon-button absolute right-3 top-3 h-7 w-7 rounded-full bg-danger-100 text-xs font-bold text-danger-500 hover:bg-danger-200 dark:bg-danger-900/40"
           >
             x
           </button>
@@ -122,10 +122,10 @@ function DropZone({ label, sublabel, icon, file, onFile, disabled, name }) {
   )
 }
 
-export default function UploadScreen({ onGenerate, onFreeGenerate, onSkip, error, bloqueado = false }) {
+export default function UploadScreen({ onGenerate, onFreeGenerate, onSkip, error, bloqueado = false, modoSoloPlanificador = false }) {
   const [pdfPE, setPdfPE] = useState(null)
   const [pdfGPE, setPdfGPE] = useState(null)
-  const canGenerate = pdfPE && pdfGPE && !bloqueado
+  const canGenerate = pdfPE && pdfGPE && !bloqueado && !modoSoloPlanificador
   const canFreeGenerate = !!(pdfPE && pdfGPE)
 
   return (
@@ -137,7 +137,7 @@ export default function UploadScreen({ onGenerate, onFreeGenerate, onSkip, error
           <div className="mb-5 flex justify-center">
             <BrandMark className="w-14 h-14" />
           </div>
-          <h2 className="mb-2 text-2xl font-extrabold text-slate-900 dark:text-white">
+          <h2 className="mb-2 font-display text-2xl font-semibold text-slate-900 dark:text-white">
             Sube PE y GPE del mismo modulo
           </h2>
           <p className="mx-auto max-w-md text-sm leading-relaxed text-slate-500 dark:text-slate-400">
@@ -175,23 +175,25 @@ export default function UploadScreen({ onGenerate, onFreeGenerate, onSkip, error
         </div>
 
         {error && (
-          <div className="mb-4 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800 dark:border-rose-800/40 dark:bg-rose-900/20 dark:text-rose-300" aria-live="polite">
+          <div className="mb-4 rounded-2xl border border-danger-200 bg-danger-50 p-4 text-sm text-danger-800 dark:border-danger-800/40 dark:bg-danger-900/20 dark:text-danger-300" aria-live="polite">
             <p className="mb-1 font-semibold">No pudimos preparar la planeacion:</p>
             <p className="break-all font-mono text-xs opacity-80">{error.slice(0, 200)}</p>
           </div>
         )}
 
-        <button
-          onClick={() => onGenerate(pdfPE, pdfGPE)}
-          disabled={!canGenerate}
-          className={`btn-primary mb-4 w-full justify-center gap-2 py-3.5 text-base disabled:cursor-not-allowed disabled:opacity-40
-            ${bloqueado ? 'pointer-events-none opacity-40' : ''}`}
-        >
-          <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-          Generar planeacion didactica
-        </button>
+        {!modoSoloPlanificador && (
+          <button
+            onClick={() => onGenerate(pdfPE, pdfGPE)}
+            disabled={!canGenerate}
+            className={`btn-accent mb-4 w-full justify-center gap-2 py-3.5 text-base disabled:cursor-not-allowed disabled:opacity-40
+              ${bloqueado ? 'pointer-events-none opacity-40' : ''}`}
+          >
+            <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            Generar planeacion didactica (75 creditos)
+          </button>
+        )}
 
         <div className="my-5 flex items-center gap-3">
           <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
@@ -207,9 +209,9 @@ export default function UploadScreen({ onGenerate, onFreeGenerate, onSkip, error
               </svg>
             </div>
             <div>
-              <p className="text-sm font-bold text-slate-700 dark:text-slate-200">Solo planificador de horarios</p>
+              <p className="text-sm font-bold text-slate-700 dark:text-slate-200">Solo planificador de horarios (25 creditos)</p>
               <p className="mt-0.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-                Extrae unidades y horas del PE <strong>sin gastar creditos</strong>. La planeacion didactica queda disponible cuando adquieras creditos.
+                Extrae unidades y horas del PE. Cuenta como anticipo: la planeacion completa luego solo cuesta 50 creditos.
               </p>
             </div>
           </div>
@@ -221,7 +223,7 @@ export default function UploadScreen({ onGenerate, onFreeGenerate, onSkip, error
             <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-            {canFreeGenerate ? 'Generar horario automatico gratis' : 'Sube PE y GPE para continuar'}
+            {canFreeGenerate ? 'Generar horario automatico (25 creditos)' : 'Sube PE y GPE para continuar'}
           </button>
         </div>
 

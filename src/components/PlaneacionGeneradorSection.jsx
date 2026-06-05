@@ -356,7 +356,7 @@ export default function PlaneacionGeneradorSection({
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {savedFlash && <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Importado ✓</span>}
+          {savedFlash && <span className="text-xs text-success-600 dark:text-success-400 font-semibold">Importado ✓</span>}
           <label className="btn-secondary text-xs py-1.5 cursor-pointer gap-1.5">
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
             Importar JSON
@@ -377,6 +377,7 @@ export default function PlaneacionGeneradorSection({
           raList={raList}
           onSinCreditos={() => setMostrarModalSinCreditos(true)}
           modelo={modelo}
+          materiaId={materiaId}
         />
       )}
 
@@ -425,7 +426,7 @@ export default function PlaneacionGeneradorSection({
       {/* Empty state */}
       {showEmptyState && (
         <div className="card p-12 flex flex-col items-center text-center">
-          <div className="w-16 h-16 bg-gradient-to-br from-primary-50 to-violet-50 dark:from-primary-900/20 dark:to-violet-900/20 rounded-2xl flex items-center justify-center mb-4">
+          <div className="w-16 h-16 bg-gradient-to-br from-primary-50 to-info-50 dark:from-primary-900/20 dark:to-info-900/20 rounded-2xl flex items-center justify-center mb-4">
             <svg className="w-8 h-8 text-primary-300 dark:text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
@@ -455,10 +456,10 @@ export default function PlaneacionGeneradorSection({
               >
                 RA {ra.raLabel}
                 {iaStatus[ra.raLabel]?.generado && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0" title="Generado con IA" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-success-400 flex-shrink-0" title="Generado con IA" />
                 )}
                 {iaErrors[ra.raLabel] && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0" title="Error de generación — usa Reintentar" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-warning-400 flex-shrink-0" title="Error de generación — usa Reintentar" />
                 )}
               </button>
             ))}
@@ -487,8 +488,8 @@ export default function PlaneacionGeneradorSection({
                       </p>
                     )}
                     {iaStatus[activeTab]?.generado && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />Generado con IA
+                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-success-600 dark:text-success-400 mt-0.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-success-400" />Generado con IA
                       </span>
                     )}
                   </div>
@@ -506,13 +507,13 @@ export default function PlaneacionGeneradorSection({
 
                 {/* Error + retry banner */}
                 {iaErrors[activeTab] && (
-                  <div className="mb-4 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 flex items-start gap-3">
-                    <svg className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="mb-4 p-3 rounded-xl bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-800/40 flex items-start gap-3">
+                    <svg className="w-4 h-4 text-warning-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-amber-800 dark:text-amber-300 mb-0.5">No se generó este RA correctamente</p>
-                      <p className="text-[10px] text-amber-600 dark:text-amber-400 font-mono break-all line-clamp-2">{iaErrors[activeTab].slice(0, 140)}</p>
+                      <p className="text-xs font-semibold text-warning-800 dark:text-warning-300 mb-0.5">No se generó este RA correctamente</p>
+                      <p className="text-[10px] text-warning-600 dark:text-warning-400 font-mono break-all line-clamp-2">{iaErrors[activeTab].slice(0, 140)}</p>
                     </div>
                     <button
                       onClick={() => handleRetryRA(activeTab)}

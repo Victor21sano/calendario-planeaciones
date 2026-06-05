@@ -63,15 +63,16 @@ export function validarRequisitos2023({ perfilDocente, semestre, pdfPE, pdfGPE }
  * @param {{ pdfPE, pdfGPE, datosDocente, calendario, onProgreso }} input
  * @returns {{ planeacion, errores, rasConError, advertenciasEstructura }}
  */
-export async function generarPlaneacion2023Completa({ pdfPE, pdfGPE, datosDocente, calendario, onProgreso = () => {} }) {
+export async function generarPlaneacion2023Completa({ pdfPE, pdfGPE, datosDocente, calendario, materiaId = null, onProgreso = () => {} }) {
 
   const prog = (phase, message, current = 0, total = 100) =>
     onProgreso({ phase, message, current, total })
 
-  // ── Abrir sesión de generación (descuenta 1 crédito en el servidor) ──
+  // ── Abrir sesión de generación (descuenta el costo en el servidor) ──
   // Todo el costo de la generación queda cubierto por esta única sesión.
-  // Si algo falla, finalizarSesion2023(sessionId, false) reembolsa el crédito.
-  const sessionId = await iniciarSesion2023()
+  // Si ya se pagó el horario de esta materia, el servidor aplica el anticipo.
+  // Si algo falla, finalizarSesion2023(sessionId, false) reembolsa.
+  const sessionId = await iniciarSesion2023(materiaId)
 
   try {
     return await ejecutarGeneracion2023({ pdfPE, pdfGPE, datosDocente, calendario, prog, sessionId })

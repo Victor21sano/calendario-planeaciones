@@ -26,21 +26,21 @@ export default function SuccessTransition({ errors, onComplete }) {
         {/* ── Check circle ── */}
         <div className={`flex justify-center mb-8 ${reduced ? '' : 'animate-scale-in'}`}>
           <div className="relative">
-            <div className="w-28 h-28 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-              <svg className="w-14 h-14 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="w-28 h-28 rounded-full bg-success-100 dark:bg-success-900/30 flex items-center justify-center">
+              <svg className="w-14 h-14 text-success-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
             {/* Pulse ring */}
             {!reduced && (
-              <div className="absolute inset-0 rounded-full border-4 border-emerald-400/30 animate-ping" />
+              <div className="absolute inset-0 rounded-full border-4 border-success-400/30 animate-ping" />
             )}
           </div>
         </div>
 
         {/* ── Message ── */}
         <div className={reduced ? '' : 'animate-slide-up'} style={{ animationDelay: '150ms' }}>
-          <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white mb-3">
+          <h2 className="font-display text-2xl font-semibold text-slate-900 dark:text-white mb-3">
             {hasErrors
               ? `Planeaciones generadas (${errorCount} con advertencia)`
               : '¡Listo! Planeaciones generadas.'}
@@ -55,7 +55,7 @@ export default function SuccessTransition({ errors, onComplete }) {
         {/* ── Stats chips ── */}
         <div className={`flex flex-wrap justify-center gap-2 mt-6 ${reduced ? '' : 'animate-fade-in'}`}
           style={{ animationDelay: '300ms' }}>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-success-100 dark:bg-success-900/30 text-success-700 dark:text-success-300">
             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
@@ -67,7 +67,7 @@ export default function SuccessTransition({ errors, onComplete }) {
             </svg>
             Planeaciones generadas con IA
           </span>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-info-100 dark:bg-info-900/30 text-info-700 dark:text-info-300">
             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>

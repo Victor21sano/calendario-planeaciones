@@ -5,9 +5,9 @@ import CampoTexto    from './campos/CampoTexto'
 import { AMBIENTES_SUGERIDOS } from '../../modelos/2023/constantes.js'
 
 const CFG = {
-  inicio:     { titulo: 'Inicio',     color: 'border-violet-300 dark:border-violet-800',  bg: 'bg-violet-50/50 dark:bg-violet-950/20' },
-  desarrollo: { titulo: 'Desarrollo', color: 'border-emerald-300 dark:border-emerald-800', bg: 'bg-emerald-50/50 dark:bg-emerald-950/20' },
-  cierre:     { titulo: 'Cierre',     color: 'border-amber-300 dark:border-amber-800',    bg: 'bg-amber-50/50 dark:bg-amber-950/20' },
+  inicio:     { titulo: 'Inicio',     color: 'border-info-300 dark:border-info-800',  bg: 'bg-info-50/50 dark:bg-info-950/20' },
+  desarrollo: { titulo: 'Desarrollo', color: 'border-success-300 dark:border-success-800', bg: 'bg-success-50/50 dark:bg-success-950/20' },
+  cierre:     { titulo: 'Cierre',     color: 'border-warning-300 dark:border-warning-800',    bg: 'bg-warning-50/50 dark:bg-warning-950/20' },
 }
 
 const AYUDA_EVALUACION = {
