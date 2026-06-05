@@ -12,6 +12,9 @@ import EmptyState          from '../components/dashboard/EmptyState'
 import ModeloMateriaModal  from '../components/dashboard/ModeloMateriaModal'
 import PerfilIncompletoModal from '../components/dashboard/PerfilIncompletoModal'
 import BrandLogo           from '../components/brand/BrandLogo'
+import AnimatedNumber      from '../components/ui/AnimatedNumber'
+import { useSpotlight }    from '../hooks/useSpotlight'
+import { useMagnetic }     from '../hooks/useMagnetic'
 
 // ─── Progreso del semestre ────────────────────────────────────
 function calcProgreso(fechaInicio, fechaFin) {
@@ -46,9 +49,13 @@ function MateriaCard({ materia, idx, onNavigate, onDuplicate, onDelete }) {
       : `${format(inicio, 'MMM yyyy', { locale: es })} – ${format(fin, 'MMM yyyy', { locale: es })}`
   }
 
+  const { ref: spotRef, onMouseMove: onSpotMove } = useSpotlight()
+
   return (
     <div
-      className="card group relative cursor-pointer animate-scale-in"
+      ref={spotRef}
+      onMouseMove={onSpotMove}
+      className="card card-spotlight group relative cursor-pointer animate-scale-in"
       style={{ animationDelay: `${Math.min(idx * 50, 250)}ms` }}
       onClick={() => onNavigate(materia.id)}
     >
@@ -71,7 +78,7 @@ function MateriaCard({ materia, idx, onNavigate, onDuplicate, onDelete }) {
         </div>
       </div>
 
-      <div className="p-5 flex flex-col h-full">
+      <div className="relative z-[1] p-5 flex flex-col h-full">
         {/* Nombre */}
         <h3 className="text-base font-bold text-slate-900 dark:text-slate-50 leading-snug pr-20 mb-3 line-clamp-2">
           {materia.nombre}
@@ -159,6 +166,7 @@ export default function DashboardPage() {
   const [mostrarModalSinCreditos,   setMostrarModalSinCreditos]   = useState(false)
   const [mostrarPerfilIncompleto,   setMostrarPerfilIncompleto]   = useState(false)
   const navigate = useNavigate()
+  const crearMag = useMagnetic()
 
   useEffect(() => { loadMaterias() }, [user])
 
@@ -328,8 +336,8 @@ export default function DashboardPage() {
               </p>
               <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">Tus planeaciones recientes</h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                {materias.length} {materias.length === 1 ? 'planeación' : 'planeaciones'}
-                {' · '}{totalConIA} con IA, {totalManuales} manuales
+                <AnimatedNumber value={materias.length} /> {materias.length === 1 ? 'planeación' : 'planeaciones'}
+                {' · '}<AnimatedNumber value={totalConIA} /> con IA, <AnimatedNumber value={totalManuales} /> manuales
               </p>
             </div>
             <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -347,12 +355,19 @@ export default function DashboardPage() {
                   onChange={e => setSearchTerm(e.target.value)}
                 />
               </div>
-              <button onClick={abrirModalCrear} className="btn-accent text-xs h-9 gap-1.5 flex-shrink-0">
-                <svg aria-hidden="true" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                Crear planeacion
-              </button>
+              <span
+                ref={crearMag.ref}
+                onMouseMove={crearMag.onMouseMove}
+                onMouseLeave={crearMag.onMouseLeave}
+                className="inline-block flex-shrink-0 transition-transform duration-300 ease-out-strong will-change-transform"
+              >
+                <button onClick={abrirModalCrear} className="btn-accent text-xs h-9 gap-1.5">
+                  <svg aria-hidden="true" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Crear planeacion
+                </button>
+              </span>
             </div>
           </div>
         )}

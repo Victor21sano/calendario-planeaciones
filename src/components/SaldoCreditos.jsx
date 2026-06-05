@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import AnimatedNumber from './ui/AnimatedNumber'
 
 export default function SaldoCreditos({ className = '' }) {
   const { user, esAdmin, creditos, sinCreditosDisponibles } = useAuth()
@@ -43,7 +44,7 @@ export default function SaldoCreditos({ className = '' }) {
         : sinCreditosDisponibles ? 'text-warning-700 dark:text-warning-300'
         : 'text-slate-700 dark:text-slate-200'
       }`}>
-        {esAdmin ? '∞' : (creditos === null ? '…' : creditos)}
+        {esAdmin ? '∞' : (creditos === null ? '…' : <AnimatedNumber value={creditos} />)}
       </span>
 
       {esAdmin && (
