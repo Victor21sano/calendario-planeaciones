@@ -183,8 +183,8 @@ function FormAcreditar({ onSuccess }) {
               required
               value={creditos}
               onChange={e => setCreditos(Number(e.target.value))}
-              min={-50}
-              max={50}
+              min={-500}
+              max={500}
               className={`input-base w-28 text-center font-bold text-lg ${esNegativo ? 'border-danger-300 dark:border-danger-700 text-danger-700 dark:text-danger-400' : ''}`}
             />
             <div className="flex gap-1.5">

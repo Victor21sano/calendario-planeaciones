@@ -36,7 +36,7 @@ export async function acreditarCreditoManual({ emailDestino, creditos, metodo, m
 
   if (!emailNorm)           throw new Error('El email destino es obligatorio.')
   if (creditosNum === 0)    throw new Error('La cantidad de créditos no puede ser 0.')
-  if (Math.abs(creditosNum) > 50) throw new Error('La cantidad máxima por operación es 50 créditos.')
+  if (Math.abs(creditosNum) > 500) throw new Error('La cantidad máxima por operación es 500 créditos.')
   if (creditosNum < 0 && !String(nota || '').trim()) {
     throw new Error('La nota es obligatoria para reversas (créditos negativos).')
   }
