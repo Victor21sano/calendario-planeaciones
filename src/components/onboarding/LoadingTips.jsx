@@ -2,15 +2,15 @@ import { useEffect, useState } from 'react'
 import BrandMark from '../brand/BrandMark'
 
 const TIPS = [
-  'Leyendo documentos oficiales y ubicando la estructura del modulo.',
+  'Leyendo documentos oficiales y ubicando la estructura del módulo.',
   'Identificando unidades, resultados de aprendizaje y horas asignadas.',
-  'Revisando que PE y GPE correspondan al mismo modulo.',
+  'Revisando que PE y GPE correspondan al mismo módulo.',
   'Organizando sesiones para que puedas revisar antes de exportar.',
   'Preparando una base editable, no un documento cerrado.',
-  'Una buena planeacion deja claro que hara el docente y que hara el alumno.',
-  'La evaluacion formativa ayuda a corregir a tiempo, no solo a calificar al final.',
-  'El cierre de sesion es clave para detectar dudas antes de avanzar.',
-  'Relacionar el contenido con el contexto del grupo mejora la participacion.',
+  'Una buena planeación deja claro qué hará el docente y qué hará el alumno.',
+  'La evaluación formativa ayuda a corregir a tiempo, no solo a calificar al final.',
+  'El cierre de sesión es clave para detectar dudas antes de avanzar.',
+  'Relacionar el contenido con el contexto del grupo mejora la participación.',
   'Documentar tus planeaciones te permite mejorarlas ciclo tras ciclo.',
 ]
 
@@ -24,7 +24,7 @@ function ProgressBar({ progress }) {
   return (
     <div className="mx-auto w-full max-w-md">
       <div className="mb-2 flex justify-between text-xs font-semibold text-slate-400 dark:text-slate-500">
-        <span>{progress.message || 'Preparando planeacion...'}</span>
+        <span>{progress.message || 'Preparando planeación...'}</span>
         {pct !== null && <span className="tabular-nums">{pct}%</span>}
       </div>
       <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
@@ -86,8 +86,8 @@ export default function LoadingTips({ progress, onCancel }) {
         {is2023 && (
           <div className="mb-6">
             <p className="mb-3 text-sm font-bold text-slate-700 dark:text-slate-200">
-              {isEstructura ? 'Leyendo estructura del modulo...' : ''}
-              {isActividades ? 'Organizando actividades didacticas...' : ''}
+              {isEstructura ? 'Leyendo estructura del módulo...' : ''}
+              {isActividades ? 'Organizando actividades didácticas...' : ''}
               {isFechas ? 'Calculando calendario del semestre...' : ''}
             </p>
             <div className="mx-auto w-full max-w-md">
@@ -135,13 +135,13 @@ export default function LoadingTips({ progress, onCancel }) {
             {progress.waitSeconds > 0 && (
               <div className="flex flex-col items-center gap-2 rounded-xl border border-document-200 bg-document-50 px-4 py-3 dark:border-document-800/40 dark:bg-document-900/20">
                 <span className="text-xs font-semibold text-document-700 dark:text-document-300">
-                  Respetando el limite de la API de Google
+                  Respetando el límite de la API de Google
                 </span>
                 <div className="text-3xl font-black leading-none text-document-700 tabular-nums dark:text-document-300">
                   {progress.waitSeconds}s
                 </div>
                 <p className="text-center text-[10px] text-document-700/70 dark:text-document-300/70">
-                  Esto es normal. La generacion continua automaticamente.
+                  Esto es normal. La generación continúa automáticamente.
                 </p>
               </div>
             )}

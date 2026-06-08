@@ -163,7 +163,7 @@ export default function CalendarioForm({
             autoCalc.requiereManual ? (
               <div className="mt-2 p-2.5 rounded-xl bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-800/40">
                 <p className="text-xs text-warning-800 dark:text-warning-300">
-                  El calculo da <strong>{autoCalc.exact.toFixed(2)} h/sem</strong>. Captura un numero manualmente.
+                  El cálculo da <strong>{autoCalc.exact.toFixed(2)} h/sem</strong>. Captura un número manualmente.
                 </p>
               </div>
             ) : (
@@ -172,7 +172,7 @@ export default function CalendarioForm({
                   <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/>
                   </svg>
-                  <span><strong>{autoCalc.rounded} h/sem</strong> - 100 % de ocupacion ({horasTotalesPrograma} h / {semanasHabilesCount} sem)</span>
+                  <span><strong>{autoCalc.rounded} h/sem</strong> - 100 % de ocupación ({horasTotalesPrograma} h / {semanasHabilesCount} sem)</span>
                 </div>
                 {puedeAplicarAuto && (
                   <button

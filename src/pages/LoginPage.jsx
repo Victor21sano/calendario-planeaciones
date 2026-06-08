@@ -24,7 +24,7 @@ export default function LoginPage() {
       navigate(from, { replace: true })
     } catch (err) {
       console.error(err)
-      setError('No pudimos iniciar sesion. Revisa tu correo y contrasena.')
+      setError('No pudimos iniciar sesión. Revisa tu correo y contraseña.')
     } finally {
       setLoading(false)
     }
@@ -38,7 +38,7 @@ export default function LoginPage() {
       navigate(from, { replace: true })
     } catch (err) {
       console.error(err)
-      setError('No pudimos iniciar sesion con Google. Intentalo nuevamente.')
+      setError('No pudimos iniciar sesión con Google. Inténtalo nuevamente.')
     } finally {
       setLoading(false)
     }
@@ -47,6 +47,17 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-[radial-gradient(circle_at_top_left,#d6efe9,transparent_38%),radial-gradient(circle_at_bottom_right,#fde3db,transparent_42%),linear-gradient(135deg,#fffdf8_0%,#f7f3ea_50%,#fdf0e9_100%)] p-4 dark:bg-[radial-gradient(circle_at_top_left,rgba(94,234,212,0.10),transparent_36%),radial-gradient(circle_at_bottom_right,rgba(232,93,63,0.08),transparent_42%),linear-gradient(135deg,#0d1614_0%,#111a18_55%,#1a1512_100%)]">
       <main className="mx-auto grid min-h-screen w-full max-w-6xl items-center gap-10 py-8 lg:grid-cols-[1.05fr_0.95fr]">
+        {/* Hero compacto — solo móvil (en lg+ aparece el panel lateral completo) */}
+        <section className="text-center lg:hidden animate-slide-up">
+          <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-white/70 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-brand-700 shadow-sm backdrop-blur dark:border-brand-800/60 dark:bg-slate-900/50 dark:text-brand-300">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent-500" />
+            Para docentes CONALEP
+          </p>
+          <h2 className="font-display text-[1.6rem] font-semibold leading-tight tracking-tight text-slate-950 dark:text-white">
+            Convierte PE y GPE en <span className="text-accent-600 dark:text-accent-400">planeaciones listas</span> para revisar y exportar.
+          </h2>
+        </section>
+
         <section className="hidden animate-slide-up lg:block">
           <BrandLogo markClassName="w-12 h-12" showTagline />
           <div className="mt-10 max-w-xl">
@@ -58,7 +69,7 @@ export default function LoginPage() {
               Convierte PE y GPE en <span className="text-accent-600 dark:text-accent-400">planeaciones listas</span> para revisar y exportar.
             </h1>
             <p className="mt-6 max-w-lg text-[15px] leading-8 text-slate-600 dark:text-slate-300">
-              Planea-Pro te ayuda a ordenar documentos oficiales, calcular horarios y preparar planeaciones didacticas con una experiencia pensada para el trabajo docente.
+              Planea-Pro te ayuda a ordenar documentos oficiales, calcular horarios y preparar planeaciones didácticas con una experiencia pensada para el trabajo docente.
             </p>
           </div>
           <div className="mt-8 grid max-w-xl grid-cols-3 gap-3">
@@ -79,10 +90,10 @@ export default function LoginPage() {
           <div className="mb-8 text-center">
             <BrandLogo className="justify-center" markClassName="w-14 h-14" showTagline />
             <h2 className="mt-7 font-display text-[1.7rem] font-semibold tracking-tight text-slate-900 dark:text-white">
-              Accede a tu centro de planeacion
+              Accede a tu centro de planeación
             </h2>
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-              Continua tus materias, documentos y exportaciones.
+              Continúa tus materias, documentos y exportaciones.
             </p>
           </div>
 
@@ -95,7 +106,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <label className="block">
               <span className="mb-1.5 ml-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">
-                Correo electronico
+                Correo electrónico
               </span>
               <span className="relative block">
                 <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -119,7 +130,7 @@ export default function LoginPage() {
 
             <label className="block">
               <span className="mb-1.5 ml-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">
-                Contrasena
+                Contraseña
               </span>
               <span className="relative block">
                 <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -140,13 +151,9 @@ export default function LoginPage() {
               </span>
             </label>
 
-            <div className="flex items-center justify-between pt-1">
-              <label className="flex cursor-pointer items-center gap-2">
-                <input type="checkbox" className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500" />
-                <span className="text-xs text-slate-600 dark:text-slate-400">Mantener sesion</span>
-              </label>
+            <div className="flex items-center justify-end pt-1">
               <Link to="/reset-password" className="text-xs font-semibold text-brand-700 hover:text-brand-800 dark:text-brand-300">
-                Olvide mi contrasena
+                Olvidé mi contraseña
               </Link>
             </div>
 
@@ -160,7 +167,7 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-6 flex items-center text-sm text-slate-400 before:mr-4 before:flex-1 before:border-t before:border-slate-200 after:ml-4 after:flex-1 after:border-t after:border-slate-200 dark:before:border-slate-700 dark:after:border-slate-700">
-            o continua con
+            o continúa con
           </div>
 
           <button
@@ -180,7 +187,7 @@ export default function LoginPage() {
           <p className="mt-8 text-center text-xs text-slate-500 dark:text-slate-400">
             No tienes una cuenta?{' '}
             <Link to="/register" className="font-semibold text-brand-700 hover:underline dark:text-brand-300">
-              Registrate
+              Regístrate
             </Link>
           </p>
         </div>
