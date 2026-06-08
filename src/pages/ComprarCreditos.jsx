@@ -47,9 +47,9 @@ export default function ComprarCreditos() {
               1 crédito = $1 MXN
             </p>
             <ul className="text-xs text-primary-600 dark:text-primary-400 space-y-1">
-              <li>• Planeación completa: <strong>75 créditos</strong></li>
-              <li>• Solo horario automático: <strong>25 créditos</strong> (cuenta como anticipo de la completa)</li>
-              <li>• Captura 100% manual: <strong>gratis</strong></li>
+              <li>• Planeación completa: <strong>100 créditos</strong></li>
+              <li>• Solo horario automático: <strong>25 créditos</strong> (anticipo de la completa)</li>
+              <li>• Completa después del horario: <strong>75 créditos</strong></li>
             </ul>
           </div>
 

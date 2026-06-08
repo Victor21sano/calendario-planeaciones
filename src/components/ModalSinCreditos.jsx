@@ -1,6 +1,6 @@
 import BrandMark from './brand/BrandMark'
 
-export default function ModalSinCreditos({ onComprar, onModoGratuito, onCerrar }) {
+export default function ModalSinCreditos({ onComprar, onCerrar }) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center overscroll-contain bg-black/50 p-4 backdrop-blur-sm animate-fade-in"
@@ -29,7 +29,7 @@ export default function ModalSinCreditos({ onComprar, onModoGratuito, onCerrar }
             Tus creditos no son suficientes
           </h2>
           <p className="text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-            La planeacion completa cuesta 75 creditos y el horario automatico 25. Tambien puedes capturar todo manualmente sin gastar creditos.
+            La planeacion completa cuesta 100 creditos y el horario automatico 25. Adquiere creditos para continuar.
           </p>
         </div>
 
@@ -45,19 +45,8 @@ export default function ModalSinCreditos({ onComprar, onModoGratuito, onCerrar }
             Adquirir creditos
           </button>
 
-          <button
-            onClick={onModoGratuito}
-            className="btn-secondary w-full justify-center gap-2 py-3 text-sm"
-          >
-            <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            Capturar manualmente (gratis)
-          </button>
-
           <p className="px-2 text-center text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">
-            Puedes generar la planeacion didactica completa cuando tengas creditos disponibles.
+            Si ya pagaste el horario (25), la planeacion completa son solo 75 creditos mas.
           </p>
         </div>
       </div>

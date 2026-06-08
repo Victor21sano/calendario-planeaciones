@@ -122,7 +122,7 @@ function DropZone({ label, sublabel, icon, file, onFile, disabled, name }) {
   )
 }
 
-export default function UploadScreen({ onGenerate, onFreeGenerate, onSkip, error, bloqueado = false, modoSoloPlanificador = false }) {
+export default function UploadScreen({ onGenerate, onFreeGenerate, error, bloqueado = false, modoSoloPlanificador = false }) {
   const [pdfPE, setPdfPE] = useState(null)
   const [pdfGPE, setPdfGPE] = useState(null)
   const canGenerate = pdfPE && pdfGPE && !bloqueado && !modoSoloPlanificador
@@ -191,7 +191,7 @@ export default function UploadScreen({ onGenerate, onFreeGenerate, onSkip, error
             <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
-            Generar planeacion didactica (75 creditos)
+            Generar planeacion didactica (100 creditos)
           </button>
         )}
 
@@ -211,7 +211,7 @@ export default function UploadScreen({ onGenerate, onFreeGenerate, onSkip, error
             <div>
               <p className="text-sm font-bold text-slate-700 dark:text-slate-200">Solo planificador de horarios (25 creditos)</p>
               <p className="mt-0.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-                Extrae unidades y horas del PE. Cuenta como anticipo: la planeacion completa luego solo cuesta 50 creditos.
+                Extrae unidades y horas del PE para construir tu planificador de horarios.
               </p>
             </div>
           </div>
@@ -224,15 +224,6 @@ export default function UploadScreen({ onGenerate, onFreeGenerate, onSkip, error
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             {canFreeGenerate ? 'Generar horario automatico (25 creditos)' : 'Sube PE y GPE para continuar'}
-          </button>
-        </div>
-
-        <div className="text-center">
-          <button
-            onClick={onSkip}
-            className="pressable text-xs font-medium text-slate-400 underline-offset-2 hover:text-slate-600 hover:underline dark:text-slate-500 dark:hover:text-slate-300"
-          >
-            Prefiero llenar todo manualmente -&gt;
           </button>
         </div>
       </div>

@@ -81,7 +81,6 @@ export default function PlaneacionGeneradorSection({
   materiaId, unidades, resultado, onUpdateUnidades, onHorasTotales, onHorasSemana,
   pendingGenerationResult, onPendingResultApplied,
   onGeneratedComplete,
-  modoManualInicial = false,
   pagada = true,
   modelo = '2018',
 }) {
@@ -106,10 +105,8 @@ export default function PlaneacionGeneradorSection({
   const [iaEstructura, setIaEstructura] = useState(null)
   // raLabel currently being retried (null = none)
   const [retryingRA, setRetryingRA] = useState(null)
-  // Modal de sin créditos y modo gratuito
-  // modoManualInicial viene de DashboardPage cuando el usuario eligió "modo gratuito"
+  // Modal de sin créditos
   const [mostrarModalSinCreditos, setMostrarModalSinCreditos] = useState(false)
-  const [modoGratuito, setModoGratuito]                       = useState(modoManualInicial)
 
   useEffect(() => {
     try { localStorage.setItem(LS_KEY(materiaId), JSON.stringify(data)) } catch {}
@@ -369,48 +366,20 @@ export default function PlaneacionGeneradorSection({
         </div>
       </div>
 
-      {/* Panel IA — oculto en modo gratuito */}
-      {!modoGratuito && (
-        <GeneradorIA
-          onGenerated={applyGeneratedData}
-          onUpdateUnidades={onUpdateUnidades}
-          raList={raList}
-          onSinCreditos={() => setMostrarModalSinCreditos(true)}
-          modelo={modelo}
-          materiaId={materiaId}
-        />
-      )}
-
-      {/* Banner modo gratuito */}
-      {modoGratuito && (
-        <div className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-3">
-            <svg className="w-5 h-5 text-slate-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-            </svg>
-            <div>
-              <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">Modo manual activo</p>
-              <p className="text-xs text-slate-400 dark:text-slate-500">Llena los formularios manualmente. La generación con IA requiere créditos.</p>
-            </div>
-          </div>
-          <button
-            onClick={() => setModoGratuito(false)}
-            className="btn-secondary text-xs py-1.5 flex-shrink-0"
-          >
-            Activar IA
-          </button>
-        </div>
-      )}
+      {/* Panel IA */}
+      <GeneradorIA
+        onGenerated={applyGeneratedData}
+        onUpdateUnidades={onUpdateUnidades}
+        raList={raList}
+        onSinCreditos={() => setMostrarModalSinCreditos(true)}
+        modelo={modelo}
+        materiaId={materiaId}
+      />
 
       {/* Modal sin créditos */}
       {mostrarModalSinCreditos && (
         <ModalSinCreditos
           onComprar={() => navigate('/comprar-creditos')}
-          onModoGratuito={() => {
-            setMostrarModalSinCreditos(false)
-            setModoGratuito(true)
-          }}
           onCerrar={() => setMostrarModalSinCreditos(false)}
         />
       )}

@@ -21,7 +21,7 @@ export default function EmptyState({ onCrear, sinCreditosDisponibles }) {
           Empieza tu primera planeacion con una ruta clara.
         </h2>
         <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-slate-500 dark:text-slate-400">
-          Puedes generar una planeacion completa con IA o extraer solo el planificador de horarios sin gastar creditos.
+          Puedes generar una planeacion completa con IA o extraer solo el horario automatico del modulo.
         </p>
       </div>
 
@@ -42,7 +42,7 @@ export default function EmptyState({ onCrear, sinCreditosDisponibles }) {
             Sube PE y GPE. Planea-Pro propone estructura, sesiones y tablas didacticas para revisar.
           </p>
           <span className="inline-flex items-center rounded-full bg-brand-50 px-2.5 py-1 text-[10px] font-bold text-brand-700 dark:bg-brand-900/30 dark:text-brand-200">
-            1 credito por modulo
+            100 creditos
           </span>
           {sinCreditosDisponibles && (
             <p className="mt-2 text-[11px] font-medium text-warning-700 dark:text-warning-300">
@@ -63,10 +63,10 @@ export default function EmptyState({ onCrear, sinCreditosDisponibles }) {
           </div>
           <h3 className="mb-1 text-base font-extrabold text-slate-900 dark:text-white">Horario automatico</h3>
           <p className="mb-4 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-            Extrae unidades y horas para construir tu planificador. Ideal para iniciar sin creditos.
+            Extrae unidades y horas para construir tu planificador de horarios.
           </p>
           <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-500 dark:bg-slate-700/60 dark:text-slate-300">
-            Gratis
+            25 creditos
           </span>
         </button>
       </div>

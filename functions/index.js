@@ -57,12 +57,12 @@ const MAX_PDF_B64_LEN  = 50_000_000 // ~37.5 MB en base64 ≈ ~28 MB de PDF orig
 const CREDITOS_POR_GENERACION = 1 // legacy (modo sin sesión / compatibilidad)
 
 // Costo en créditos por tipo de flujo.
-//   completa → planeación didáctica completa (75)
+//   completa → planeación didáctica completa (100)
 //   horario  → solo planificador de horarios / estructura (25)
 //   regenRA  → regeneración de 1 RA individual (gratis)
-const COSTO_POR_FLUJO = { completa: 75, horario: 25, regenRA: 0 }
+const COSTO_POR_FLUJO = { completa: 100, horario: 25, regenRA: 0 }
 // El horario (25) funciona como anticipo: si el docente ya pagó el horario de una
-// materia, la planeación completa solo cobra la diferencia (75 - 25 = 50).
+// materia, la planeación completa solo cobra la diferencia (100 - 25 = 75).
 const DESCUENTO_HORARIO_PREVIO = 25
 
 // ── Sesiones de generación 2023 ────────────────────────────────
@@ -305,8 +305,9 @@ exports.iniciarGeneracion = onCall({ cors: true }, async (request) => {
   let delta = 0
   let costoCobrado = 0
   await db.runTransaction(async (tx) => {
-    // Costo base por flujo. La planeación completa aplica el anticipo del horario
-    // (si esta materia ya pagó su horario y aún no se ha pagado la completa).
+    // Costo base por flujo. La planeación completa (100) aplica el anticipo del
+    // horario (si esta materia ya pagó su horario y aún no se ha pagado la completa),
+    // de modo que solo cobra la diferencia (75).
     let costo = COSTO_POR_FLUJO[tipoFlujo] ?? COSTO_POR_FLUJO.completa
     if (tipoFlujo === 'completa' && materiaId) {
       const ledgerSnap = await tx.get(userRef.collection('cobrosMateria').doc(materiaId))
@@ -385,7 +386,7 @@ exports.finalizarGeneracion = onCall({ cors: true }, async (request) => {
     })
 
     // Si la generación fue exitosa (no reembolsada), registrar el cobro de la
-    // materia en el ledger server-only. Permite el anticipo: horario → completa = 50.
+    // materia en el ledger server-only. Permite el anticipo: horario → completa = 75.
     if (!procedeReembolso && ses.materiaId && ses.creditoDescontado) {
       const ledgerRef = userRef.collection('cobrosMateria').doc(ses.materiaId)
       if (ses.tipoFlujo === 'horario') {

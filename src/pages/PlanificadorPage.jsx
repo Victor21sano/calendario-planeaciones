@@ -685,8 +685,8 @@ export default function PlanificadorPage() {
   }
 
   // ── Modo horario: extrae solo la estructura del PE (cuesta 25 créditos) ──
-  // El servidor lo registra como anticipo: al generar la planeación completa
-  // de esta materia solo se cobra la diferencia (50).
+  // El horario (25) cuenta como anticipo: la planeación completa de esta materia
+  // pasa de 100 a 75 una vez pagado el horario.
   // semestreOverride: cuando se guardan fechas desde el modal (evita state stale)
   async function handleFreeExtract(pdfPE, pdfGPE, semestreOverride = null) {
     const semestreActual = semestreOverride || estado.semestre
@@ -712,8 +712,7 @@ export default function PlanificadorPage() {
     const sem    = semestreOverride || estado.semestre
     const vac    = estado.periodosVacacionales || []
 
-    // Abrir sesión de horario (descuenta 25 créditos; el servidor lo registra
-    // como anticipo de la planeación completa de esta materia).
+    // Abrir sesión de horario (descuenta 25 créditos en el servidor).
     let sessionId
     try {
       sessionId = await iniciarSesionGeneracion('horario', materiaId)
@@ -962,14 +961,12 @@ export default function PlanificadorPage() {
   }
 
   if (onboardingFase === 'upload') {
-    const skipToManual = () => { setOnboardingFase('app'); setMainTab('planificador') }
     const sinCreditos  = !esAdmin && creditos !== null && creditos <= 0
     return (
       <>
         <UploadScreen
           onGenerate={handleOnboardingGenerate}
           onFreeGenerate={handleFreeExtract}
-          onSkip={skipToManual}
           error={genError}
           bloqueado={sinCreditos}
           modoSoloPlanificador={modoManualInicial}
@@ -977,7 +974,6 @@ export default function PlanificadorPage() {
         {mostrarModalSinCreditos && (
           <ModalSinCreditos
             onComprar={() => navigate('/comprar-creditos')}
-            onModoGratuito={() => setMostrarModalSinCreditos(false)}
             onCerrar={() => setMostrarModalSinCreditos(false)}
           />
         )}
@@ -1209,7 +1205,6 @@ export default function PlanificadorPage() {
                         pendingGenerationResult={null}
                         onPendingResultApplied={() => {}}
                         onGeneratedComplete={() => {}}
-                        modoManualInicial={true}
                         pagada={false}
                         modelo={estado.modelo || '2018'}
                       />
@@ -1235,7 +1230,7 @@ export default function PlanificadorPage() {
                       <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
                         {(!esAdmin && creditos <= 0)
                           ? <>Compra créditos para <strong className="text-primary-600 dark:text-primary-400">desbloquear el contenido</strong> y generar tu planeación didáctica completa con IA.</>
-                          : <>Genera tu planeación didáctica completa con IA. Se descontará <strong className="text-primary-600 dark:text-primary-400">1 crédito</strong>.</>
+                          : <>Genera tu planeación didáctica completa con IA. Se descontarán <strong className="text-primary-600 dark:text-primary-400">75 créditos</strong>.</>
                         }
                       </p>
                     </div>
@@ -1261,7 +1256,7 @@ export default function PlanificadorPage() {
                           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                           </svg>
-                          {generandoPagada ? <span className="text-shimmer">Generando…</span> : 'Generar mi planeación (1 crédito)'}
+                          {generandoPagada ? <span className="text-shimmer">Generando…</span> : 'Generar mi planeación (75 créditos)'}
                         </button>
                       )
                     }
@@ -1353,7 +1348,6 @@ export default function PlanificadorPage() {
                 pendingGenerationResult={pendingResult}
                 onPendingResultApplied={() => setPendingResult(null)}
                 onGeneratedComplete={marcarMateriaComoIA}
-                modoManualInicial={modoManualInicial}
                 pagada={estado.pagada !== false}
                 modelo={estado.modelo || '2018'}
               />
@@ -1370,12 +1364,6 @@ export default function PlanificadorPage() {
       {mostrarModalSinCreditos && (
         <ModalSinCreditos
           onComprar={() => navigate('/comprar-creditos')}
-          onModoGratuito={() => {
-            setMostrarModalSinCreditos(false)
-            // Saltar el onboarding de IA y entrar directo en modo manual
-            setOnboardingFase('app')
-            setMainTab('planificador')
-          }}
           onCerrar={() => setMostrarModalSinCreditos(false)}
         />
       )}
