@@ -53,9 +53,9 @@ export default function LoginPage() {
             <span className="h-1.5 w-1.5 rounded-full bg-accent-500" />
             Para docentes CONALEP
           </p>
-          <h1 className="font-display text-[1.6rem] font-semibold leading-tight tracking-tight text-slate-950 dark:text-white">
+          <h2 className="font-display text-[1.6rem] font-semibold leading-tight tracking-tight text-slate-950 dark:text-white">
             Convierte PE y GPE en <span className="text-accent-600 dark:text-accent-400">planeaciones listas</span> para revisar y exportar.
-          </h1>
+          </h2>
         </section>
 
         <section className="hidden animate-slide-up lg:block">
