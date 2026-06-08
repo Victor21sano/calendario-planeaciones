@@ -287,7 +287,7 @@ export default function DashboardPage() {
   }, [materias, searchTerm])
 
   return (
-    <div className="min-h-screen bg-[var(--surface-sunken)] flex flex-col">
+    <div className="min-h-screen surface-atmosphere flex flex-col">
 
       {/* ── Header ── */}
       <header className="sticky top-0 z-40 bg-[#fffdf8]/80 dark:bg-[#182420]/80 backdrop-blur-xl border-b border-brand-100/60 dark:border-white/5">
