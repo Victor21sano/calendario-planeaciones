@@ -94,7 +94,7 @@ export default function CalendarioForm({
     <div className="card p-5 sm:p-6 animate-fade-in">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-info-600 rounded-xl flex items-center justify-center shadow-sm shadow-primary-200 dark:shadow-primary-900/40 flex-shrink-0">
+        <div className="w-8 h-8 bg-gradient-to-br from-brand-600 to-academic-600 rounded-xl flex items-center justify-center shadow-sm shadow-brand-200 dark:shadow-brand-900/40 flex-shrink-0">
           <span className="text-xs font-bold text-white">1</span>
         </div>
         <div>
@@ -104,7 +104,7 @@ export default function CalendarioForm({
       </div>
 
       {/* Top accent line */}
-      <div className="absolute top-0 left-6 right-6 h-0.5 bg-gradient-to-r from-primary-500 to-info-500 rounded-full opacity-60" style={{top: 0}}/>
+      <div className="absolute top-0 left-6 right-6 h-0.5 bg-gradient-to-r from-brand-500 to-academic-500 rounded-full opacity-60" style={{top: 0}}/>
 
       {/* Date & Hours Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">

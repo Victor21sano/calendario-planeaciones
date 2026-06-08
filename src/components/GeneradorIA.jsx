@@ -110,7 +110,7 @@ function ProgressBar({ progress, errors }) {
       <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden">
         <div
           className={`h-2.5 rounded-full transition-all duration-500
-            ${isDone ? 'bg-success-400 dark:bg-success-500' : 'bg-gradient-to-r from-primary-500 to-info-600'}
+            ${isDone ? 'bg-success-400 dark:bg-success-500' : 'bg-gradient-to-r from-brand-600 to-academic-600'}
             ${isConverting || isStructure ? 'animate-pulse' : ''}`}
           style={{ width: isConverting || isStructure ? '20%' : `${isDone ? 100 : pct}%` }}
         />
@@ -359,9 +359,9 @@ export default function GeneradorIA({ onGenerated, onUpdateUnidades, raList, onS
           {/* ── Modo gratis: bloqueo con CTA ── */}
           {modoGratis && (
             <div className="space-y-4">
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-primary-50 to-info-50 dark:from-primary-900/20 dark:to-info-900/20 border border-primary-200 dark:border-primary-800/40 space-y-4">
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-brand-50 to-academic-50 dark:from-brand-900/20 dark:to-academic-900/20 border border-primary-200 dark:border-primary-800/40 space-y-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-info-600 flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-600 to-academic-600 flex items-center justify-center flex-shrink-0">
                     <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z"/>
                     </svg>

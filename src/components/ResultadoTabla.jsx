@@ -164,7 +164,7 @@ export default function ResultadoTabla({ resultado }) {
   if (!resultado) return (
     <div className="card p-10 flex flex-col items-center text-center animate-fade-in">
       <div className="relative mb-5">
-        <div className="w-16 h-16 bg-gradient-to-br from-primary-50 to-info-50 dark:from-primary-900/20 dark:to-info-900/20 rounded-2xl flex items-center justify-center">
+        <div className="w-16 h-16 bg-gradient-to-br from-brand-50 to-academic-50 dark:from-brand-900/20 dark:to-academic-900/20 rounded-2xl flex items-center justify-center">
           <svg className="w-8 h-8 text-primary-300 dark:text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
           </svg>
