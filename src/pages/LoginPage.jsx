@@ -24,7 +24,7 @@ export default function LoginPage() {
       navigate(from, { replace: true })
     } catch (err) {
       console.error(err)
-      setError('No pudimos iniciar sesion. Revisa tu correo y contrasena.')
+      setError('No pudimos iniciar sesión. Revisa tu correo y contraseña.')
     } finally {
       setLoading(false)
     }
@@ -38,7 +38,7 @@ export default function LoginPage() {
       navigate(from, { replace: true })
     } catch (err) {
       console.error(err)
-      setError('No pudimos iniciar sesion con Google. Intentalo nuevamente.')
+      setError('No pudimos iniciar sesión con Google. Inténtalo nuevamente.')
     } finally {
       setLoading(false)
     }
@@ -69,7 +69,7 @@ export default function LoginPage() {
               Convierte PE y GPE en <span className="text-accent-600 dark:text-accent-400">planeaciones listas</span> para revisar y exportar.
             </h1>
             <p className="mt-6 max-w-lg text-[15px] leading-8 text-slate-600 dark:text-slate-300">
-              Planea-Pro te ayuda a ordenar documentos oficiales, calcular horarios y preparar planeaciones didacticas con una experiencia pensada para el trabajo docente.
+              Planea-Pro te ayuda a ordenar documentos oficiales, calcular horarios y preparar planeaciones didácticas con una experiencia pensada para el trabajo docente.
             </p>
           </div>
           <div className="mt-8 grid max-w-xl grid-cols-3 gap-3">
@@ -90,10 +90,10 @@ export default function LoginPage() {
           <div className="mb-8 text-center">
             <BrandLogo className="justify-center" markClassName="w-14 h-14" showTagline />
             <h2 className="mt-7 font-display text-[1.7rem] font-semibold tracking-tight text-slate-900 dark:text-white">
-              Accede a tu centro de planeacion
+              Accede a tu centro de planeación
             </h2>
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-              Continua tus materias, documentos y exportaciones.
+              Continúa tus materias, documentos y exportaciones.
             </p>
           </div>
 
@@ -106,7 +106,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <label className="block">
               <span className="mb-1.5 ml-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">
-                Correo electronico
+                Correo electrónico
               </span>
               <span className="relative block">
                 <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -130,7 +130,7 @@ export default function LoginPage() {
 
             <label className="block">
               <span className="mb-1.5 ml-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">
-                Contrasena
+                Contraseña
               </span>
               <span className="relative block">
                 <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -167,7 +167,7 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-6 flex items-center text-sm text-slate-400 before:mr-4 before:flex-1 before:border-t before:border-slate-200 after:ml-4 after:flex-1 after:border-t after:border-slate-200 dark:before:border-slate-700 dark:after:border-slate-700">
-            o continua con
+            o continúa con
           </div>
 
           <button
@@ -187,7 +187,7 @@ export default function LoginPage() {
           <p className="mt-8 text-center text-xs text-slate-500 dark:text-slate-400">
             No tienes una cuenta?{' '}
             <Link to="/register" className="font-semibold text-brand-700 hover:underline dark:text-brand-300">
-              Registrate
+              Regístrate
             </Link>
           </p>
         </div>
