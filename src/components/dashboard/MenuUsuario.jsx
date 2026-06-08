@@ -9,6 +9,8 @@ import { Link } from 'react-router-dom'
 export default function MenuUsuario({ inicial, esAdmin, onLogout }) {
   const [abierto, setAbierto] = useState(false)
   const ref = useRef(null)
+  const btnRef = useRef(null)
+  const firstItemRef = useRef(null)
 
   // Cerrar al hacer click fuera
   useEffect(() => {
@@ -17,7 +19,7 @@ export default function MenuUsuario({ inicial, esAdmin, onLogout }) {
       if (ref.current && !ref.current.contains(e.target)) setAbierto(false)
     }
     function onEsc(e) {
-      if (e.key === 'Escape') setAbierto(false)
+      if (e.key === 'Escape') { setAbierto(false); btnRef.current?.focus() }
     }
     document.addEventListener('mousedown', onClickFuera)
     document.addEventListener('keydown', onEsc)
@@ -27,9 +29,15 @@ export default function MenuUsuario({ inicial, esAdmin, onLogout }) {
     }
   }, [abierto])
 
+  // Al abrir, mover el foco al primer ítem (navegación por teclado)
+  useEffect(() => {
+    if (abierto) firstItemRef.current?.focus()
+  }, [abierto])
+
   return (
     <div ref={ref} className="relative">
       <button
+        ref={btnRef}
         type="button"
         onClick={() => setAbierto(v => !v)}
         aria-haspopup="menu"
@@ -47,6 +55,7 @@ export default function MenuUsuario({ inicial, esAdmin, onLogout }) {
         >
           <Link
             to="/perfil"
+            ref={firstItemRef}
             role="menuitem"
             onClick={() => setAbierto(false)}
             className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
