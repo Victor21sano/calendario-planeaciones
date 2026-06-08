@@ -126,7 +126,7 @@ export default function LoadingTips({ progress, onCancel }) {
                 <span key={i} className={`flex h-6 w-6 items-center justify-center rounded-lg text-[9px] font-bold
                   ${i < progress.current - 1 ? 'bg-academic-100 text-academic-700 dark:bg-academic-900/30 dark:text-academic-300' :
                     i === progress.current - 1 ? 'bg-brand-100 text-brand-700 animate-pulse dark:bg-brand-900/30 dark:text-brand-300' :
-                    'bg-slate-100 text-slate-400 dark:bg-slate-800'}`}>
+                    'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'}`}>
                   {i + 1}
                 </span>
               ))}

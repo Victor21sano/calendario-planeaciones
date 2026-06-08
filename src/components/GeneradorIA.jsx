@@ -125,7 +125,7 @@ function ProgressBar({ progress, errors }) {
               <span key={i} className={`w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold transition-all
                 ${done    ? 'bg-success-100 dark:bg-success-900/30 text-success-700 dark:text-success-300' :
                   current ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 animate-pulse' :
-                  'bg-slate-100 dark:bg-slate-800 text-slate-400'}`}>
+                  'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'}`}>
                 {i + 1}
               </span>
             )

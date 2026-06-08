@@ -62,7 +62,7 @@ function CeldaDia({ celda }) {
 
   let cls = base + ' '
   if (celda.esVacacion)  cls += 'bg-warning-100 dark:bg-warning-900/40 text-warning-700 dark:text-warning-300'
-  else if (celda.esFinSemana) cls += 'bg-slate-100 dark:bg-slate-800/60 text-slate-400'
+  else if (celda.esFinSemana) cls += 'bg-slate-100 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400'
   else if (celda.actividad)   cls += 'text-white'
   else                         cls += 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'
 

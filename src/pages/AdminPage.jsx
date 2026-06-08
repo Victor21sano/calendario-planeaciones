@@ -175,7 +175,7 @@ function FormAcreditar({ onSuccess }) {
         <div>
           <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5 ml-1">
             Cantidad de créditos *
-            <span className="ml-1 font-normal text-slate-400">(negativo = reversa)</span>
+            <span className="ml-1 font-normal text-slate-500 dark:text-slate-400">(negativo = reversa)</span>
           </label>
           <div className="flex items-center gap-3">
             <input
@@ -244,7 +244,7 @@ function FormAcreditar({ onSuccess }) {
         <div>
           <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5 ml-1">
             Nota {esNegativo && <span className="text-danger-500">*</span>}
-            <span className="ml-1 font-normal text-slate-400">(comprobante, motivo, etc.)</span>
+            <span className="ml-1 font-normal text-slate-500 dark:text-slate-400">(comprobante, motivo, etc.)</span>
           </label>
           <textarea
             value={nota}
