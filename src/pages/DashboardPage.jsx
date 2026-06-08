@@ -11,7 +11,7 @@ import MateriaTypeBadge   from '../components/badges/MateriaTypeBadge'
 import EmptyState          from '../components/dashboard/EmptyState'
 import ModeloMateriaModal  from '../components/dashboard/ModeloMateriaModal'
 import PerfilIncompletoModal from '../components/dashboard/PerfilIncompletoModal'
-import MenuUsuario          from '../components/dashboard/MenuUsuario'
+import MenuUsuario from '../components/dashboard/MenuUsuario'
 import BrandLogo           from '../components/brand/BrandLogo'
 import AnimatedNumber      from '../components/ui/AnimatedNumber'
 import { useSpotlight }    from '../hooks/useSpotlight'
@@ -238,6 +238,12 @@ export default function DashboardPage() {
       return
     }
 
+    // El horario automático cuesta 25 créditos: sin saldo suficiente, mostrar compra
+    if (!conIA && !esAdmin && creditos !== null && creditos < 25) {
+      setMostrarModalSinCreditos(true)
+      return
+    }
+
     // Crear la materia
     try {
       const defaultMateria = {
@@ -393,10 +399,6 @@ export default function DashboardPage() {
       {mostrarModalSinCreditos && (
         <ModalSinCreditos
           onComprar={() => navigate('/comprar-creditos')}
-          onModoGratuito={() => {
-            setMostrarModalSinCreditos(false)
-            handleConfirmarCreacion({ modelo: MODELO_2018, conIA: false })
-          }}
           onCerrar={() => setMostrarModalSinCreditos(false)}
         />
       )}

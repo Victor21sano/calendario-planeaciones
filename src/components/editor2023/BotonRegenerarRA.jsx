@@ -1,10 +1,8 @@
 import { useState } from 'react'
-import { useAuth }                      from '../../contexts/AuthContext'
 import { generarActividadesParaRA2023 } from '../../services/ia/gemini2023'
 import { iniciarSesionGeneracion, finalizarSesionGeneracion } from '../../services/creditosService'
 
 export default function BotonRegenerarRA({ ra, cabecera, pdfPE, pdfGPE, onRegenerado }) {
-  const { creditos, esAdmin } = useAuth()
   const [generando,  setGenerando]  = useState(false)
   const [confirmar,  setConfirmar]  = useState(false)
   const [errorLocal, setErrorLocal] = useState('')
@@ -14,13 +12,7 @@ export default function BotonRegenerarRA({ ra, cabecera, pdfPE, pdfGPE, onRegene
     setGenerando(true)
     setErrorLocal('')
 
-    if (!esAdmin && (creditos ?? 0) <= 0) {
-      setErrorLocal('Sin créditos. Adquiere créditos para regenerar.')
-      setGenerando(false)
-      return
-    }
-
-    // Sesión propia para esta regeneración (1 crédito, descontado en el servidor).
+    // Sesión propia para esta regeneración (gratis: el flujo regenRA no cobra créditos).
     let sessionId
     try {
       sessionId = await iniciarSesionGeneracion('regenRA')
@@ -72,7 +64,7 @@ export default function BotonRegenerarRA({ ra, cabecera, pdfPE, pdfGPE, onRegene
             d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
         </svg>
         <span className="text-xs text-slate-700 dark:text-slate-300 flex-1">
-          Reemplazará todas las actividades del RA {ra.codigo} y {esAdmin ? 'no' : 'sí'} descontará 1 crédito. ¿Continuar?
+          Reemplazará todas las actividades del RA {ra.codigo}. ¿Continuar?
         </span>
         <button
           onClick={handleRegenerar}
@@ -104,7 +96,7 @@ export default function BotonRegenerarRA({ ra, cabecera, pdfPE, pdfGPE, onRegene
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
           d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
       </svg>
-      Regenerar con IA{!esAdmin && ' (1 crédito)'}
+      Regenerar
     </button>
   )
 }
