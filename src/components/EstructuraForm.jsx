@@ -75,12 +75,12 @@ function SubunidadRow({ sub, onChange, onDelete, total, palette }) {
             value={sub.horas}
             onChange={e => onChange({ ...sub, horas: e.target.value })}
           />
-          <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 dark:text-slate-500 pointer-events-none">hrs</span>
+          <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-500 dark:text-slate-400 pointer-events-none">hrs</span>
         </div>
 
         <div className="w-10 text-right flex-shrink-0">
           {pct !== null ? (
-            <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">{pct}%</span>
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{pct}%</span>
           ) : (
             <span className="text-xs text-slate-300 dark:text-slate-600">—</span>
           )}
@@ -90,7 +90,7 @@ function SubunidadRow({ sub, onChange, onDelete, total, palette }) {
         <button
           onClick={onDelete}
           title="Eliminar subunidad"
-          className="flex-shrink-0 p-2 rounded-lg text-slate-400 dark:text-slate-500 hover:text-danger-500 hover:bg-danger-50 dark:hover:bg-danger-900/20 transition-all duration-200 opacity-100 sm:opacity-0 sm:group-hover:opacity-100">
+          className="flex-shrink-0 p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-danger-500 hover:bg-danger-50 dark:hover:bg-danger-900/20 transition-all duration-200 opacity-100 sm:opacity-0 sm:group-hover:opacity-100">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -145,7 +145,7 @@ function UnidadCard({ unidad, palette, onUpdate, onDelete, totalHoras }) {
         {unidad.subunidades.length === 0 ? (
           <div className="flex items-center gap-2 py-2 px-2">
             <div className={`w-1.5 h-1.5 rounded-full ${palette.dot} opacity-40`} />
-            <p className="text-xs text-slate-400 dark:text-slate-500 italic">Sin subunidades — agrega al menos una.</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 italic">Sin subunidades — agrega al menos una.</p>
           </div>
         ) : (
           unidad.subunidades.map(sub => (
@@ -198,7 +198,7 @@ export default function EstructuraForm({ unidades, onChange }) {
           </div>
           <div>
             <h2 className="section-title leading-tight">Estructura del Programa</h2>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Unidades y subunidades con horas asignadas</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Unidades y subunidades con horas asignadas</p>
           </div>
         </div>
 
@@ -231,7 +231,7 @@ export default function EstructuraForm({ unidades, onChange }) {
             </svg>
           </div>
           <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-1">Sin unidades todavía</p>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mb-4 text-center max-w-xs">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 text-center max-w-xs">
             Agrega las unidades del programa de tu materia con sus horas correspondientes.
           </p>
           <button onClick={addUnidad} className="btn-primary text-xs">

@@ -23,7 +23,7 @@ function ProgressBar({ progress }) {
 
   return (
     <div className="mx-auto w-full max-w-md">
-      <div className="mb-2 flex justify-between text-xs font-semibold text-slate-400 dark:text-slate-500">
+      <div className="mb-2 flex justify-between text-xs font-semibold text-slate-500 dark:text-slate-400">
         <span>{progress.message || 'Preparando planeación...'}</span>
         {pct !== null && <span className="tabular-nums">{pct}%</span>}
       </div>
@@ -92,7 +92,7 @@ export default function LoadingTips({ progress, onCancel }) {
             </p>
             <div className="mx-auto w-full max-w-md">
               {progress.message && (
-                <div className="mb-2 flex justify-between text-xs font-semibold text-slate-400 dark:text-slate-500">
+                <div className="mb-2 flex justify-between text-xs font-semibold text-slate-500 dark:text-slate-400">
                   <span>{progress.message}</span>
                   {progress.current > 0 && (
                     <span className="tabular-nums">{Math.min(100, Math.round(progress.current))}%</span>

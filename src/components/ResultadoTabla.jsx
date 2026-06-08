@@ -43,7 +43,7 @@ function DonutChart({ pct, color }) {
       {/* Center hole */}
       <div className="absolute inset-3 rounded-full bg-white dark:bg-slate-900 flex flex-col items-center justify-center">
         <span className="text-base font-black leading-none" style={{ color: fill }}>{safeP.toFixed(0)}%</span>
-        <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 leading-none mt-0.5">usado</span>
+        <span className="text-[9px] font-semibold text-slate-500 dark:text-slate-400 leading-none mt-0.5">usado</span>
       </div>
     </div>
   )
@@ -59,14 +59,14 @@ function StatCard({ icon, label, value, sub, highlight }) {
   }
   return (
     <div className="flex flex-col gap-1 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
-      <div className="flex items-center gap-1.5 text-slate-400 dark:text-slate-500">
+      <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
         {icon}
         <span className="text-[10px] font-semibold uppercase tracking-wide">{label}</span>
       </div>
       <p className={`text-2xl font-black leading-none ${highlight ? colorMap[highlight] : 'text-slate-800 dark:text-slate-100'}`}>
         {value}
       </p>
-      {sub && <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">{sub}</p>}
+      {sub && <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">{sub}</p>}
     </div>
   )
 }
@@ -129,7 +129,7 @@ function Resumen({ resumen }) {
 
       {/* Progress bar */}
       <div className="mb-3">
-        <div className="flex justify-between text-[10px] font-semibold text-slate-400 dark:text-slate-500 mb-1.5">
+        <div className="flex justify-between text-[10px] font-semibold text-slate-500 dark:text-slate-400 mb-1.5">
           <span>Ocupación del semestre</span>
           <span>{pct.toFixed(1)}%</span>
         </div>
@@ -174,7 +174,7 @@ export default function ResultadoTabla({ resultado }) {
         <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-info-200 dark:bg-info-800 rounded-full animate-pulse delay-300" />
       </div>
       <p className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Aún no hay planeación</p>
-      <p className="text-xs text-slate-400 dark:text-slate-500 max-w-xs leading-relaxed">
+      <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs leading-relaxed">
         Completa los pasos <span className="font-semibold text-primary-500">1</span> y <span className="font-semibold text-info-500">2</span> para ver la distribución calculada de tu semestre.
       </p>
     </div>
@@ -196,7 +196,7 @@ export default function ResultadoTabla({ resultado }) {
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-white/5">
           <div>
             <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">Distribución por semana</h3>
-            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{planeacion.length} registros</p>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{planeacion.length} registros</p>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -274,7 +274,7 @@ export default function ResultadoTabla({ resultado }) {
                             style={{ width: `${row.porcentaje}%`, transition: 'width 600ms cubic-bezier(0.16,1,0.3,1)' }}
                           />
                         </div>
-                        <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 w-8 text-right flex-shrink-0">
+                        <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 w-8 text-right flex-shrink-0">
                           {row.porcentaje.toFixed(1)}%
                         </span>
                       </div>

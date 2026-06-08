@@ -33,7 +33,7 @@ export default function BotonCopiarTabla({ getHTML, etiqueta = 'Copiar', bloquea
       <button
         onClick={handleCopiar}
         aria-label={ariaLabel || `Copiar ${etiqueta}`}
-        className={`${base} bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed
+        className={`${base} bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 cursor-not-allowed
           ${bloqAnimado ? 'scale-95' : ''}`}
       >
         {/* Lock icon */}

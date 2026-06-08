@@ -105,19 +105,19 @@ export default function PreviewModelo2023({ planeacion, pagada = true, esAdmin =
               <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 mt-0.5">
                 {seleccion.ra.titulo || seleccion.ra.nombre}
               </p>
-              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 {seleccion.ra.duracionHoras}h · Actividad de evaluación: {seleccion.ra.actividadEvaluacion?.codigo}
                 {seleccion.ra.actividadEvaluacion?.ponderacion ? ` (${seleccion.ra.actividadEvaluacion.ponderacion}%)` : ''}
               </p>
             </div>
-            <div className="text-xs text-slate-400 dark:text-slate-500 text-right flex-shrink-0">
+            <div className="text-xs text-slate-500 dark:text-slate-400 text-right flex-shrink-0">
               <p>{props.length} propósito{props.length !== 1 ? 's' : ''}</p>
             </div>
           </div>
 
           {/* Sin actividades */}
           {props.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-16 text-slate-400 dark:text-slate-500">
+            <div className="flex flex-col items-center justify-center py-16 text-slate-500 dark:text-slate-400">
               <svg className="w-10 h-10 mb-3 text-slate-300 dark:text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                   d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
@@ -176,7 +176,7 @@ export default function PreviewModelo2023({ planeacion, pagada = true, esAdmin =
                       </svg>
                       Propósito anterior
                     </button>
-                    <span className="text-xs text-slate-400 dark:text-slate-500">
+                    <span className="text-xs text-slate-500 dark:text-slate-400">
                       {propActivo + 1} / {props.length}
                     </span>
                     <button

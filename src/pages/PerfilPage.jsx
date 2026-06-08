@@ -116,7 +116,7 @@ export default function PerfilPage() {
                 readOnly
                 className="input-base opacity-60 cursor-not-allowed"
               />
-              <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1 ml-1">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 ml-1">
                 Asociado a tu cuenta. No se puede cambiar desde aquí.
               </p>
             </div>
@@ -151,7 +151,7 @@ export default function PerfilPage() {
                 maxLength={15}
                 className="input-base font-mono tracking-wider"
               />
-              <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1 ml-1">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 ml-1">
                 Aparece en las planeaciones oficiales del CONALEP.
               </p>
             </div>

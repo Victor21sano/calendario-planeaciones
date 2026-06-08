@@ -116,7 +116,7 @@ export default function CalendarioSemestre({ planeacion, compacto = false }) {
       {/* Grid de días */}
       <div className="grid grid-cols-7 gap-0.5 text-xs">
         {['L','M','M','J','V','S','D'].map((d, i) => (
-          <div key={i} className="text-center text-slate-400 dark:text-slate-500 font-semibold pb-1">{d}</div>
+          <div key={i} className="text-center text-slate-500 dark:text-slate-400 font-semibold pb-1">{d}</div>
         ))}
         {datos.celdas.map((celda, i) => <CeldaDia key={i} celda={celda} />)}
       </div>
