@@ -93,7 +93,7 @@ export default function PagoResultado() {
           </Link>
 
           {resultado !== 'exito' && (
-            <Link to="/" className="block mt-3 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+            <Link to="/" className="block mt-3 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
               Ir al inicio
             </Link>
           )}

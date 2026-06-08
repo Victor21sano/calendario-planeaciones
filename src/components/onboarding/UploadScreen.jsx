@@ -3,7 +3,7 @@ import { fileSizeMB } from '../../services/iaPlaneacion'
 import BrandMark from '../brand/BrandMark'
 
 function Stepper({ step }) {
-  const steps = ['Documentos', 'Generacion', 'Listo']
+  const steps = ['Documentos', 'Generación', 'Listo']
   return (
     <div className="mb-10 flex items-center gap-0">
       {steps.map((label, i) => {
@@ -114,7 +114,7 @@ function DropZone({ label, sublabel, icon, file, onFile, disabled, name }) {
             <p className="mt-1 max-w-[170px] text-xs leading-relaxed text-slate-400 dark:text-slate-500">{sublabel}</p>
           </div>
           <p className="text-[10px] text-slate-400 dark:text-slate-500">
-            Arrastra aqui o presiona Enter para seleccionar
+            Arrastra aquí o presiona Enter para seleccionar
           </p>
         </>
       )}
@@ -138,10 +138,10 @@ export default function UploadScreen({ onGenerate, onFreeGenerate, onSkip, error
             <BrandMark className="w-14 h-14" />
           </div>
           <h2 className="mb-2 font-display text-2xl font-semibold text-slate-900 dark:text-white">
-            Sube PE y GPE del mismo modulo
+            Sube PE y GPE del mismo módulo
           </h2>
           <p className="mx-auto max-w-md text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-            Planea-Pro usara estos documentos oficiales para detectar unidades, RAs, horas y la estructura de tu planeacion.
+            Planea-Pro usará estos documentos oficiales para detectar unidades, RAs, horas y la estructura de tu planeación.
           </p>
         </div>
 
@@ -160,7 +160,7 @@ export default function UploadScreen({ onGenerate, onFreeGenerate, onSkip, error
             disabled={false}
           />
           <DropZone
-            label="Guia Pedagogica (GPE)"
+            label="Guía Pedagógica (GPE)"
             name="guia-pedagogica"
             sublabel="Competencias, atributos y evaluaciones"
             icon={
@@ -176,7 +176,7 @@ export default function UploadScreen({ onGenerate, onFreeGenerate, onSkip, error
 
         {error && (
           <div className="mb-4 rounded-2xl border border-danger-200 bg-danger-50 p-4 text-sm text-danger-800 dark:border-danger-800/40 dark:bg-danger-900/20 dark:text-danger-300" aria-live="polite">
-            <p className="mb-1 font-semibold">No pudimos preparar la planeacion:</p>
+            <p className="mb-1 font-semibold">No pudimos preparar la planeación:</p>
             <p className="break-all font-mono text-xs opacity-80">{error.slice(0, 200)}</p>
           </div>
         )}
@@ -191,13 +191,13 @@ export default function UploadScreen({ onGenerate, onFreeGenerate, onSkip, error
             <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
-            Generar planeacion didactica (75 creditos)
+            Generar planeación didáctica (75 créditos)
           </button>
         )}
 
         <div className="my-5 flex items-center gap-3">
           <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
-          <span className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Horario automatico</span>
+          <span className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Horario automático</span>
           <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
         </div>
 
@@ -209,9 +209,9 @@ export default function UploadScreen({ onGenerate, onFreeGenerate, onSkip, error
               </svg>
             </div>
             <div>
-              <p className="text-sm font-bold text-slate-700 dark:text-slate-200">Solo planificador de horarios (25 creditos)</p>
+              <p className="text-sm font-bold text-slate-700 dark:text-slate-200">Solo planificador de horarios (25 créditos)</p>
               <p className="mt-0.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-                Extrae unidades y horas del PE. Cuenta como anticipo: la planeacion completa luego solo cuesta 50 creditos.
+                Extrae unidades y horas del PE. Cuenta como anticipo: la planeación completa luego solo cuesta 50 créditos.
               </p>
             </div>
           </div>
@@ -223,7 +223,7 @@ export default function UploadScreen({ onGenerate, onFreeGenerate, onSkip, error
             <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-            {canFreeGenerate ? 'Generar horario automatico (25 creditos)' : 'Sube PE y GPE para continuar'}
+            {canFreeGenerate ? 'Generar horario automático (25 créditos)' : 'Sube PE y GPE para continuar'}
           </button>
         </div>
 

@@ -183,7 +183,7 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        <div className="mt-6 flex items-center text-sm text-slate-400 before:flex-1 before:border-t before:border-slate-200 dark:before:border-slate-700 before:mr-4 after:flex-1 after:border-t after:border-slate-200 dark:after:border-slate-700 after:ml-4">
+        <div className="mt-6 flex items-center text-sm text-slate-500 dark:text-slate-400 before:flex-1 before:border-t before:border-slate-200 dark:before:border-slate-700 before:mr-4 after:flex-1 after:border-t after:border-slate-200 dark:after:border-slate-700 after:ml-4">
           o regístrate con
         </div>
 

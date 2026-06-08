@@ -220,7 +220,7 @@ export default function PlaneacionForm({
             placeholder="1.1, 5.3, 5.6, 6.1, 8.1, 8.2"
           />
         </div>
-        <p className="text-xs text-slate-400 dark:text-slate-500">Consulta la GPE para identificar las competencias genéricas y atributos aplicables a este RA.</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400">Consulta la GPE para identificar las competencias genéricas y atributos aplicables a este RA.</p>
       </Section>
 
       {/* Datos pedagógicos */}
@@ -308,7 +308,7 @@ export default function PlaneacionForm({
           />
         ))}
         {sesiones.length === 0 && (
-          <p className="text-sm text-slate-400 dark:text-slate-500 text-center py-4">
+          <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-4">
             Selecciona el número de sesiones para comenzar.
           </p>
         )}

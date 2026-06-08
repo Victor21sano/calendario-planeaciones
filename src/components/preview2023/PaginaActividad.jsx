@@ -188,7 +188,7 @@ export default function PaginaActividad({ cabecera, unidad, ra, actividad, numer
                    p-4 md:p-6 space-y-4 print:shadow-none print:border-0 print:rounded-none"
       >
         {/* Barra superior */}
-        <div className="flex items-center justify-between text-xs text-slate-400 dark:text-slate-500 no-print">
+        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 no-print">
           <span>
             Página {numeroPagina} / {totalPaginas} · RA {ra?.codigo} · Propósito {actividad?.numero}
             {actividad?.noSesion ? ` · Sesión ${actividad.noSesion}` : ''}

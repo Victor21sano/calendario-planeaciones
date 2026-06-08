@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <!-- Fondo -->
+  <rect width="1200" height="630" fill="#0F766E"/>
+  <!-- Banda inferior decorativa -->
+  <rect y="530" width="1200" height="100" fill="#0c6259"/>
+  <!-- Acento coral -->
+  <rect x="0" y="0" width="12" height="630" fill="#E85D3F"/>
+  <!-- Ícono P grande -->
+  <rect x="80" y="180" width="160" height="160" rx="32" fill="white" opacity="0.15"/>
+  <text x="160" y="296" font-family="Arial" font-size="110" font-weight="900" fill="white" text-anchor="middle">P</text>
+  <!-- Nombre -->
+  <text x="280" y="270" font-family="Arial" font-size="72" font-weight="900" fill="white">Planea-Pro</text>
+  <!-- Subtítulo -->
+  <text x="280" y="340" font-family="Arial" font-size="34" fill="rgba(255,255,255,0.85)">Planificador docente con IA para CONALEP</text>
+  <!-- Descripción -->
+  <text x="80" y="480" font-family="Arial" font-size="26" fill="rgba(255,255,255,0.7)">Genera tu planeación didáctica y horario automático en minutos.</text>
+  <!-- URL -->
+  <text x="80" y="590" font-family="Arial" font-size="22" fill="rgba(255,255,255,0.5)">planea-pro.com.mx</text>
+</svg>

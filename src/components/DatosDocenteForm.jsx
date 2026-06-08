@@ -51,7 +51,7 @@ function Field({ label, value, onChange, placeholder = '', type = 'text', readOn
         placeholder={placeholder}
         className={`input-base ${readOnly ? 'bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 cursor-default' : ''}`}
       />
-      {hint && <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">{hint}</p>}
+      {hint && <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">{hint}</p>}
     </div>
   )
 }
@@ -165,7 +165,7 @@ export default function DatosDocenteForm({ datosDocente, modulo, onChangeDatosDo
                   ))}
                 </select>
                 {perfilDocente?.plantel && (
-                  <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
                     Guardado en tu perfil para todas las materias.
                   </p>
                 )}

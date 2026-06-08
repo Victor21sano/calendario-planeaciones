@@ -21,7 +21,7 @@ const MODELOS = [
 const METODOS = [
   {
     id: 'ia',
-    nombre: 'Planeacion completa',
+    nombre: 'Planeación completa',
     desc: 'Sube PE y GPE, Planea-Pro genera todo - 75 créditos',
     icon: 'M13 10V3L4 14h7v7l9-11h-7z',
   },
@@ -63,13 +63,13 @@ export default function ModeloMateriaModal({ onConfirmar, onCerrar, sinCreditosD
         </button>
 
         <div>
-          <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">Crear nueva planeacion</h2>
+          <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">Crear nueva planeación</h2>
           <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">Elige el formato oficial y la ruta de trabajo.</p>
         </div>
 
         <div className="space-y-3">
           <p className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
-            1 - Modelo de planeacion
+            1 - Modelo de planeación
           </p>
           <div className="grid grid-cols-2 gap-3">
             {MODELOS.map(m => (
@@ -109,7 +109,7 @@ export default function ModeloMateriaModal({ onConfirmar, onCerrar, sinCreditosD
 
         <div className="space-y-3">
           <p className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
-            2 - Como crearla
+            2 - Cómo crearla
           </p>
           <div className="space-y-2">
             {METODOS.map(met => {
@@ -134,7 +134,7 @@ export default function ModeloMateriaModal({ onConfirmar, onCerrar, sinCreditosD
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-slate-900 dark:text-white">{met.nombre}</p>
                     <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-                      {met.id === 'ia' && sinCreditosDisponibles ? 'Necesitas creditos para la planeacion completa' : met.desc}
+                      {met.id === 'ia' && sinCreditosDisponibles ? 'Necesitas créditos para la planeación completa' : met.desc}
                     </p>
                   </div>
                   {metodo === met.id && (

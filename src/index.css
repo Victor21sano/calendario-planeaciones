@@ -91,6 +91,24 @@
 @layer components {
 
   /*
+   * SURFACE-ATMOSPHERE — radiales cálidos muy tenues para superficies amplias
+   * (dashboard). Da profundidad sin ruido y refuerza la paleta de papel del
+   * sistema "Archivo Vivo". Reemplaza el fondo plano var(--surface-sunken).
+   */
+  .surface-atmosphere {
+    background-color: var(--surface-sunken);
+    background-image:
+      radial-gradient(55rem 38rem at 10% -12%, rgba(15, 118, 110, 0.06), transparent 60%),
+      radial-gradient(45rem 32rem at 100% -6%, rgba(232, 93, 63, 0.05), transparent 55%);
+    background-repeat: no-repeat;
+  }
+  .dark .surface-atmosphere {
+    background-image:
+      radial-gradient(55rem 38rem at 10% -12%, rgba(94, 234, 212, 0.055), transparent 60%),
+      radial-gradient(45rem 32rem at 100% -6%, rgba(232, 93, 63, 0.04), transparent 55%);
+  }
+
+  /*
    * [3] CARDS CON LIFT FÍSICO
    * transform se declara explícitamente aquí (fuera del * global)
    * con la curva spring de 280ms para un overshoot sutil.

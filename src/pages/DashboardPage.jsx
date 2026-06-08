@@ -287,7 +287,7 @@ export default function DashboardPage() {
   }, [materias, searchTerm])
 
   return (
-    <div className="min-h-screen bg-[var(--surface-sunken)] flex flex-col">
+    <div className="min-h-screen surface-atmosphere flex flex-col">
 
       {/* ── Header ── */}
       <header className="sticky top-0 z-40 bg-[#fffdf8]/80 dark:bg-[#182420]/80 backdrop-blur-xl border-b border-brand-100/60 dark:border-white/5">
@@ -342,7 +342,7 @@ export default function DashboardPage() {
                   <svg aria-hidden="true" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
-                  Crear planeacion
+                  Crear planeación
                 </button>
               </span>
             </div>

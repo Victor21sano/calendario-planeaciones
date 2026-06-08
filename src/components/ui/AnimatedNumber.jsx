@@ -38,5 +38,6 @@ export default function AnimatedNumber({ value, duration = 800, className = '' }
     return () => cancelAnimationFrame(rafRef.current)
   }, [value, duration, reduced])
 
-  return <span className={className}>{display}</span>
+  // tabular-nums: dígitos de ancho fijo para que el contador no "tiemble" al animar
+  return <span className={`tabular-nums ${className}`}>{display}</span>
 }

@@ -933,7 +933,7 @@ export default function PlanificadorPage() {
       }
     } catch (err) {
       console.error('Error al continuar tras completar perfil:', err)
-      setGenError(err.message || 'No se pudo continuar la generacion.')
+      setGenError(err.message || 'No se pudo continuar la generación.')
       setOnboardingFase('upload')
     }
   }, [loading, location.state, materiaId])
@@ -1157,7 +1157,7 @@ export default function PlanificadorPage() {
                   <div className="flex items-center gap-2 no-print">
                     <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300
                       ${step3Done
-                        ? 'bg-gradient-to-br from-primary-500 to-info-600 text-white shadow-sm shadow-primary-200 dark:shadow-primary-900/40'
+                        ? 'bg-gradient-to-br from-brand-600 to-academic-600 text-white shadow-sm shadow-brand-200 dark:shadow-brand-900/40'
                         : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
                       }`}>
                       {step3Done ? (
@@ -1220,7 +1220,7 @@ export default function PlanificadorPage() {
                 <div className="absolute inset-0 flex items-start justify-center pt-8 sm:pt-20 z-10">
                   <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 sm:p-8 max-w-md mx-4 text-center space-y-5 animate-scale-in">
                     <div className="relative inline-flex">
-                      <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-primary-500 to-info-600 flex items-center justify-center shadow-lg shadow-primary-500/30">
+                      <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-brand-600 to-academic-600 flex items-center justify-center shadow-lg shadow-brand-500/30">
                         <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>

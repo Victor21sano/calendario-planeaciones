@@ -26,10 +26,10 @@ export default function ModalSinCreditos({ onComprar, onModoGratuito, onCerrar }
 
         <div className="space-y-2 text-center">
           <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">
-            Tus creditos no son suficientes
+            Tus créditos no son suficientes
           </h2>
           <p className="text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-            La planeacion completa cuesta 75 creditos y el horario automatico 25. Tambien puedes capturar todo manualmente sin gastar creditos.
+            La planeación completa cuesta 75 créditos y el horario automático 25. También puedes capturar todo manualmente sin gastar créditos.
           </p>
         </div>
 
@@ -42,7 +42,7 @@ export default function ModalSinCreditos({ onComprar, onModoGratuito, onCerrar }
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                 d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
-            Adquirir creditos
+            Adquirir créditos
           </button>
 
           <button
@@ -57,7 +57,7 @@ export default function ModalSinCreditos({ onComprar, onModoGratuito, onCerrar }
           </button>
 
           <p className="px-2 text-center text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">
-            Puedes generar la planeacion didactica completa cuando tengas creditos disponibles.
+            Puedes generar la planeación didáctica completa cuando tengas créditos disponibles.
           </p>
         </div>
       </div>

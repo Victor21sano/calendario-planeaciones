@@ -58,7 +58,7 @@ function CopyButton({ elementId, label = 'Copiar tabla' }) {
           : copied
             ? 'bg-success-100 dark:bg-success-900/30 text-success-700 dark:text-success-300 border border-success-300 dark:border-success-700'
             : modoGratis
-              ? 'bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-600 cursor-not-allowed'
+              ? 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-600 cursor-not-allowed'
               : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 hover:border-primary-400 hover:text-primary-600 dark:hover:text-primary-400'
         }`}
     >
@@ -204,7 +204,7 @@ export default function PlaneacionPreview({
           <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">
             Vista Previa — RA {raLabel}
           </h3>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             {sesiones.length > 0 ? `${10 + sesiones.length * 3 + 3} tablas` : '13 tablas base'} · Haz clic en "Copiar tabla" para pegar en Word
           </p>
         </div>
@@ -425,7 +425,7 @@ export default function PlaneacionPreview({
 
       {/* ── Tablas 11+: Secuencia Didáctica por sesión ── */}
       {sesiones.length === 0 && (
-        <div className="p-6 rounded-xl border border-dashed border-slate-300 dark:border-slate-600 text-center text-sm text-slate-400 dark:text-slate-500">
+        <div className="p-6 rounded-xl border border-dashed border-slate-300 dark:border-slate-600 text-center text-sm text-slate-500 dark:text-slate-400">
           Configura al menos una sesión en el formulario para ver la secuencia didáctica.
         </div>
       )}

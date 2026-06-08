@@ -94,17 +94,17 @@ export default function CalendarioForm({
     <div className="card p-5 sm:p-6 animate-fade-in">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-info-600 rounded-xl flex items-center justify-center shadow-sm shadow-primary-200 dark:shadow-primary-900/40 flex-shrink-0">
+        <div className="w-8 h-8 bg-gradient-to-br from-brand-600 to-academic-600 rounded-xl flex items-center justify-center shadow-sm shadow-brand-200 dark:shadow-brand-900/40 flex-shrink-0">
           <span className="text-xs font-bold text-white">1</span>
         </div>
         <div>
           <h2 className="section-title leading-tight">Configuración del Semestre</h2>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Fechas y horas por semana hábil</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Fechas y horas por semana hábil</p>
         </div>
       </div>
 
       {/* Top accent line */}
-      <div className="absolute top-0 left-6 right-6 h-0.5 bg-gradient-to-r from-primary-500 to-info-500 rounded-full opacity-60" style={{top: 0}}/>
+      <div className="absolute top-0 left-6 right-6 h-0.5 bg-gradient-to-r from-brand-500 to-academic-500 rounded-full opacity-60" style={{top: 0}}/>
 
       {/* Date & Hours Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
@@ -155,7 +155,7 @@ export default function CalendarioForm({
               value={horasSemana}
               onChange={e => updateHoras(e.target.value)}
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400 dark:text-slate-500 pointer-events-none">hrs</span>
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-500 dark:text-slate-400 pointer-events-none">hrs</span>
           </div>
 
           {/* Auto-calculo horas/semana (Parte C) */}
@@ -215,7 +215,7 @@ export default function CalendarioForm({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>
               </svg>
             </div>
-            <p className="text-sm text-slate-400 dark:text-slate-500">Sin períodos vacacionales — todas las semanas son hábiles.</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Sin períodos vacacionales — todas las semanas son hábiles.</p>
           </div>
         ) : (
           <div className="space-y-3">

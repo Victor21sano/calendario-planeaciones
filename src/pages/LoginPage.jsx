@@ -54,7 +54,7 @@ export default function LoginPage() {
             Para docentes CONALEP
           </p>
           <h2 className="font-display text-[1.6rem] font-semibold leading-tight tracking-tight text-slate-950 dark:text-white">
-            Convierte PE y GPE en <span className="text-accent-600 dark:text-accent-400">planeaciones listas</span> para revisar y exportar.
+            Convierte PE y GPE en <span className="italic text-accent-600 dark:text-accent-400">planeaciones listas</span> para revisar y exportar.
           </h2>
         </section>
 
@@ -66,7 +66,7 @@ export default function LoginPage() {
               Para docentes CONALEP
             </p>
             <h1 className="font-display text-[2.75rem] font-semibold leading-[1.08] tracking-tight text-slate-950 dark:text-white">
-              Convierte PE y GPE en <span className="text-accent-600 dark:text-accent-400">planeaciones listas</span> para revisar y exportar.
+              Convierte PE y GPE en <span className="italic text-accent-600 dark:text-accent-400">planeaciones listas</span> para revisar y exportar.
             </h1>
             <p className="mt-6 max-w-lg text-[15px] leading-8 text-slate-600 dark:text-slate-300">
               Planea-Pro te ayuda a ordenar documentos oficiales, calcular horarios y preparar planeaciones didácticas con una experiencia pensada para el trabajo docente.
@@ -166,7 +166,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-6 flex items-center text-sm text-slate-400 before:mr-4 before:flex-1 before:border-t before:border-slate-200 after:ml-4 after:flex-1 after:border-t after:border-slate-200 dark:before:border-slate-700 dark:after:border-slate-700">
+          <div className="mt-6 flex items-center text-sm text-slate-500 dark:text-slate-400 before:mr-4 before:flex-1 before:border-t before:border-slate-200 after:ml-4 after:flex-1 after:border-t after:border-slate-200 dark:before:border-slate-700 dark:after:border-slate-700">
             o continúa con
           </div>
 

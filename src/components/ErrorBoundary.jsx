@@ -62,7 +62,7 @@ export default class ErrorBoundary extends Component {
           {/* Detalle técnico en desarrollo */}
           {import.meta.env.DEV && this.state.error && (
             <details className="text-left mt-2">
-              <summary className="text-xs text-slate-400 cursor-pointer hover:text-slate-600">
+              <summary className="text-xs text-slate-500 dark:text-slate-400 cursor-pointer hover:text-slate-600">
                 Detalle técnico (solo visible en desarrollo)
               </summary>
               <pre className="mt-2 text-[10px] text-danger-600 dark:text-danger-400 bg-danger-50 dark:bg-danger-900/20 p-3 rounded-xl overflow-auto max-h-40 whitespace-pre-wrap break-all">
