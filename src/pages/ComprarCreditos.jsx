@@ -5,12 +5,12 @@ export default function ComprarCreditos() {
   const { creditos } = useAuth()
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center px-4">
+    <div className="min-h-screen bg-[var(--surface-sunken)] flex flex-col items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="card p-8 text-center space-y-6">
 
           {/* Icono */}
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-info-600 flex items-center justify-center mx-auto shadow-lg shadow-primary-500/25">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-600 to-academic-600 flex items-center justify-center mx-auto shadow-lg shadow-brand-500/25">
             <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                 d="M13 10V3L4 14h7v7l9-11h-7z" />
