@@ -11,6 +11,7 @@ import MateriaTypeBadge   from '../components/badges/MateriaTypeBadge'
 import EmptyState          from '../components/dashboard/EmptyState'
 import ModeloMateriaModal  from '../components/dashboard/ModeloMateriaModal'
 import PerfilIncompletoModal from '../components/dashboard/PerfilIncompletoModal'
+import MenuUsuario          from '../components/dashboard/MenuUsuario'
 import BrandLogo           from '../components/brand/BrandLogo'
 import AnimatedNumber      from '../components/ui/AnimatedNumber'
 import { useSpotlight }    from '../hooks/useSpotlight'
@@ -159,6 +160,8 @@ function SkeletonGrid() {
 // ─── Página principal ─────────────────────────────────────────
 export default function DashboardPage() {
   const { user, logout, esAdmin, creditos, sinCreditosDisponibles, perfilDocente } = useAuth()
+  const inicialAvatar = (perfilDocente?.nombre || user?.displayName || user?.email || '?')
+    .trim().charAt(0).toUpperCase() || '?'
   const [materias,                  setMaterias]                  = useState([])
   const [loading,                   setLoading]                   = useState(true)
   const [searchTerm,                setSearchTerm]                = useState('')
@@ -293,33 +296,7 @@ export default function DashboardPage() {
 
           <div className="flex items-center gap-2">
             <SaldoCreditos />
-            {esAdmin && (
-              <Link to="/admin"
-                className="pressable hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-brand-700 dark:text-brand-300 bg-brand-50 dark:bg-brand-900/20 hover:bg-brand-100 dark:hover:bg-brand-900/30">
-                <svg aria-hidden="true" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                </svg>
-                Admin
-              </Link>
-            )}
-            {/* Link perfil */}
-            <Link
-              to="/perfil"
-              className="hidden sm:inline-flex items-center gap-1 text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              title="Mi perfil"
-            >
-              <svg aria-hidden="true" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-              Perfil
-            </Link>
-            <button
-              onClick={handleLogout}
-              className="text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-danger-600 dark:hover:text-danger-400 px-2.5 py-1.5 rounded-lg hover:bg-danger-50 dark:hover:bg-danger-900/20 transition-colors"
-            >
-              Salir
-            </button>
+            <MenuUsuario inicial={inicialAvatar} esAdmin={esAdmin} onLogout={handleLogout} />
           </div>
         </div>
       </header>
