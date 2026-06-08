@@ -47,6 +47,17 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-[radial-gradient(circle_at_top_left,#d6efe9,transparent_38%),radial-gradient(circle_at_bottom_right,#fde3db,transparent_42%),linear-gradient(135deg,#fffdf8_0%,#f7f3ea_50%,#fdf0e9_100%)] p-4 dark:bg-[radial-gradient(circle_at_top_left,rgba(94,234,212,0.10),transparent_36%),radial-gradient(circle_at_bottom_right,rgba(232,93,63,0.08),transparent_42%),linear-gradient(135deg,#0d1614_0%,#111a18_55%,#1a1512_100%)]">
       <main className="mx-auto grid min-h-screen w-full max-w-6xl items-center gap-10 py-8 lg:grid-cols-[1.05fr_0.95fr]">
+        {/* Hero compacto — solo móvil (en lg+ aparece el panel lateral completo) */}
+        <section className="text-center lg:hidden animate-slide-up">
+          <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-white/70 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-brand-700 shadow-sm backdrop-blur dark:border-brand-800/60 dark:bg-slate-900/50 dark:text-brand-300">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent-500" />
+            Para docentes CONALEP
+          </p>
+          <h1 className="font-display text-[1.6rem] font-semibold leading-tight tracking-tight text-slate-950 dark:text-white">
+            Convierte PE y GPE en <span className="text-accent-600 dark:text-accent-400">planeaciones listas</span> para revisar y exportar.
+          </h1>
+        </section>
+
         <section className="hidden animate-slide-up lg:block">
           <BrandLogo markClassName="w-12 h-12" showTagline />
           <div className="mt-10 max-w-xl">
@@ -140,13 +151,9 @@ export default function LoginPage() {
               </span>
             </label>
 
-            <div className="flex items-center justify-between pt-1">
-              <label className="flex cursor-pointer items-center gap-2">
-                <input type="checkbox" className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500" />
-                <span className="text-xs text-slate-600 dark:text-slate-400">Mantener sesion</span>
-              </label>
+            <div className="flex items-center justify-end pt-1">
               <Link to="/reset-password" className="text-xs font-semibold text-brand-700 hover:text-brand-800 dark:text-brand-300">
-                Olvide mi contrasena
+                Olvidé mi contraseña
               </Link>
             </div>
 
