@@ -933,7 +933,7 @@ export default function PlanificadorPage() {
       }
     } catch (err) {
       console.error('Error al continuar tras completar perfil:', err)
-      setGenError(err.message || 'No se pudo continuar la generacion.')
+      setGenError(err.message || 'No se pudo continuar la generación.')
       setOnboardingFase('upload')
     }
   }, [loading, location.state, materiaId])
