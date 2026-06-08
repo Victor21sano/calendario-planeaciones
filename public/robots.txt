@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /materia/
+Disallow: /perfil
+
+Sitemap: https://planea-pro.com.mx/sitemap.xml
