@@ -1,24 +1,31 @@
 import { Link } from 'react-router-dom'
 import BrandLogo from '../components/brand/BrandLogo'
+import { useReveal } from '../hooks/useReveal'
 
 export default function PlaneacionesConalep() {
+  const revealQue = useReveal()
+  const revealComo = useReveal()
+  const revealComoLista = useReveal()
+  const revealFaq = useReveal()
+  const revealCta = useReveal()
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-teal-50 dark:from-slate-950 dark:to-slate-900">
+    <div className="min-h-screen surface-atmosphere">
       <header className="mx-auto max-w-4xl px-4 py-6">
         <BrandLogo markClassName="w-10 h-10" />
       </header>
 
       <main className="mx-auto max-w-4xl px-4 pb-20">
         <article>
-          <h1 className="font-display text-4xl font-semibold tracking-tight text-slate-900 dark:text-white mt-10">
+          <h1 className="reveal-hero font-display text-5xl sm:text-6xl font-semibold tracking-tight text-slate-900 dark:text-white mt-10">
             Planeaciones Didácticas para CONALEP
           </h1>
-          <p className="mt-4 text-lg text-slate-600 dark:text-slate-300 max-w-2xl">
+          <p className="reveal-hero reveal-hero-delay-1 mt-5 text-lg text-slate-600 dark:text-slate-300 max-w-2xl">
             Planea Pro genera automáticamente planeaciones didácticas en formato 2023 para docentes CONALEP. En minutos, no en horas.
           </p>
 
           <section className="mt-12 space-y-8">
-            <div>
+            <div ref={revealQue} className="reveal">
               <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">¿Qué incluye una planeación CONALEP formato 2023?</h2>
               <p className="mt-3 text-slate-600 dark:text-slate-400 leading-relaxed">
                 El formato oficial 2023 incluye: datos del docente y módulo, unidad de competencia, resultado de aprendizaje,
@@ -27,9 +34,9 @@ export default function PlaneacionesConalep() {
               </p>
             </div>
 
-            <div>
+            <div ref={revealComo} className="reveal">
               <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Cómo genera Planea Pro tu planeación</h2>
-              <ol className="mt-3 space-y-2 text-slate-600 dark:text-slate-400 list-decimal list-inside leading-relaxed">
+              <ol ref={revealComoLista} className="reveal-stagger mt-3 space-y-2 text-slate-600 dark:text-slate-400 list-decimal list-inside leading-relaxed">
                 <li>Subes tu PE (Programa de Estudio) y GPE (Guía de Práctica Educativa)</li>
                 <li>La IA extrae módulos, unidades, resultados de aprendizaje y competencias</li>
                 <li>Genera las sesiones en formato 2023 con actividades coherentes</li>
@@ -37,7 +44,7 @@ export default function PlaneacionesConalep() {
               </ol>
             </div>
 
-            <div>
+            <div ref={revealFaq} className="reveal">
               <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Preguntas frecuentes</h2>
               <dl className="mt-4 space-y-4">
                 <div>
@@ -56,11 +63,11 @@ export default function PlaneacionesConalep() {
             </div>
           </section>
 
-          <div className="mt-12 flex flex-col sm:flex-row gap-4">
-            <Link to="/register" className="inline-flex items-center justify-center rounded-xl bg-brand-700 px-6 py-3 text-base font-semibold text-white hover:bg-brand-800 transition-colors">
+          <div ref={revealCta} className="reveal mt-12 flex flex-col sm:flex-row gap-4">
+            <Link to="/register" className="btn-accent justify-center px-6 py-3 text-base">
               Generar mi primera planeación gratis
             </Link>
-            <Link to="/login" className="inline-flex items-center justify-center rounded-xl border border-slate-300 dark:border-slate-700 px-6 py-3 text-base font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+            <Link to="/login" className="btn-secondary justify-center px-6 py-3 text-base">
               Iniciar sesión
             </Link>
           </div>
