@@ -1,13 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Página principal (Google rastrea /login al ser redirigido desde /) -->
   <url>
-    <loc>https://planea-pro.com.mx/</loc>
+    <loc>https://planea-pro.com.mx/login</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+    <lastmod>2026-06-09</lastmod>
   </url>
   <url>
-    <loc>https://planea-pro.com.mx/comprar-creditos</loc>
+    <loc>https://planea-pro.com.mx/register</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <lastmod>2026-06-09</lastmod>
+  </url>
+  <!-- Páginas SEO temáticas -->
+  <url>
+    <loc>https://planea-pro.com.mx/planeaciones-conalep</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <lastmod>2026-06-09</lastmod>
+  </url>
+  <url>
+    <loc>https://planea-pro.com.mx/generador-planeaciones-ia</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <lastmod>2026-06-09</lastmod>
+  </url>
+  <url>
+    <loc>https://planea-pro.com.mx/horario-docente-conalep</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+    <lastmod>2026-06-09</lastmod>
   </url>
 </urlset>
