@@ -397,6 +397,51 @@
   .badge {
     @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold;
   }
+
+  /*
+   * REVEAL — entrada al hacer scroll (sobrio, estilo editorial).
+   * El hook useReveal añade .is-revealed vía IntersectionObserver.
+   * Solo opacity/transform: el contenido permanece en el árbol de
+   * accesibilidad desde el primer render.
+   */
+  .reveal {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 550ms var(--spring), transform 550ms var(--spring);
+  }
+  .reveal.is-revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /*
+   * REVEAL-STAGGER — los hijos directos entran escalonados (80ms entre sí,
+   * hasta 6 hijos). Para listas <ol>/<ul>/<dl> de las páginas SEO.
+   */
+  .reveal-stagger > * {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 550ms var(--spring), transform 550ms var(--spring);
+  }
+  .reveal-stagger.is-revealed > * {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal-stagger.is-revealed > *:nth-child(2) { transition-delay: 80ms; }
+  .reveal-stagger.is-revealed > *:nth-child(3) { transition-delay: 160ms; }
+  .reveal-stagger.is-revealed > *:nth-child(4) { transition-delay: 240ms; }
+  .reveal-stagger.is-revealed > *:nth-child(5) { transition-delay: 320ms; }
+  .reveal-stagger.is-revealed > *:nth-child(6) { transition-delay: 400ms; }
+
+  /*
+   * REVEAL-HERO — entrada al CARGAR la página (no por scroll).
+   * H1 primero, subtítulo +120ms, tercer elemento +240ms.
+   */
+  .reveal-hero {
+    animation: revealHero 600ms var(--spring) both;
+  }
+  .reveal-hero-delay-1 { animation-delay: 120ms; }
+  .reveal-hero-delay-2 { animation-delay: 240ms; }
 }
 
 /*
@@ -483,6 +528,11 @@
   100% { background-position: -120% 0; }
 }
 
+@keyframes revealHero {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   /* Texto legible sin barrido */
   .text-shimmer {
@@ -495,6 +545,20 @@
   .btn-accent::before,
   .card-spotlight::before {
     display: none !important;
+  }
+  /* Reveal: contenido visible sin animación */
+  .reveal,
+  .reveal-stagger > * {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .reveal-hero,
+  .reveal-hero-delay-1,
+  .reveal-hero-delay-2 {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
 }
 
