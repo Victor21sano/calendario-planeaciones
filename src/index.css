@@ -403,15 +403,14 @@
    * El hook useReveal añade .is-revealed vía IntersectionObserver.
    * Solo opacity/transform: el contenido permanece en el árbol de
    * accesibilidad desde el primer render.
+   * No aplicar .reveal al mismo nodo que .card/.pressable (usa un wrapper).
    */
   .reveal {
-    opacity: 0;
-    transform: translateY(14px);
     transition: opacity 550ms var(--spring), transform 550ms var(--spring);
   }
-  .reveal.is-revealed {
-    opacity: 1;
-    transform: translateY(0);
+  .reveal:not(.is-revealed) {
+    opacity: 0;
+    transform: translateY(14px);
   }
 
   /*
@@ -419,19 +418,18 @@
    * hasta 6 hijos). Para listas <ol>/<ul>/<dl> de las páginas SEO.
    */
   .reveal-stagger > * {
-    opacity: 0;
-    transform: translateY(14px);
     transition: opacity 550ms var(--spring), transform 550ms var(--spring);
   }
-  .reveal-stagger.is-revealed > * {
-    opacity: 1;
-    transform: translateY(0);
+  .reveal-stagger:not(.is-revealed) > * {
+    opacity: 0;
+    transform: translateY(14px);
   }
   .reveal-stagger.is-revealed > *:nth-child(2) { transition-delay: 80ms; }
   .reveal-stagger.is-revealed > *:nth-child(3) { transition-delay: 160ms; }
   .reveal-stagger.is-revealed > *:nth-child(4) { transition-delay: 240ms; }
   .reveal-stagger.is-revealed > *:nth-child(5) { transition-delay: 320ms; }
   .reveal-stagger.is-revealed > *:nth-child(6) { transition-delay: 400ms; }
+  .reveal-stagger.is-revealed > *:nth-child(n+7) { transition-delay: 400ms; }
 
   /*
    * REVEAL-HERO — entrada al CARGAR la página (no por scroll).
