@@ -58,7 +58,7 @@ export default function GeneradorPlaneacionesIA() {
           </section>
 
           <div className="mt-12 flex flex-col sm:flex-row gap-4">
-            <Link to="/register" className="inline-flex items-center justify-center rounded-xl bg-teal-700 px-6 py-3 text-base font-semibold text-white hover:bg-teal-800 transition-colors">
+            <Link to="/register" className="inline-flex items-center justify-center rounded-xl bg-brand-700 px-6 py-3 text-base font-semibold text-white hover:bg-brand-800 transition-colors">
               Probar el generador gratis
             </Link>
             <Link to="/login" className="inline-flex items-center justify-center rounded-xl border border-slate-300 dark:border-slate-700 px-6 py-3 text-base font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
