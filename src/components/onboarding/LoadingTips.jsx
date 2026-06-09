@@ -184,7 +184,7 @@ export default function LoadingTips({ progress, onCancel }) {
         {onCancel && (
           <button
             onClick={onCancel}
-            className="pressable text-xs font-medium text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
+            className="pressable text-xs font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
           >
             Cancelar y volver a la subida de archivos
           </button>

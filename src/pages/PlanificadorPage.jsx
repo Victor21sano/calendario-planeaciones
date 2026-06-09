@@ -133,7 +133,7 @@ function Toast({ visible, message = 'Progreso guardado' }) {
   return (
     <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-300
       ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
-      <div className="flex items-center gap-2.5 px-5 py-3 bg-success-600 text-white rounded-2xl shadow-xl shadow-success-900/20">
+      <div className="flex items-center gap-2.5 px-5 py-3 bg-success-700 text-white rounded-2xl shadow-xl shadow-success-900/20">
         <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
         </svg>
@@ -1046,7 +1046,7 @@ export default function PlanificadorPage() {
 
           {/* Actions */}
           <div className="flex items-center gap-2 flex-shrink-0">
-            {guardando && <span className="text-xs text-slate-400 dark:text-slate-500 hidden sm:inline mr-2 animate-pulse" aria-live="polite">Guardando…</span>}
+            {guardando && <span className="text-xs text-slate-500 dark:text-slate-400 hidden sm:inline mr-2 animate-pulse" aria-live="polite">Guardando…</span>}
 
             <SaldoCreditos className="hidden sm:flex" />
 
@@ -1191,7 +1191,7 @@ export default function PlanificadorPage() {
             ? (
               /* ── Generador bloqueado: contenido borroso + paywall (2018 o 2023) ── */
               <div className="relative min-h-[600px]">
-                <div className="blur-[6px] pointer-events-none select-none opacity-80 max-h-[640px] overflow-hidden" aria-hidden="true">
+                <div className="blur-[6px] pointer-events-none select-none opacity-80 max-h-[640px] overflow-hidden" aria-hidden="true" inert="">
                   {estado.modelo === MODELO_2023 && estado.planeacion2023
                     ? <PreviewModelo2023 planeacion={estado.planeacion2023} pagada={false} esAdmin={false} />
                     : (
@@ -1261,7 +1261,7 @@ export default function PlanificadorPage() {
                       )
                     }
 
-                    <p className="text-xs text-slate-400 dark:text-slate-500">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       Tu Planificador de Horarios ya está listo y disponible en la pestaña anterior.
                     </p>
                   </div>
@@ -1275,7 +1275,7 @@ export default function PlanificadorPage() {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4 no-print">
                   <div>
                     <h2 className="section-title">Planeación — Modelo 2023</h2>
-                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                       {(estado.planeacion2023.unidades || []).flatMap(u => u.ras).flatMap(r => r.actividadesEspecificas || []).length} actividades
                       {estado.planeacion2023.cabecera?.modulo?.horasSemana > 0 && (
                         <span className="ml-2">
@@ -1356,7 +1356,7 @@ export default function PlanificadorPage() {
       </main>
 
       {/* ── Footer ─────────────────────────────────────────── */}
-      <footer className="text-center py-8 text-xs text-slate-400 dark:text-slate-600 no-print">
+      <footer className="text-center py-8 text-xs text-slate-500 dark:text-slate-500 no-print">
         Planificador Docente · datos guardados de forma segura en la nube
       </footer>
 

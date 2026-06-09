@@ -497,3 +497,20 @@
     display: none !important;
   }
 }
+
+/* ─── Tablas PaginaActividad – dark mode ─────────────────────────
+   Los inline styles usan colores fijos; !important los sobreescribe
+   en modo oscuro sin tocar el HTML de exportación Word.            */
+.dark .preview-2023-pagina table th {
+  background-color: #1E293B !important;
+  color: #F1F5F9 !important;
+  border-color: #334155 !important;
+}
+.dark .preview-2023-pagina table td:not([aria-hidden="true"]) {
+  background-color: #0F172A !important;
+  color: #CBD5E1 !important;
+  border-color: #334155 !important;
+}
+.dark .preview-2023-pagina table td[aria-hidden="true"] {
+  border-color: #334155 !important;
+}

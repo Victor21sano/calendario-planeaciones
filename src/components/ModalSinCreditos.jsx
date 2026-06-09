@@ -45,7 +45,7 @@ export default function ModalSinCreditos({ onComprar, onCerrar }) {
             Adquirir créditos
           </button>
 
-          <p className="px-2 text-center text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">
+          <p className="px-2 text-center text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
             Si ya pagaste el horario (25), la planeación completa son solo 75 créditos más.
           </p>
         </div>

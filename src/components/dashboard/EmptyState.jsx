@@ -65,7 +65,7 @@ export default function EmptyState({ onCrear, sinCreditosDisponibles }) {
           <p className="mb-4 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
             Extrae unidades y horas para construir tu planificador de horarios.
           </p>
-          <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-500 dark:bg-slate-700/60 dark:text-slate-300">
+          <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-600 dark:bg-slate-700/60 dark:text-slate-300">
             25 créditos
           </span>
         </button>
@@ -82,7 +82,7 @@ export default function EmptyState({ onCrear, sinCreditosDisponibles }) {
                 {step.n}
               </div>
               <p className="text-xs font-bold text-slate-800 dark:text-slate-100">{step.label}</p>
-              <p className="mt-1 text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">{step.desc}</p>
+              <p className="mt-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">{step.desc}</p>
             </div>
           ))}
         </div>

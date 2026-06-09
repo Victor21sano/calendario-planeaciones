@@ -147,6 +147,30 @@ export function calcularPlaneacion(semestre, horasSemana, periodosVacacionales, 
         continue
       }
 
+      // Si la subunidad anterior terminó a mitad de semana, avanzar a la
+      // semana siguiente para que las subunidades sean estrictamente secuenciales.
+      if (horasUsadasEnSemana > 0) {
+        semanaActual++
+        horasUsadasEnSemana = 0
+        if (semanaActual >= semanasHabiles.length) {
+          planeacion.push({
+            unidadId: unidad.id,
+            unidadNombre: unidad.nombre,
+            subunidadId: subunidad.id,
+            subunidadNombre: subunidad.nombre,
+            horas,
+            semanaInicio: null,
+            semanaFin: null,
+            fechaInicio: null,
+            fechaFin: null,
+            duracionSemanas: null,
+            porcentaje: totalHoras > 0 ? (horas / totalHoras) * 100 : 0,
+            sinCapacidad: true,
+          })
+          continue
+        }
+      }
+
       const semanaInicioIdx = semanaActual
       const semanaInicioNum = semanasHabiles[semanaActual].numero
       const fechaInicioSub = formatDate(semanasHabiles[semanaActual].lunesEfectivo)

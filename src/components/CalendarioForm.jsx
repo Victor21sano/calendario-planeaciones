@@ -21,13 +21,14 @@ function PeriodoVacacional({ periodo, onChange, onDelete }) {
       </div>
 
       <div className="flex-1 min-w-[140px]">
-        <label className="block text-xs font-semibold text-warning-700 dark:text-warning-400 mb-1.5 flex items-center gap-1">
+        <label htmlFor={`vac-inicio-${periodo.id}`} className="block text-xs font-semibold text-warning-700 dark:text-warning-400 mb-1.5 flex items-center gap-1">
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
           </svg>
           Inicio vacaciones
         </label>
         <input
+          id={`vac-inicio-${periodo.id}`}
           type="date"
           className="input-base"
           value={periodo.fechaInicio}
@@ -36,13 +37,14 @@ function PeriodoVacacional({ periodo, onChange, onDelete }) {
       </div>
 
       <div className="flex-1 min-w-[140px]">
-        <label className="block text-xs font-semibold text-warning-700 dark:text-warning-400 mb-1.5 flex items-center gap-1">
+        <label htmlFor={`vac-fin-${periodo.id}`} className="block text-xs font-semibold text-warning-700 dark:text-warning-400 mb-1.5 flex items-center gap-1">
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
           </svg>
           Fin vacaciones
         </label>
         <input
+          id={`vac-fin-${periodo.id}`}
           type="date"
           className="input-base"
           value={periodo.fechaFin}
@@ -109,13 +111,14 @@ export default function CalendarioForm({
       {/* Date & Hours Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div>
-          <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5 flex items-center gap-1">
+          <label htmlFor="fecha-inicio-semestre" className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5 flex items-center gap-1">
             <svg className="w-3 h-3 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
             </svg>
             Inicio del semestre
           </label>
           <input
+            id="fecha-inicio-semestre"
             type="date"
             className="input-base"
             value={semestre.fechaInicio}
@@ -124,13 +127,14 @@ export default function CalendarioForm({
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5 flex items-center gap-1">
+          <label htmlFor="fecha-fin-semestre" className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5 flex items-center gap-1">
             <svg className="w-3 h-3 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
             </svg>
             Fin del semestre
           </label>
           <input
+            id="fecha-fin-semestre"
             type="date"
             className="input-base"
             value={semestre.fechaFin}

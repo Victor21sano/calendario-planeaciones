@@ -111,9 +111,9 @@ function DropZone({ label, sublabel, icon, file, onFile, disabled, name }) {
           </div>
           <div className="text-center">
             <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{label}</p>
-            <p className="mt-1 max-w-[170px] text-xs leading-relaxed text-slate-400 dark:text-slate-500">{sublabel}</p>
+            <p className="mt-1 max-w-[170px] text-xs leading-relaxed text-slate-500 dark:text-slate-400">{sublabel}</p>
           </div>
-          <p className="text-[10px] text-slate-400 dark:text-slate-500">
+          <p className="text-[10px] text-slate-500 dark:text-slate-400">
             Arrastra aquí o presiona Enter para seleccionar
           </p>
         </>
@@ -197,7 +197,7 @@ export default function UploadScreen({ onGenerate, onFreeGenerate, error, bloque
 
         <div className="my-5 flex items-center gap-3">
           <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
-          <span className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Horario automático</span>
+          <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Horario automático</span>
           <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
         </div>
 

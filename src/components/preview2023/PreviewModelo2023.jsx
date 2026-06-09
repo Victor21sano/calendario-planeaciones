@@ -139,7 +139,7 @@ export default function PreviewModelo2023({ planeacion, pagada = true, esAdmin =
                       onClick={() => setPropActivo(i)}
                       className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors
                         ${propActivo === i
-                          ? 'bg-primary-500 text-white'
+                          ? 'bg-primary-600 text-white'
                           : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                         }`}
                     >

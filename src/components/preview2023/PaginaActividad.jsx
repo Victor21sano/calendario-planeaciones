@@ -93,9 +93,9 @@ function TablaRA({ ra = {}, mostrarEvidencia = true, bloqueado }) {
   const ev = ra.actividadEvaluacion || {}
   return (
     <Tabla titulo="Resultado y Actividad de Aprendizaje" getHTML={() => ''} bloqueado={bloqueado}>
-      <table style={TS}><tbody>
-        <tr><td colSpan={4} style={TITLE}>RESULTADO Y ACTIVIDAD DE APRENDIZAJE</td></tr>
-        <tr><th style={TH}>Resultado de Aprendizaje</th><th style={THC}>Duración (hrs)</th><th style={TH}>Actividad de Evaluación</th>{mostrarEvidencia && <th style={TH}>Evidencia</th>}</tr>
+      <table style={TS}><caption className="sr-only">Resultado y Actividad de Aprendizaje</caption><tbody>
+        <tr><td colSpan={4} style={TITLE} aria-hidden="true">RESULTADO Y ACTIVIDAD DE APRENDIZAJE</td></tr>
+        <tr><th scope="col" style={TH}>Resultado de Aprendizaje</th><th scope="col" style={THC}>Duración (hrs)</th><th scope="col" style={TH}>Actividad de Evaluación</th>{mostrarEvidencia && <th scope="col" style={TH}>Evidencia</th>}</tr>
         <tr>
           <td style={{...TD,whiteSpace:'pre-wrap'}}>{ra.titulo||'—'}</td>
           <td style={TDC}>{ra.duracionHoras||'—'}</td>
@@ -111,9 +111,9 @@ function TablaRA({ ra = {}, mostrarEvidencia = true, bloqueado }) {
 function TablaDatosEspecifico({ actividad = {}, bloqueado }) {
   return (
     <Tabla titulo="Datos Específico" getHTML={() => ''} bloqueado={bloqueado}>
-      <table style={TS}><tbody>
-        <tr><td colSpan={4} style={TITLE}>DATOS ESPECÍFICO</td></tr>
-        <tr><th style={TH}>Propósito del Aprendizaje</th><th style={THC}>Duración (hrs)</th><th style={TH}>Modalidad</th><th style={TH}>Fechas</th></tr>
+      <table style={TS}><caption className="sr-only">Datos Específico</caption><tbody>
+        <tr><td colSpan={4} style={TITLE} aria-hidden="true">DATOS ESPECÍFICO</td></tr>
+        <tr><th scope="col" style={TH}>Propósito del Aprendizaje</th><th scope="col" style={THC}>Duración (hrs)</th><th scope="col" style={TH}>Modalidad</th><th scope="col" style={TH}>Fechas</th></tr>
         <tr>
           <td style={{...TD,whiteSpace:'pre-wrap'}}>{actividad.propositoAprendizaje||'—'}</td>
           <td style={TDC}>{actividad.duracionHoras||'—'}</td>
@@ -139,19 +139,19 @@ function TablaMomento({ tipo, momento = {}, bloqueado }) {
 
   return (
     <Tabla titulo={titulo} getHTML={() => ''} bloqueado={bloqueado}>
-      <table style={TS}><tbody>
+      <table style={TS}><caption className="sr-only">{titulo}</caption><tbody>
         <tr>
-          <td colSpan={6} style={{ ...TITLE, backgroundColor: bg, color: '#0F172A', fontWeight: 'bold', textAlign: 'center', fontSize: '10pt' }}>
+          <td colSpan={6} aria-hidden="true" style={{ ...TITLE, backgroundColor: bg, color: '#0F172A', fontWeight: 'bold', textAlign: 'center', fontSize: '10pt' }}>
             {titulo} — {momento.tiempoHoras || '—'} Horas
           </td>
         </tr>
         <tr>
-          <th style={hdrStyle}>Ambiente</th>
-          <th style={hdrStyle}>Estrategia Enseñanza (Docente)</th>
-          <th style={hdrStyle}>Estrategia Aprendizaje (Alumno)</th>
-          <th style={hdrStyle}>Evaluación</th>
-          <th style={hdrStyle}>Recursos</th>
-          <th style={hdrStyle}>Est. Independiente</th>
+          <th scope="col" style={hdrStyle}>Ambiente</th>
+          <th scope="col" style={hdrStyle}>Estrategia Enseñanza (Docente)</th>
+          <th scope="col" style={hdrStyle}>Estrategia Aprendizaje (Alumno)</th>
+          <th scope="col" style={hdrStyle}>Evaluación</th>
+          <th scope="col" style={hdrStyle}>Recursos</th>
+          <th scope="col" style={hdrStyle}>Est. Independiente</th>
         </tr>
         <tr>
           <td style={{ ...TD, verticalAlign: 'top', width: '10%' }}>{momento.ambienteAprendizaje||'—'}</td>
