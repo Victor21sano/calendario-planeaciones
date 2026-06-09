@@ -1,24 +1,31 @@
 import { Link } from 'react-router-dom'
 import BrandLogo from '../components/brand/BrandLogo'
+import { useReveal } from '../hooks/useReveal'
 
 export default function GeneradorPlaneacionesIA() {
+  const revealQue = useReveal()
+  const revealVentajas = useReveal()
+  const revealVentajasLista = useReveal()
+  const revealFaq = useReveal()
+  const revealCta = useReveal()
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-teal-50 dark:from-slate-950 dark:to-slate-900">
+    <div className="min-h-screen surface-atmosphere">
       <header className="mx-auto max-w-4xl px-4 py-6">
         <BrandLogo markClassName="w-10 h-10" />
       </header>
 
       <main className="mx-auto max-w-4xl px-4 pb-20">
         <article>
-          <h1 className="font-display text-4xl font-semibold tracking-tight text-slate-900 dark:text-white mt-10">
+          <h1 className="reveal-hero font-display text-5xl sm:text-6xl font-semibold tracking-tight text-slate-900 dark:text-white mt-10">
             Generador de Planeaciones Didácticas con IA para CONALEP
           </h1>
-          <p className="mt-4 text-lg text-slate-600 dark:text-slate-300 max-w-2xl">
+          <p className="reveal-hero reveal-hero-delay-1 mt-5 text-lg text-slate-600 dark:text-slate-300 max-w-2xl">
             Planea Pro usa inteligencia artificial para leer tu PE y GPE, y generar automáticamente una planeación didáctica completa en formato 2023.
           </p>
 
           <section className="mt-12 space-y-8">
-            <div>
+            <div ref={revealQue} className="reveal">
               <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">¿Qué hace la IA de Planea Pro?</h2>
               <p className="mt-3 text-slate-600 dark:text-slate-400 leading-relaxed">
                 El modelo de IA analiza el Programa de Estudio (PE) y la Guía de Práctica Educativa (GPE) para extraer
@@ -27,9 +34,9 @@ export default function GeneradorPlaneacionesIA() {
               </p>
             </div>
 
-            <div>
+            <div ref={revealVentajas} className="reveal">
               <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Ventajas del generador con IA</h2>
-              <ul className="mt-3 space-y-2 text-slate-600 dark:text-slate-400 list-disc list-inside leading-relaxed">
+              <ul ref={revealVentajasLista} className="reveal-stagger mt-3 space-y-2 text-slate-600 dark:text-slate-400 list-disc list-inside leading-relaxed">
                 <li>Reduce de horas a minutos la elaboración de planeaciones</li>
                 <li>Respeta la estructura oficial del Modelo 2023 en cada campo</li>
                 <li>Genera los tres momentos didácticos (inicio, desarrollo, cierre) con coherencia interna</li>
@@ -38,7 +45,7 @@ export default function GeneradorPlaneacionesIA() {
               </ul>
             </div>
 
-            <div>
+            <div ref={revealFaq} className="reveal">
               <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Preguntas frecuentes sobre el generador IA</h2>
               <dl className="mt-4 space-y-4">
                 <div>
@@ -57,11 +64,11 @@ export default function GeneradorPlaneacionesIA() {
             </div>
           </section>
 
-          <div className="mt-12 flex flex-col sm:flex-row gap-4">
-            <Link to="/register" className="inline-flex items-center justify-center rounded-xl bg-brand-700 px-6 py-3 text-base font-semibold text-white hover:bg-brand-800 transition-colors">
+          <div ref={revealCta} className="reveal mt-12 flex flex-col sm:flex-row gap-4">
+            <Link to="/register" className="btn-accent justify-center px-6 py-3 text-base">
               Probar el generador gratis
             </Link>
-            <Link to="/login" className="inline-flex items-center justify-center rounded-xl border border-slate-300 dark:border-slate-700 px-6 py-3 text-base font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+            <Link to="/login" className="btn-secondary justify-center px-6 py-3 text-base">
               Iniciar sesión
             </Link>
           </div>
