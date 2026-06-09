@@ -87,7 +87,7 @@ export default function LoginPage() {
           </div>
         </section>
 
-        <div className="card relative z-10 w-full max-w-md justify-self-center p-8 animate-slide-up">
+        <div className="card relative z-10 w-full max-w-md justify-self-center p-8 animate-slide-up" style={{ animationDelay: '120ms' }}>
           <div className="mb-8 text-center">
             <BrandLogo className="justify-center" markClassName="w-14 h-14" showTagline />
             <h2 className="mt-7 font-display text-[1.7rem] font-semibold tracking-tight text-slate-900 dark:text-white">
