@@ -4,9 +4,12 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import ErrorBoundary from './components/ErrorBoundary'
 
 // Páginas de auth — carga inmediata (pequeñas, necesarias sin login)
-import LoginPage        from './pages/LoginPage'
-import RegisterPage     from './pages/RegisterPage'
-import ResetPasswordPage from './pages/ResetPasswordPage'
+import LoginPage           from './pages/LoginPage'
+import RegisterPage        from './pages/RegisterPage'
+import ResetPasswordPage   from './pages/ResetPasswordPage'
+import PlaneacionesConalep       from './pages/PlaneacionesConalep'
+import GeneradorPlaneacionesIA   from './pages/GeneradorPlaneacionesIA'
+import HorarioDocenteConalep     from './pages/HorarioDocenteConalep'
 
 // Páginas principales — carga diferida (pesadas: Firebase, date-fns, IA)
 const DashboardPage    = lazy(() => import('./pages/DashboardPage'))
@@ -36,9 +39,12 @@ export default function App() {
         <div key={location.pathname} className="animate-fade-in">
         <Routes location={location}>
           {/* Rutas públicas */}
-          <Route path="/login"          element={<LoginPage />} />
-          <Route path="/register"       element={<RegisterPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/login"                      element={<LoginPage />} />
+          <Route path="/register"                   element={<RegisterPage />} />
+          <Route path="/reset-password"             element={<ResetPasswordPage />} />
+          <Route path="/planeaciones-conalep"       element={<PlaneacionesConalep />} />
+          <Route path="/generador-planeaciones-ia"  element={<GeneradorPlaneacionesIA />} />
+          <Route path="/horario-docente-conalep"    element={<HorarioDocenteConalep />} />
 
           {/* Rutas protegidas — todos los usuarios autenticados */}
           <Route element={<ProtectedRoute />}>
