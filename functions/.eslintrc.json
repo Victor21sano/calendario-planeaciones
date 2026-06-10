@@ -13,5 +13,23 @@
     "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
     "no-empty": ["error", { "allowEmptyCatch": true }]
   },
+  "overrides": [
+    {
+      "files": ["test/**/*.js"],
+      "globals": {
+        "describe": "readonly",
+        "it": "readonly",
+        "expect": "readonly",
+        "beforeAll": "readonly",
+        "afterAll": "readonly",
+        "beforeEach": "readonly",
+        "afterEach": "readonly"
+      }
+    },
+    {
+      "files": ["vitest.config.js"],
+      "parserOptions": { "sourceType": "module" }
+    }
+  ],
   "ignorePatterns": ["node_modules/"]
 }

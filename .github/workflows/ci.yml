@@ -37,6 +37,17 @@ jobs:
       - run: npm ci
       - name: Lint
         run: npm run lint
+      # ── Tests del sistema de créditos (emulador de Firestore) ──
+      # Gate DURO: la lógica de dinero (costo, anticipo, reembolso anti-abuso)
+      # debe bloquear el merge si se rompe. El emulador necesita un JDK.
+      - name: Setup Java (emulador Firestore)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Tests del sistema de créditos
+        working-directory: .
+        run: npx --yes firebase-tools emulators:exec --only firestore --project demo-planea 'cd functions && npm run test'
       # Las vulnerabilidades restantes son transitivas de la cadena @google-cloud/*
       # de firebase-admin (uuid <11.1.1) y hoy no tienen fix sin downgrade.
       # continue-on-error mantiene la SEÑAL visible (el paso se marca como fallido
