@@ -382,7 +382,9 @@ export default function PlanificadorPage() {
               type="text"
               value={nombre}
               onChange={e => setEstado(p => ({ ...p, nombre: e.target.value }))}
+              id="nombre-materia"
               name="nombre-materia"
+              aria-label="Nombre de la materia"
               autoComplete="off"
               className="bg-transparent font-bold text-lg text-slate-800 dark:text-white border-b border-transparent focus-visible:border-primary-500 focus-visible:outline-none transition-colors max-w-[200px] sm:max-w-[300px]"
               placeholder="Nombre de la materia"
