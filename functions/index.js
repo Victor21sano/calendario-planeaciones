@@ -57,12 +57,12 @@ const MAX_PDF_B64_LEN  = 50_000_000 // ~37.5 MB en base64 ≈ ~28 MB de PDF orig
 const CREDITOS_POR_GENERACION = 1 // legacy (modo sin sesión / compatibilidad)
 
 // Costo en créditos por tipo de flujo.
-//   completa → planeación didáctica completa (75)
+//   completa → planeación didáctica completa (100)
 //   horario  → solo planificador de horarios / estructura (25)
 //   regenRA  → regeneración de 1 RA individual (gratis)
-const COSTO_POR_FLUJO = { completa: 75, horario: 25, regenRA: 0 }
+const COSTO_POR_FLUJO = { completa: 100, horario: 25, regenRA: 0 }
 // El horario (25) funciona como anticipo: si el docente ya pagó el horario de una
-// materia, la planeación completa solo cobra la diferencia (75 - 25 = 50).
+// materia, la planeación completa solo cobra la diferencia (100 - 25 = 75).
 const DESCUENTO_HORARIO_PREVIO = 25
 
 // ── Sesiones de generación 2023 ────────────────────────────────
@@ -305,8 +305,9 @@ exports.iniciarGeneracion = onCall({ cors: true }, async (request) => {
   let delta = 0
   let costoCobrado = 0
   await db.runTransaction(async (tx) => {
-    // Costo base por flujo. La planeación completa aplica el anticipo del horario
-    // (si esta materia ya pagó su horario y aún no se ha pagado la completa).
+    // Costo base por flujo. La planeación completa (100) aplica el anticipo del
+    // horario (si esta materia ya pagó su horario y aún no se ha pagado la completa),
+    // de modo que solo cobra la diferencia (75).
     let costo = COSTO_POR_FLUJO[tipoFlujo] ?? COSTO_POR_FLUJO.completa
     if (tipoFlujo === 'completa' && materiaId) {
       const ledgerSnap = await tx.get(userRef.collection('cobrosMateria').doc(materiaId))
@@ -385,7 +386,7 @@ exports.finalizarGeneracion = onCall({ cors: true }, async (request) => {
     })
 
     // Si la generación fue exitosa (no reembolsada), registrar el cobro de la
-    // materia en el ledger server-only. Permite el anticipo: horario → completa = 50.
+    // materia en el ledger server-only. Permite el anticipo: horario → completa = 75.
     if (!procedeReembolso && ses.materiaId && ses.creditoDescontado) {
       const ledgerRef = userRef.collection('cobrosMateria').doc(ses.materiaId)
       if (ses.tipoFlujo === 'horario') {
@@ -533,96 +534,6 @@ exports.generarGemini2023 = onCall(
       return { text }
     } catch (err) {
       console.error('IA 2023 API error (uid=%s):', request.auth.uid, err.message)
-      throw new HttpsError('internal', err.message || 'Error al llamar a la IA.')
-    }
-  }
-)
-
-// ── extraerEstructura2023Gratis: extracción de estructura 2023 SIN cobrar ──
-// Equivalente gratuito de generarGemini2023, igual que `extraerEstructura` lo es
-// del flujo 2018. Solo requiere auth: NO abre sesión ni descuenta créditos.
-// Pensado exclusivamente para el "Planificador de horarios" (estructura/RAs sin
-// actividades). La planeación didáctica completa sigue pasando por la ruta de pago.
-exports.extraerEstructura2023Gratis = onCall(
-  {
-    timeoutSeconds: 120,
-    memory: '512MiB',
-    secrets: [GEMINI_API_KEY_SECRET, OPENAI_API_KEY_SECRET],
-    cors: true,
-  },
-  async (request) => {
-    if (!request.auth) {
-      throw new HttpsError('unauthenticated', 'Debes iniciar sesion para usar esta funcion.')
-    }
-
-    const {
-      systemPrompt = null,
-      userPrompt,
-      pdfPEBase64,
-      pdfGPEBase64,
-      temperature = 0.2,
-      maxOutputTokens = 8192,
-      model = 'gemini-2.5-flash',
-    } = request.data || {}
-
-    if (!userPrompt || typeof userPrompt !== 'string') {
-      throw new HttpsError('invalid-argument', 'Falta el prompt de usuario.')
-    }
-    if (systemPrompt !== null && typeof systemPrompt !== 'string') {
-      throw new HttpsError('invalid-argument', 'El prompt del sistema no es valido.')
-    }
-    if (!GEMINI_2023_MODELS.has(model)) {
-      throw new HttpsError('invalid-argument', 'Modelo Gemini no permitido.')
-    }
-    if (typeof temperature !== 'number' || temperature < 0 || temperature > 1) {
-      throw new HttpsError('invalid-argument', 'La temperatura debe estar entre 0 y 1.')
-    }
-    if (!Number.isInteger(maxOutputTokens) || maxOutputTokens < 512 || maxOutputTokens > 65536) {
-      throw new HttpsError('invalid-argument', 'maxOutputTokens no es valido.')
-    }
-    if ((systemPrompt?.length || 0) + userPrompt.length > MAX_PROMPT_CHARS) {
-      throw new HttpsError('invalid-argument', 'Los prompts superan el tamano maximo permitido.')
-    }
-    if (pdfPEBase64 && pdfPEBase64.length > MAX_PDF_B64_LEN) {
-      throw new HttpsError('invalid-argument', 'El PDF del PE supera el tamano maximo.')
-    }
-    if (pdfGPEBase64 && pdfGPEBase64.length > MAX_PDF_B64_LEN) {
-      throw new HttpsError('invalid-argument', 'El PDF de la GPE supera el tamano maximo.')
-    }
-
-    const openaiKey = OPENAI_API_KEY_SECRET.value() || process.env.OPENAI_API_KEY
-    const geminiKey = GEMINI_API_KEY_SECRET.value() || process.env.GEMINI_API_KEY
-    if (!openaiKey && !geminiKey) {
-      throw new HttpsError('failed-precondition', 'No hay API key de IA configurada (OPENAI_API_KEY o GEMINI_API_KEY).')
-    }
-
-    try {
-      let text
-      if (openaiKey) {
-        text = await callOpenAI({
-          openaiKey,
-          systemPrompt,
-          userPrompt,
-          pdfPEBase64,
-          pdfGPEBase64,
-          temperature,
-          maxTokens: maxOutputTokens,
-        })
-      } else {
-        text = await callGemini({
-          geminiKey,
-          systemPrompt,
-          userPrompt,
-          pdfPEBase64,
-          pdfGPEBase64,
-          temperature,
-          model,
-          maxOutputTokens,
-        })
-      }
-      return { text }
-    } catch (err) {
-      console.error('extraerEstructura2023Gratis IA error (uid=%s):', request.auth.uid, err.message)
       throw new HttpsError('internal', err.message || 'Error al llamar a la IA.')
     }
   }

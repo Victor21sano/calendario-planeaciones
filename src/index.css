@@ -397,6 +397,49 @@
   .badge {
     @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold;
   }
+
+  /*
+   * REVEAL — entrada al hacer scroll (sobrio, estilo editorial).
+   * El hook useReveal añade .is-revealed vía IntersectionObserver.
+   * Solo opacity/transform: el contenido permanece en el árbol de
+   * accesibilidad desde el primer render.
+   * No aplicar .reveal al mismo nodo que .card/.pressable (usa un wrapper).
+   */
+  .reveal {
+    transition: opacity 550ms var(--spring), transform 550ms var(--spring);
+  }
+  .reveal:not(.is-revealed) {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  /*
+   * REVEAL-STAGGER — los hijos directos entran escalonados (80ms entre sí,
+   * hasta 6 hijos). Para listas <ol>/<ul>/<dl> de las páginas SEO.
+   */
+  .reveal-stagger > * {
+    transition: opacity 550ms var(--spring), transform 550ms var(--spring);
+  }
+  .reveal-stagger:not(.is-revealed) > * {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  .reveal-stagger.is-revealed > *:nth-child(2) { transition-delay: 80ms; }
+  .reveal-stagger.is-revealed > *:nth-child(3) { transition-delay: 160ms; }
+  .reveal-stagger.is-revealed > *:nth-child(4) { transition-delay: 240ms; }
+  .reveal-stagger.is-revealed > *:nth-child(5) { transition-delay: 320ms; }
+  .reveal-stagger.is-revealed > *:nth-child(6) { transition-delay: 400ms; }
+  .reveal-stagger.is-revealed > *:nth-child(n+7) { transition-delay: 400ms; }
+
+  /*
+   * REVEAL-HERO — entrada al CARGAR la página (no por scroll).
+   * H1 primero, subtítulo +120ms, tercer elemento +240ms.
+   */
+  .reveal-hero {
+    animation: revealHero 600ms var(--spring) both;
+  }
+  .reveal-hero-delay-1 { animation-delay: 120ms; }
+  .reveal-hero-delay-2 { animation-delay: 240ms; }
 }
 
 /*
@@ -410,6 +453,7 @@
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration:        0.01ms !important;
+    animation-delay:           0ms    !important;
     animation-iteration-count: 1      !important;
     transition-duration:       0.01ms !important;
     scroll-behavior:           auto   !important;
@@ -483,6 +527,11 @@
   100% { background-position: -120% 0; }
 }
 
+@keyframes revealHero {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   /* Texto legible sin barrido */
   .text-shimmer {
@@ -496,4 +545,35 @@
   .card-spotlight::before {
     display: none !important;
   }
+  /* Reveal: contenido visible sin animación */
+  .reveal,
+  .reveal-stagger > * {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .reveal-hero,
+  .reveal-hero-delay-1,
+  .reveal-hero-delay-2 {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* ─── Tablas PaginaActividad – dark mode ─────────────────────────
+   Los inline styles usan colores fijos; !important los sobreescribe
+   en modo oscuro sin tocar el HTML de exportación Word.            */
+.dark .preview-2023-pagina table th {
+  background-color: #1E293B !important;
+  color: #F1F5F9 !important;
+  border-color: #334155 !important;
+}
+.dark .preview-2023-pagina table td:not([aria-hidden="true"]) {
+  background-color: #0F172A !important;
+  color: #CBD5E1 !important;
+  border-color: #334155 !important;
+}
+.dark .preview-2023-pagina table td[aria-hidden="true"] {
+  border-color: #334155 !important;
 }

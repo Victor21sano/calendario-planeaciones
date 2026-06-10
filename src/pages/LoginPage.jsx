@@ -66,10 +66,11 @@ export default function LoginPage() {
               Para docentes CONALEP
             </p>
             <h1 className="font-display text-[2.75rem] font-semibold leading-[1.08] tracking-tight text-slate-950 dark:text-white">
+              <span className="block text-[1.35rem] font-bold text-brand-700 dark:text-brand-300 mb-1">Planea Pro</span>
               Convierte PE y GPE en <span className="italic text-accent-600 dark:text-accent-400">planeaciones listas</span> para revisar y exportar.
             </h1>
             <p className="mt-6 max-w-lg text-[15px] leading-8 text-slate-600 dark:text-slate-300">
-              Planea-Pro te ayuda a ordenar documentos oficiales, calcular horarios y preparar planeaciones didácticas con una experiencia pensada para el trabajo docente.
+              Planea Pro te ayuda a ordenar documentos oficiales, calcular horarios y preparar planeaciones didácticas con una experiencia pensada para el trabajo docente.
             </p>
           </div>
           <div className="mt-8 grid max-w-xl grid-cols-3 gap-3">
@@ -86,7 +87,7 @@ export default function LoginPage() {
           </div>
         </section>
 
-        <div className="card relative z-10 w-full max-w-md justify-self-center p-8 animate-slide-up">
+        <div className="card relative z-10 w-full max-w-md justify-self-center p-8 animate-slide-up" style={{ animationDelay: '120ms' }}>
           <div className="mb-8 text-center">
             <BrandLogo className="justify-center" markClassName="w-14 h-14" showTagline />
             <h2 className="mt-7 font-display text-[1.7rem] font-semibold tracking-tight text-slate-900 dark:text-white">
@@ -162,7 +163,7 @@ export default function LoginPage() {
               disabled={loading}
               className="btn-accent mt-2 w-full justify-center py-2.5 text-base"
             >
-              {loading ? 'Preparando tu espacio...' : 'Entrar a Planea-Pro'}
+              {loading ? 'Preparando tu espacio...' : 'Entrar a Planea Pro'}
             </button>
           </form>
 

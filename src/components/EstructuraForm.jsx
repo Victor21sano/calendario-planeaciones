@@ -56,6 +56,9 @@ function SubunidadRow({ sub, onChange, onDelete, total, palette }) {
       <div className="flex items-center gap-2 flex-1 min-w-0">
         <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${palette.dot} opacity-60`} />
         <input
+          id={`sub-nombre-${sub.id}`}
+          name={`sub-nombre-${sub.id}`}
+          aria-label={`Nombre de la subunidad ${sub.id}`}
           className="input-base flex-1 py-2 text-sm"
           placeholder="Nombre de la subunidad"
           value={sub.nombre}
@@ -67,6 +70,9 @@ function SubunidadRow({ sub, onChange, onDelete, total, palette }) {
       <div className="flex items-center gap-2 pl-3.5 sm:pl-0">
         <div className="relative w-24 flex-shrink-0">
           <input
+            id={`sub-horas-${sub.id}`}
+            name={`sub-horas-${sub.id}`}
+            aria-label={`Horas de la subunidad ${sub.id}`}
             type="number"
             className="input-base py-2 pr-9 text-center text-sm w-full"
             min="0.5"
@@ -120,6 +126,9 @@ function UnidadCard({ unidad, palette, onUpdate, onDelete, totalHoras }) {
       {/* Unit header */}
       <div className="flex items-center gap-2 mb-3">
         <input
+          id={`unidad-nombre-${unidad.id}`}
+          name={`unidad-nombre-${unidad.id}`}
+          aria-label={`Nombre de la unidad ${unidad.id}`}
           className={`input-base flex-1 font-semibold text-sm ${palette.heading}`}
           placeholder="Nombre de la unidad"
           value={unidad.nombre}

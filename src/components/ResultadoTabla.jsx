@@ -24,12 +24,12 @@ function formatFechaLegible(dateStr) {
 function DonutChart({ pct, color }) {
   const safeP = Math.min(100, Math.max(0, pct))
   const colorMap = {
-    green:  ['#10b981', '#d1fae5'],
-    amber:  ['#f59e0b', '#fef3c7'],
-    red:    ['#ef4444', '#fee2e2'],
-    indigo: ['#0f766e', '#d6efe9'],
+    green:  ['#10b981', '#d1fae5', '#047857'],
+    amber:  ['#f59e0b', '#fef3c7', '#b45309'],
+    red:    ['#ef4444', '#fee2e2', '#b91c1c'],
+    indigo: ['#0f766e', '#d6efe9', '#0f766e'],
   }
-  const [fill, track] = colorMap[color] || colorMap.indigo
+  const [fill, track, textColor] = colorMap[color] || colorMap.indigo
 
   return (
     <div className="relative w-24 h-24 flex-shrink-0">
@@ -42,7 +42,7 @@ function DonutChart({ pct, color }) {
       />
       {/* Center hole */}
       <div className="absolute inset-3 rounded-full bg-white dark:bg-slate-900 flex flex-col items-center justify-center">
-        <span className="text-base font-black leading-none" style={{ color: fill }}>{safeP.toFixed(0)}%</span>
+        <span className="text-base font-black leading-none" style={{ color: textColor }}>{safeP.toFixed(0)}%</span>
         <span className="text-[9px] font-semibold text-slate-500 dark:text-slate-400 leading-none mt-0.5">usado</span>
       </div>
     </div>
@@ -258,11 +258,11 @@ export default function ResultadoTabla({ resultado }) {
                         <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Sem. {row.semanaInicio}–{row.semanaFin}</span>
                       )}
                     </td>
-                    <td className="px-3 py-3 text-xs text-slate-500 dark:text-slate-400 hidden sm:table-cell">{formatFechaLegible(row.fechaInicio)}</td>
-                    <td className="px-3 py-3 text-xs text-slate-500 dark:text-slate-400 hidden sm:table-cell">{formatFechaLegible(row.fechaFin)}</td>
+                    <td className="px-3 py-3 text-xs text-slate-600 dark:text-slate-400 hidden sm:table-cell">{formatFechaLegible(row.fechaInicio)}</td>
+                    <td className="px-3 py-3 text-xs text-slate-600 dark:text-slate-400 hidden sm:table-cell">{formatFechaLegible(row.fechaFin)}</td>
                     <td className="px-3 py-3 text-center hidden md:table-cell">
                       {row.duracionSemanas != null
-                        ? <span className="badge bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">{row.duracionSemanas} sem</span>
+                        ? <span className="badge bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">{row.duracionSemanas} sem</span>
                         : <span className="text-slate-300 dark:text-slate-600">—</span>
                       }
                     </td>
@@ -274,7 +274,7 @@ export default function ResultadoTabla({ resultado }) {
                             style={{ width: `${row.porcentaje}%`, transition: 'width 600ms cubic-bezier(0.16,1,0.3,1)' }}
                           />
                         </div>
-                        <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 w-8 text-right flex-shrink-0">
+                        <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-400 w-8 text-right flex-shrink-0">
                           {row.porcentaje.toFixed(1)}%
                         </span>
                       </div>

@@ -1,0 +1,24 @@
+# Planea-Pro
+
+> Herramienta de planeación didáctica con inteligencia artificial para docentes CONALEP. Genera planeaciones completas y horarios automáticos a partir de los documentos oficiales (PE y GPE) del módulo.
+
+## Producto
+
+- [Planea-Pro — Inicio](https://planea-pro.com.mx/): Página principal. Descripción del producto, precios y acceso.
+- [Acceso — Iniciar sesión](https://planea-pro.com.mx/login): Inicio de sesión con correo electrónico o cuenta Google.
+- [Adquirir créditos](https://planea-pro.com.mx/comprar): Planes de créditos para generar planeaciones.
+
+## Funcionalidades
+
+- [Planeación completa con IA](https://planea-pro.com.mx/): Sube PE y GPE; la IA genera estructura de sesiones, tablas didácticas y momentos de inicio, desarrollo y cierre en formato CONALEP 2023. Costo: 100 créditos.
+- [Horario automático](https://planea-pro.com.mx/): Extrae unidades, Resultados de Aprendizaje (RAs) y horas del PE para construir el planificador semestral. Costo: 25 créditos.
+- [Exportación a Word](https://planea-pro.com.mx/): Las planeaciones se exportan en .docx compatible con el formato oficial 2023 de CONALEP.
+
+## Precios
+
+- [Ver precios y créditos](https://planea-pro.com.mx/comprar): Planeación completa 100 créditos · Horario automático 25 créditos · Descuento 75 créditos si ya generaste el horario · Regeneración de RAs gratuita.
+
+## Optional
+
+- [Sitemap](https://planea-pro.com.mx/sitemap.xml): Mapa del sitio en formato XML.
+- [Robots](https://planea-pro.com.mx/robots.txt): Directivas para rastreadores.

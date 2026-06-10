@@ -51,7 +51,7 @@ export default function SaldoCreditos({ className = '' }) {
         <span className="text-[10px] font-semibold text-info-600 dark:text-info-400 leading-none">Admin</span>
       )}
       {sinCreditosDisponibles && (
-        <span className="text-[10px] font-semibold text-warning-600 dark:text-warning-400 leading-none">Comprar</span>
+        <span className="text-[10px] font-semibold text-warning-700 dark:text-warning-400 leading-none">Comprar</span>
       )}
     </Link>
   )

@@ -397,7 +397,7 @@ export default function GeneradorIA({ onGenerated, onUpdateUnidades, raList, onS
                     </svg>
                     Adquirir créditos
                   </Link>
-                  <span className="text-xs text-slate-400 dark:text-slate-500">1 crédito = 1 módulo completo</span>
+                  <span className="text-xs text-slate-400 dark:text-slate-500">Planeación completa: 100 créditos (75 si ya pagaste el horario)</span>
                 </div>
               </div>
             </div>
