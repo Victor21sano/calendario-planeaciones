@@ -68,7 +68,7 @@ export default function CreateMateriaModal({ onIA, onManual, onCerrar, sinCredit
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-bold text-slate-900 dark:text-white">Llenar manualmente</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Gratis · Tú escribes cada campo a tu ritmo</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Tú escribes cada campo a tu ritmo</p>
             </div>
             <svg aria-hidden="true" className="w-4 h-4 text-slate-300 dark:text-slate-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

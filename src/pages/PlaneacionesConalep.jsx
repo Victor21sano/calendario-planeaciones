@@ -58,8 +58,8 @@ export default function PlaneacionesConalep() {
                 <dd className="mt-1 text-slate-600 dark:text-slate-400">Sí. La exportación a Word (.docx) permite editar cualquier campo antes de entregar.</dd>
               </div>
               <div>
-                <dt className="font-semibold text-slate-800 dark:text-slate-200">¿Es gratuito?</dt>
-                <dd className="mt-1 text-slate-600 dark:text-slate-400">Planea Pro ofrece una primera planeación gratis. Las siguientes usan créditos con precios accesibles para docentes.</dd>
+                <dt className="font-semibold text-slate-800 dark:text-slate-200">¿Cuánto cuesta?</dt>
+                <dd className="mt-1 text-slate-600 dark:text-slate-400">Planea Pro funciona con créditos: 1 crédito = $1 MXN. La planeación completa usa 100 créditos; solo el horario automático, 25 (como anticipo), y completarla después del horario, 75.</dd>
               </div>
             </dl>
           </div>

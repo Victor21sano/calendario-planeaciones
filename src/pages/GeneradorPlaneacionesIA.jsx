@@ -22,7 +22,7 @@ export default function GeneradorPlaneacionesIA() {
           chips={[
             ['PE + GPE', 'La IA lee tus documentos reales'],
             ['Sesiones', 'Actividades con coherencia interna'],
-            ['Regeneración', 'Gratis si el resultado no convence'],
+            ['Regeneración', 'Por RA, hasta quedar conforme'],
           ]}
           ctaLabel="Probar el generador"
         />
@@ -44,7 +44,7 @@ export default function GeneradorPlaneacionesIA() {
               <li>Respeta la estructura oficial del Modelo 2023 en cada campo</li>
               <li>Genera los tres momentos didácticos (inicio, desarrollo, cierre) con coherencia interna</li>
               <li>Exporta en formato Word compatible con las plantillas oficiales</li>
-              <li>Regeneración gratuita si el resultado no cumple tus expectativas</li>
+              <li>Regeneración por resultado de aprendizaje si algo no cumple tus expectativas</li>
             </ul>
           </div>
 
@@ -61,7 +61,7 @@ export default function GeneradorPlaneacionesIA() {
               </div>
               <div>
                 <dt className="font-semibold text-slate-800 dark:text-slate-200">¿Puedo regenerar si no me gusta el resultado?</dt>
-                <dd className="mt-1 text-slate-600 dark:text-slate-400">Sí. La primera regeneración es gratuita. Planea Pro reconoce cuando la calidad no es satisfactoria.</dd>
+                <dd className="mt-1 text-slate-600 dark:text-slate-400">Sí. Puedes regenerar cada resultado de aprendizaje hasta quedar conforme antes de exportar.</dd>
               </div>
             </dl>
           </div>

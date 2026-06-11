@@ -11,7 +11,7 @@ export default function LandingHero({
   title,
   subtitle,
   chips = [],
-  ctaLabel = 'Crear mi cuenta gratis',
+  ctaLabel = 'Crear mi cuenta',
 }) {
   return (
     <section className="mt-8 sm:mt-12">

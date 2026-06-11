@@ -125,7 +125,7 @@ function MateriaCard({ materia, idx, onNavigate, onDuplicate, onDelete }) {
             </div>
             <div className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-slate-700/60 overflow-hidden">
               <div className={`h-full rounded-full transition-[width,background-color] duration-700 ease-out-strong
-                  ${progreso.estado === 'finalizado' ? 'bg-success-400' : 'bg-brand-500 dark:bg-brand-400'}`}
+                  ${progreso.estado === 'finalizado' ? 'bg-success-400' : 'bg-accent-500 dark:bg-accent-400'}`}
                 style={{ width: `${progreso.pct}%` }} />
             </div>
           </div>

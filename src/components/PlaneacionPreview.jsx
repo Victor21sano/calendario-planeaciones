@@ -241,7 +241,7 @@ export default function PlaneacionPreview({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
           </svg>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-warning-800 dark:text-warning-200">Vista previa — Modo Gratis</p>
+            <p className="text-sm font-semibold text-warning-800 dark:text-warning-200">Vista previa — Contenido bloqueado</p>
             <p className="text-xs text-warning-700 dark:text-warning-300 mt-0.5">
               Esta es una vista previa de la planeación. Compra créditos para generar el contenido completo con IA y copiarlo a tu formato.
             </p>

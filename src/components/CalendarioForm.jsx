@@ -4,12 +4,12 @@ import { calcularHorasSemanaAuto } from '../utils/calculos'
 // ─── Vacation Period Card ─────────────────────────────────────
 function PeriodoVacacional({ periodo, onChange, onDelete }) {
   return (
-    <div className="group relative flex flex-wrap gap-3 items-end p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700 animate-scale-in">
+    <div className="group relative flex flex-wrap gap-3 items-end p-4 bg-warning-50 dark:bg-warning-900/10 rounded-xl border border-warning-200 dark:border-warning-800/40 animate-scale-in">
       {/* Left accent bar */}
-      <div className="absolute left-0 top-3 bottom-3 w-0.5 bg-brand-400 rounded-full" />
+      <div className="absolute left-0 top-3 bottom-3 w-0.5 bg-warning-400 rounded-full" />
 
       <div className="flex-1 min-w-[140px]">
-        <label htmlFor={`vac-nombre-${periodo.id}`} className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
+        <label htmlFor={`vac-nombre-${periodo.id}`} className="block text-xs font-semibold text-warning-700 dark:text-warning-400 mb-1.5">
           Nombre del período
         </label>
         <input
@@ -23,7 +23,7 @@ function PeriodoVacacional({ periodo, onChange, onDelete }) {
       </div>
 
       <div className="flex-1 min-w-[140px]">
-        <label htmlFor={`vac-inicio-${periodo.id}`} className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5 flex items-center gap-1">
+        <label htmlFor={`vac-inicio-${periodo.id}`} className="block text-xs font-semibold text-warning-700 dark:text-warning-400 mb-1.5 flex items-center gap-1">
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
           </svg>
@@ -39,7 +39,7 @@ function PeriodoVacacional({ periodo, onChange, onDelete }) {
       </div>
 
       <div className="flex-1 min-w-[140px]">
-        <label htmlFor={`vac-fin-${periodo.id}`} className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5 flex items-center gap-1">
+        <label htmlFor={`vac-fin-${periodo.id}`} className="block text-xs font-semibold text-warning-700 dark:text-warning-400 mb-1.5 flex items-center gap-1">
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
           </svg>
@@ -113,7 +113,7 @@ export default function CalendarioForm({
       {/* Date & Hours Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div>
-          <label htmlFor="fecha-inicio-semestre" className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5 flex items-center gap-1">
+          <label htmlFor="fecha-inicio-semestre" className="block text-xs font-semibold text-warning-700 dark:text-warning-400 mb-1.5 flex items-center gap-1">
             <svg className="w-3 h-3 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
             </svg>
@@ -129,7 +129,7 @@ export default function CalendarioForm({
         </div>
 
         <div>
-          <label htmlFor="fecha-fin-semestre" className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5 flex items-center gap-1">
+          <label htmlFor="fecha-fin-semestre" className="block text-xs font-semibold text-warning-700 dark:text-warning-400 mb-1.5 flex items-center gap-1">
             <svg className="w-3 h-3 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
             </svg>
@@ -145,7 +145,7 @@ export default function CalendarioForm({
         </div>
 
         <div>
-          <label htmlFor="horas-semana" className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5 flex items-center gap-1">
+          <label htmlFor="horas-semana" className="block text-xs font-semibold text-warning-700 dark:text-warning-400 mb-1.5 flex items-center gap-1">
             <svg className="w-3 h-3 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
@@ -203,7 +203,7 @@ export default function CalendarioForm({
           <div>
             <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Períodos vacacionales</label>
             {periodosVacacionales.length > 0 && (
-              <span className="ml-2 badge bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300">
+              <span className="ml-2 badge bg-warning-100 dark:bg-warning-900/30 text-warning-700 dark:text-warning-400">
                 {periodosVacacionales.length}
               </span>
             )}

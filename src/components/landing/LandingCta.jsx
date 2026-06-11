@@ -8,7 +8,7 @@ import { useReveal } from '../../hooks/useReveal'
 export default function LandingCta({
   title = 'Tu próximo semestre, planeado en minutos.',
   subtitle = 'Crea tu cuenta, sube tu PE y GPE, y entrega planeaciones en formato 2023 listas para revisar.',
-  ctaLabel = 'Crear mi cuenta gratis',
+  ctaLabel = 'Crear mi cuenta',
 }) {
   const revealCta = useReveal()
 

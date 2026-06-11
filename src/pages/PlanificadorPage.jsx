@@ -292,7 +292,7 @@ export default function PlanificadorPage() {
 
   if (loading || onboardingFase === 'init') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--surface-sunken)]">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
         <div className="w-10 h-10 border-4 border-slate-200 dark:border-slate-800 border-t-primary-500 rounded-full animate-spin" />
       </div>
     )
@@ -357,7 +357,7 @@ export default function PlanificadorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--surface-sunken)] transition-colors duration-300">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
 
       {/* ── Header ─────────────────────────────────────────── */}
       <header className="sticky top-0 z-20 backdrop-blur-xl bg-white/80 dark:bg-slate-900/80 border-b border-slate-200/60 dark:border-white/5 shadow-sm">
@@ -445,7 +445,7 @@ export default function PlanificadorPage() {
               onClick={() => setMainTab(tab.key)}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-t-xl text-sm font-semibold transition-all duration-200
                 ${mainTab === tab.key
-                  ? 'bg-[var(--surface-sunken)] text-primary-600 dark:text-primary-400 border border-b-transparent border-[var(--border-default)]'
+                  ? 'bg-slate-50 dark:bg-slate-950 text-primary-600 dark:text-primary-400 border border-b-transparent border-slate-200 dark:border-white/10'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                 }`}
             >
