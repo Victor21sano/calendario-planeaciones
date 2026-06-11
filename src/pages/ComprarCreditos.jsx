@@ -1,12 +1,22 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import BrandLogo from '../components/brand/BrandLogo'
 
 export default function ComprarCreditos() {
   const { creditos } = useAuth()
 
   return (
-    <div className="min-h-screen bg-[var(--surface-sunken)] flex flex-col items-center justify-center px-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen surface-atmosphere flex flex-col px-4">
+      <header className="w-full max-w-md mx-auto pt-6 pb-2">
+        <Link
+          to="/"
+          className="inline-flex rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+          aria-label="Planea-Pro — volver al inicio"
+        >
+          <BrandLogo markClassName="w-10 h-10" />
+        </Link>
+      </header>
+      <div className="w-full max-w-md mx-auto flex-1 flex flex-col justify-center py-6">
         <div className="card p-8 text-center space-y-6">
 
           {/* Icono */}
