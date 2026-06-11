@@ -62,41 +62,39 @@ export default function PreviewModelo2023({ planeacion, pagada = true, esAdmin =
     .reduce((s, r) => s + (r.ra.actividadesEspecificas?.length || 0), 0)
 
   return (
-    <div className="space-y-0">
+    <div className="card overflow-hidden">
 
-      {/* ── Tabs de RA ─────────────────────────────────────────── */}
-      <div className="overflow-x-auto no-print">
-        <div className="flex items-end gap-1 px-1 pt-2 border-b border-slate-200 dark:border-slate-700 min-w-max">
-          {rasConUnidad.map(({ ra }, idx) => {
-            const activo = ra.codigo === raActivo
-            const color  = PALETA_RA[idx % PALETA_RA.length]
-            const tieneActiv = (ra.actividadesEspecificas?.length || 0) > 0
-            return (
-              <button
-                key={ra.codigo}
-                onClick={() => { setRaActivo(ra.codigo); setPropActivo(0) }}
-                className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-t-xl text-sm font-semibold transition-all duration-200
-                  ${activo
-                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-b-transparent border-slate-200 dark:border-slate-700 shadow-sm'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-white/60 dark:hover:bg-slate-800/60'
-                  }`}
-              >
-                RA {ra.codigo}
-                {tieneActiv && (
-                  <span className={`w-1.5 h-1.5 rounded-full ${activo ? color : 'bg-slate-300 dark:bg-slate-600'}`} />
-                )}
-                {!tieneActiv && (
-                  <span className="text-[10px] text-warning-500">⚠</span>
-                )}
-              </button>
-            )
-          })}
-        </div>
+      {/* ── Tabs de RA — misma tira que el Planificador de Horarios ── */}
+      <div className="flex overflow-x-auto border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-slate-800/30 px-2 pt-2 gap-1 no-print">
+        {rasConUnidad.map(({ ra }, idx) => {
+          const activo = ra.codigo === raActivo
+          const color  = PALETA_RA[idx % PALETA_RA.length]
+          const tieneActiv = (ra.actividadesEspecificas?.length || 0) > 0
+          return (
+            <button
+              key={ra.codigo}
+              onClick={() => { setRaActivo(ra.codigo); setPropActivo(0) }}
+              className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-t-xl text-sm font-semibold transition-all duration-200
+                ${activo
+                  ? 'bg-white dark:bg-slate-900 text-primary-600 dark:text-primary-400 border border-b-transparent border-slate-200 dark:border-white/10 shadow-sm'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-white/60 dark:hover:bg-slate-800/60'
+                }`}
+            >
+              RA {ra.codigo}
+              {tieneActiv && (
+                <span className={`w-1.5 h-1.5 rounded-full ${activo ? color : 'bg-slate-300 dark:bg-slate-600'}`} />
+              )}
+              {!tieneActiv && (
+                <span className="text-[10px] text-warning-500">⚠</span>
+              )}
+            </button>
+          )
+        })}
       </div>
 
       {/* ── Contenido del RA activo ─────────────────────────────── */}
       {seleccion && (
-        <div className="border border-t-0 border-slate-200 dark:border-slate-700 rounded-b-2xl bg-white dark:bg-slate-900">
+        <div>
 
           {/* Info del RA */}
           <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800 flex items-start justify-between gap-4 no-print">
