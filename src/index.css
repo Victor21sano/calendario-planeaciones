@@ -109,6 +109,33 @@
   }
 
   /*
+   * SURFACE-GRAIN — grano de papel sutil (ruido fractal SVG) sobre
+   * superficies amplias. Overlay ::after sin eventos; opacidad mínima
+   * para textura editorial sin ensuciar el texto. Solo se usa fuera
+   * del flujo de trabajo (landings, compra de créditos).
+   */
+  .surface-grain {
+    position: relative;
+    isolation: isolate;
+  }
+  .surface-grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    opacity: 0.045;
+  }
+  .dark .surface-grain::after {
+    opacity: 0.06;
+  }
+  @media print {
+    .surface-grain::after { display: none; }
+  }
+
+  /*
    * [3] CARDS CON LIFT FÍSICO
    * transform se declara explícitamente aquí (fuera del * global)
    * con la curva spring de 280ms para un overshoot sutil.

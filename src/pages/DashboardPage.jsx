@@ -383,6 +383,19 @@ export default function DashboardPage() {
                 onDelete={handleDelete}
               />
             ))}
+            {!searchTerm && (
+              <button
+                onClick={abrirModalCrear}
+                className="selectable-card flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-slate-300 p-8 text-slate-400 hover:border-brand-400 hover:bg-white/60 hover:text-brand-600 dark:border-slate-600 dark:text-slate-500 dark:hover:border-brand-500 dark:hover:bg-slate-800/40 dark:hover:text-brand-300"
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                </span>
+                <span className="text-sm font-semibold">Nueva planeación</span>
+              </button>
+            )}
           </div>
         )}
       </main>

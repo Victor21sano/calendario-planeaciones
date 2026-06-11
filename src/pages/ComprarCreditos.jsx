@@ -6,7 +6,7 @@ export default function ComprarCreditos() {
   const { creditos } = useAuth()
 
   return (
-    <div className="min-h-screen surface-atmosphere flex flex-col px-4">
+    <div className="min-h-screen surface-atmosphere surface-grain flex flex-col px-4">
       <header className="w-full max-w-md mx-auto pt-6 pb-2">
         <Link
           to="/"
