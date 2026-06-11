@@ -5,7 +5,7 @@ export default function BrandLogo({ className = '', markClassName = 'w-9 h-9', s
     <div className={`inline-flex items-center gap-3 min-w-0 ${className}`} translate="no">
       <BrandMark className={markClassName} />
       <div className="min-w-0">
-        <p className="font-extrabold tracking-tight text-slate-900 dark:text-white leading-none">
+        <p className="whitespace-nowrap font-extrabold tracking-tight text-slate-900 dark:text-white leading-none">
           Planea-Pro
         </p>
         {showTagline && (

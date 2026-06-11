@@ -1,78 +1,75 @@
-import { Link } from 'react-router-dom'
-import BrandLogo from '../components/brand/BrandLogo'
 import { useReveal } from '../hooks/useReveal'
+import LandingLayout from '../components/landing/LandingLayout'
+import LandingHero from '../components/landing/LandingHero'
+import LandingCta from '../components/landing/LandingCta'
 
 export default function PlaneacionesConalep() {
   const revealQue = useReveal()
   const revealComo = useReveal()
   const revealComoLista = useReveal()
   const revealFaq = useReveal()
-  const revealCta = useReveal()
 
   return (
-    <div className="min-h-screen surface-atmosphere">
-      <header className="mx-auto max-w-4xl px-4 py-6">
-        <BrandLogo markClassName="w-10 h-10" />
-      </header>
+    <LandingLayout>
+      <article>
+        <LandingHero
+          title={
+            <>
+              Planeaciones <span className="italic text-accent-600 dark:text-accent-400">Didácticas</span> para CONALEP
+            </>
+          }
+          subtitle="Planea Pro genera automáticamente planeaciones didácticas en formato 2023 para docentes CONALEP. En minutos, no en horas."
+          chips={[
+            ['Formato 2023', 'Estructura oficial completa'],
+            ['3 momentos', 'Inicio, desarrollo y cierre'],
+            ['Word', 'Entrega lista para ajustar'],
+          ]}
+        />
 
-      <main className="mx-auto max-w-4xl px-4 pb-20">
-        <article>
-          <h1 className="reveal-hero font-display text-5xl sm:text-6xl font-semibold tracking-tight text-slate-900 dark:text-white mt-10">
-            Planeaciones Didácticas para CONALEP
-          </h1>
-          <p className="reveal-hero reveal-hero-delay-1 mt-5 text-lg text-slate-600 dark:text-slate-300 max-w-2xl">
-            Planea Pro genera automáticamente planeaciones didácticas en formato 2023 para docentes CONALEP. En minutos, no en horas.
-          </p>
-
-          <section className="mt-12 space-y-8">
-            <div ref={revealQue} className="reveal">
-              <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">¿Qué incluye una planeación CONALEP formato 2023?</h2>
-              <p className="mt-3 text-slate-600 dark:text-slate-400 leading-relaxed">
-                El formato oficial 2023 incluye: datos del docente y módulo, unidad de competencia, resultado de aprendizaje,
-                datos específicos (propósito, duración, modalidad, fechas), y los tres momentos didácticos: inicio, desarrollo y cierre.
-                Cada momento documenta ambiente de aprendizaje, estrategias de enseñanza y aprendizaje, evaluación, recursos y estudio independiente.
-              </p>
-            </div>
-
-            <div ref={revealComo} className="reveal">
-              <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Cómo genera Planea Pro tu planeación</h2>
-              <ol ref={revealComoLista} className="reveal-stagger mt-3 space-y-2 text-slate-600 dark:text-slate-400 list-decimal list-inside leading-relaxed">
-                <li>Subes tu PE (Programa de Estudio) y GPE (Guía de Práctica Educativa)</li>
-                <li>La IA extrae módulos, unidades, resultados de aprendizaje y competencias</li>
-                <li>Genera las sesiones en formato 2023 con actividades coherentes</li>
-                <li>Exportas a Word listo para entregar o ajustar</li>
-              </ol>
-            </div>
-
-            <div ref={revealFaq} className="reveal">
-              <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Preguntas frecuentes</h2>
-              <dl className="mt-4 space-y-4">
-                <div>
-                  <dt className="font-semibold text-slate-800 dark:text-slate-200">¿Funciona para todos los módulos CONALEP?</dt>
-                  <dd className="mt-1 text-slate-600 dark:text-slate-400">Sí. Funciona con cualquier módulo que tenga PE y GPE disponibles. La IA se adapta al contenido específico de cada módulo.</dd>
-                </div>
-                <div>
-                  <dt className="font-semibold text-slate-800 dark:text-slate-200">¿Puedo editar la planeación generada?</dt>
-                  <dd className="mt-1 text-slate-600 dark:text-slate-400">Sí. La exportación a Word (.docx) permite editar cualquier campo antes de entregar.</dd>
-                </div>
-                <div>
-                  <dt className="font-semibold text-slate-800 dark:text-slate-200">¿Es gratuito?</dt>
-                  <dd className="mt-1 text-slate-600 dark:text-slate-400">Planea Pro ofrece una primera planeación gratis. Las siguientes usan créditos con precios accesibles para docentes.</dd>
-                </div>
-              </dl>
-            </div>
-          </section>
-
-          <div ref={revealCta} className="reveal mt-12 flex flex-col sm:flex-row gap-4">
-            <Link to="/register" className="btn-accent justify-center px-6 py-3 text-base">
-              Generar mi primera planeación gratis
-            </Link>
-            <Link to="/login" className="btn-secondary justify-center px-6 py-3 text-base">
-              Iniciar sesión
-            </Link>
+        <section className="mt-14 space-y-8">
+          <div ref={revealQue} className="reveal">
+            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-800 dark:text-slate-100">¿Qué incluye una planeación CONALEP formato 2023?</h2>
+            <p className="mt-3 text-slate-600 dark:text-slate-400 leading-relaxed">
+              El formato oficial 2023 incluye: datos del docente y módulo, unidad de competencia, resultado de aprendizaje,
+              datos específicos (propósito, duración, modalidad, fechas), y los tres momentos didácticos: inicio, desarrollo y cierre.
+              Cada momento documenta ambiente de aprendizaje, estrategias de enseñanza y aprendizaje, evaluación, recursos y estudio independiente.
+            </p>
           </div>
-        </article>
-      </main>
-    </div>
+
+          <div ref={revealComo} className="reveal">
+            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-800 dark:text-slate-100">Cómo genera Planea Pro tu planeación</h2>
+            <ol ref={revealComoLista} className="reveal-stagger mt-3 space-y-2 text-slate-600 dark:text-slate-400 list-decimal list-inside leading-relaxed">
+              <li>Subes tu PE (Programa de Estudio) y GPE (Guía de Práctica Educativa)</li>
+              <li>La IA extrae módulos, unidades, resultados de aprendizaje y competencias</li>
+              <li>Genera las sesiones en formato 2023 con actividades coherentes</li>
+              <li>Exportas a Word listo para entregar o ajustar</li>
+            </ol>
+          </div>
+
+          <div ref={revealFaq} className="reveal">
+            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-800 dark:text-slate-100">Preguntas frecuentes</h2>
+            <dl className="mt-4 space-y-4">
+              <div>
+                <dt className="font-semibold text-slate-800 dark:text-slate-200">¿Funciona para todos los módulos CONALEP?</dt>
+                <dd className="mt-1 text-slate-600 dark:text-slate-400">Sí. Funciona con cualquier módulo que tenga PE y GPE disponibles. La IA se adapta al contenido específico de cada módulo.</dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-slate-800 dark:text-slate-200">¿Puedo editar la planeación generada?</dt>
+                <dd className="mt-1 text-slate-600 dark:text-slate-400">Sí. La exportación a Word (.docx) permite editar cualquier campo antes de entregar.</dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-slate-800 dark:text-slate-200">¿Es gratuito?</dt>
+                <dd className="mt-1 text-slate-600 dark:text-slate-400">Planea Pro ofrece una primera planeación gratis. Las siguientes usan créditos con precios accesibles para docentes.</dd>
+              </div>
+            </dl>
+          </div>
+        </section>
+
+        <LandingCta
+          title="Tu próxima planeación, lista en minutos."
+          ctaLabel="Generar mi planeación"
+        />
+      </article>
+    </LandingLayout>
   )
 }
