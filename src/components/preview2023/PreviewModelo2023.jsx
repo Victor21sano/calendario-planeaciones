@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import PaginaActividad from './PaginaActividad'
 
-// ─── Colores de RA (igual paleta que los stagger del 2018) ────
+// ─── Colores de RA — paleta categórica de 6 tokens (como ResultadoTabla) ────
 const PALETA_RA = [
   'bg-info-500 dark:bg-info-600',
   'bg-success-500 dark:bg-success-600',
   'bg-warning-500 dark:bg-warning-600',
-  'bg-pink-500 dark:bg-pink-600',
-  'bg-info-500 dark:bg-info-600',
+  'bg-accent-500 dark:bg-accent-600',
+  'bg-brand-500 dark:bg-brand-600',
   'bg-danger-500 dark:bg-danger-600',
 ]
 

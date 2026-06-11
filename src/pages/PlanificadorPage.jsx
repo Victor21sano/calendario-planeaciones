@@ -707,7 +707,7 @@ export default function PlanificadorPage() {
 
       {/* ── Footer ─────────────────────────────────────────── */}
       <footer className="text-center py-8 text-xs text-slate-500 dark:text-slate-500 no-print">
-        Planificador Docente · datos guardados de forma segura en la nube
+        Planea-Pro · datos guardados de forma segura en la nube
       </footer>
 
       {/* Modal sin créditos — onboarding */}
