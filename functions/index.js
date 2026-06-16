@@ -46,10 +46,11 @@ const APP_URL = process.env.APP_URL || 'https://planificador-docente-d48a6.web.a
 
 // Catálogo de paquetes — FUENTE DE VERDAD. El cliente solo envía paqueteId;
 // el monto y los créditos SIEMPRE se derivan de aquí (nunca del cliente).
+// Precios de lanzamiento (1 planeación = 100 créditos).
 const PAQUETES = {
   p100: { creditos: 100, precioMXN: 100 },
-  p300: { creditos: 300, precioMXN: 270 },
-  p500: { creditos: 500, precioMXN: 400 },
+  p300: { creditos: 300, precioMXN: 200 },
+  p500: { creditos: 500, precioMXN: 300 },
 }
 
 const ANTHROPIC_MODEL = 'claude-opus-4-7'

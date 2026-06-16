@@ -5,9 +5,9 @@ import BrandLogo from '../components/brand/BrandLogo'
 import { crearSesionCheckout } from '../services/stripeService'
 
 const PAQUETES = [
-  { id: 'p100', creditos: 100, precio: 100, etiqueta: '1 planeación completa' },
-  { id: 'p300', creditos: 300, precio: 270, etiqueta: 'Ahorra ~10%' },
-  { id: 'p500', creditos: 500, precio: 400, etiqueta: 'Ahorra ~20%' },
+  { id: 'p100', creditos: 100, precio: 100, etiqueta: '1 planeación' },
+  { id: 'p300', creditos: 300, precio: 200, etiqueta: '3 planeaciones · ahorra $100' },
+  { id: 'p500', creditos: 500, precio: 300, etiqueta: '5 planeaciones · ahorra $200' },
 ]
 
 export default function ComprarCreditos() {
