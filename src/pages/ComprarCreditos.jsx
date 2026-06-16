@@ -1,9 +1,32 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import BrandLogo from '../components/brand/BrandLogo'
+import { crearSesionCheckout } from '../services/stripeService'
+
+const PAQUETES = [
+  { id: 'p100', creditos: 100, precio: 100, etiqueta: '1 planeación completa' },
+  { id: 'p300', creditos: 300, precio: 270, etiqueta: 'Ahorra ~10%' },
+  { id: 'p500', creditos: 500, precio: 400, etiqueta: 'Ahorra ~20%' },
+]
 
 export default function ComprarCreditos() {
   const { creditos } = useAuth()
+  const [cargandoId, setCargandoId] = useState(null)
+  const [error, setError] = useState(null)
+
+  async function pagar(paqueteId) {
+    setError(null)
+    setCargandoId(paqueteId)
+    try {
+      const { url } = await crearSesionCheckout(paqueteId)
+      window.location.assign(url)
+    } catch (e) {
+      console.error('[ComprarCreditos] error al iniciar pago:', e)
+      setError('No se pudo iniciar el pago. Intenta de nuevo.')
+      setCargandoId(null)
+    }
+  }
 
   return (
     <div className="min-h-screen surface-atmosphere surface-grain flex flex-col px-4">
@@ -61,6 +84,45 @@ export default function ComprarCreditos() {
               <li>• Solo horario automático: <strong>25 créditos</strong> (anticipo de la completa)</li>
               <li>• Completa después del horario: <strong>75 créditos</strong></li>
             </ul>
+          </div>
+
+          {/* Pago con tarjeta (Stripe) */}
+          <div className="space-y-3 text-left">
+            <p className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+              Pago con tarjeta
+            </p>
+            {PAQUETES.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                disabled={cargandoId !== null}
+                onClick={() => pagar(p.id)}
+                className="btn-accent w-full justify-between gap-3 py-3 text-sm disabled:opacity-60"
+              >
+                <span className="font-semibold">{p.creditos} créditos</span>
+                <span className="flex items-center gap-2">
+                  <span className="text-xs opacity-80">{p.etiqueta}</span>
+                  <span className="font-extrabold">
+                    {cargandoId === p.id ? 'Redirigiendo…' : `$${p.precio} MXN`}
+                  </span>
+                </span>
+              </button>
+            ))}
+            {error && (
+              <p className="text-xs font-semibold text-red-600 dark:text-red-400" role="alert">
+                {error}
+              </p>
+            )}
+            <p className="text-xs text-slate-400 dark:text-slate-500">
+              Pago seguro procesado por Stripe. Tus créditos se acreditan automáticamente.
+            </p>
+          </div>
+
+          {/* Separador respaldo manual */}
+          <div className="flex items-center gap-3 text-xs text-slate-400 dark:text-slate-500">
+            <span className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+            o paga por transferencia
+            <span className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
           </div>
 
           {/* Pago por transferencia manual */}
