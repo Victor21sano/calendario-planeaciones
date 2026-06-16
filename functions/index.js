@@ -37,6 +37,20 @@ setGlobalOptions({ region: 'us-central1' })
 
 const GEMINI_API_KEY_SECRET = defineSecret('GEMINI_API_KEY')
 const OPENAI_API_KEY_SECRET = defineSecret('OPENAI_API_KEY')
+const STRIPE_SECRET_KEY     = defineSecret('STRIPE_SECRET_KEY')
+const STRIPE_WEBHOOK_SECRET = defineSecret('STRIPE_WEBHOOK_SECRET')
+const Stripe                = require('stripe')
+
+// Base de la app para success/cancel del Checkout. Configurable por entorno.
+const APP_URL = process.env.APP_URL || 'https://planificador-docente-d48a6.web.app'
+
+// Catálogo de paquetes — FUENTE DE VERDAD. El cliente solo envía paqueteId;
+// el monto y los créditos SIEMPRE se derivan de aquí (nunca del cliente).
+const PAQUETES = {
+  p100: { creditos: 100, precioMXN: 100 },
+  p300: { creditos: 300, precioMXN: 270 },
+  p500: { creditos: 500, precioMXN: 400 },
+}
 
 const ANTHROPIC_MODEL = 'claude-opus-4-7'
 const GEMINI_MODEL    = 'gemini-2.5-flash'
