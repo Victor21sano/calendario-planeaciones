@@ -10,7 +10,9 @@
 
 **Spec:** `docs/superpowers/specs/2026-06-16-stripe-creditos-design.md`
 
-**Nota de contexto importante:** los tests de créditos (`functions/test/`) existen en las ramas `tests-creditos` / `tests-sesiones-v2` pero **no están en `main`**, de donde sale esta rama. Por eso la Task 1 crea la infraestructura de test (`functions/vitest.config.js`) y la Task 4 crea un archivo de test **autocontenido** (`functions/test/stripe.test.js`) con sus propios helpers inline, sin depender de `functions/test/helpers.js` de las otras ramas (para evitar colisiones de merge).
+**Base de la rama:** `feat-stripe-creditos` sale de **`pulido-fase4`** (el estado de trabajo más reciente), NO de `main` (que está 63 commits atrás y carece de la infra de test). Verificado: la línea base tiene `functions/vitest.config.js`, `functions/test/` (24 tests: creditos + sesiones), scripts `test:emu`, `firebase-functions-test ^3.4.0` y vitest `^2.1.9`, y los 24 tests pasan en verde antes de empezar.
+
+**Nota de contexto:** la infra de test YA existe en esta base, por lo que la Task 1 solo añade la dependencia `stripe`. La Task 4 crea un archivo de test **autocontenido** (`functions/test/stripe.test.js`) con sus propios helpers inline (no usa `functions/test/helpers.js`) — los 24 tests existentes deben seguir verdes en cada paso (red de seguridad).
 
 ---
 
@@ -38,11 +40,14 @@
 
 ---
 
-## Task 1: Dependencia Stripe e infraestructura de test
+## Task 1: Dependencia Stripe
+
+La infra de test (`vitest.config.js`, `functions/test/`, scripts `test:emu`) ya
+existe en esta base (`pulido-fase4`). Esta task solo añade la dependencia
+`stripe` y confirma que los tests existentes siguen verdes.
 
 **Files:**
-- Modify: `functions/package.json`
-- Create: `functions/vitest.config.js`
+- Modify: `functions/package.json`, `functions/package-lock.json`
 
 - [ ] **Step 1: Instalar el SDK de Stripe en functions**
 
@@ -50,45 +55,21 @@ Run:
 ```bash
 cd functions && npm install stripe@^17.0.0
 ```
-Expected: `stripe` aparece en `functions/package.json` → `dependencies` y `package-lock.json` se actualiza.
+Expected: `stripe` aparece en `functions/package.json` → `dependencies` y `package-lock.json` se actualiza. NO debe cambiar la versión de vitest (`^2.1.9`) ni de firebase-functions (`^7.2.5`).
 
-- [ ] **Step 2: Crear la config de vitest para functions**
-
-Create `functions/vitest.config.js`:
-```js
-import { defineConfig } from 'vitest/config'
-
-// Los tests hablan con el emulador de Firestore vía el Admin SDK (transacciones
-// reales). Se ejecutan en serie y con timeout amplio.
-export default defineConfig({
-  // Sin esto, Vite busca hacia arriba un postcss.config.js y carga el de la RAÍZ
-  // (que requiere tailwindcss) — ausente en functions/node_modules y rompe CI.
-  css: { postcss: { plugins: [] } },
-  test: {
-    globals: true,
-    include: ['test/**/*.test.js'],
-    testTimeout: 20000,
-    hookTimeout: 20000,
-    fileParallelism: false,
-    pool: 'forks',
-    poolOptions: { forks: { singleFork: true } },
-  },
-})
-```
-
-- [ ] **Step 3: Verificar que vitest corre (sin tests aún)**
+- [ ] **Step 2: Verificar que los 24 tests base siguen verdes**
 
 Run:
 ```bash
-cd functions && npx vitest run
+cd functions && npm run test:emu
 ```
-Expected: vitest arranca y reporta "No test files found" (o 0 tests). Sin errores de configuración de postcss.
+Expected: `Test Files 2 passed (2)`, `Tests 24 passed (24)` (creditos + sesiones). La instalación de stripe no rompe nada.
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 3: Commit**
 
 ```bash
-git add functions/package.json functions/package-lock.json functions/vitest.config.js
-git commit -m "chore(stripe): añade SDK de stripe y config de vitest en functions"
+git add functions/package.json functions/package-lock.json
+git commit -m "chore(stripe): añade SDK de stripe a functions"
 ```
 
 ---
