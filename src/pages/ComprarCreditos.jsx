@@ -1,19 +1,45 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import BrandLogo from '../components/brand/BrandLogo'
 import { crearSesionCheckout } from '../services/stripeService'
 
+// Fin de la promo de lanzamiento: 1 de agosto 2026, 00:00 hora de México (UTC-6).
+// DEBE coincidir con PROMO_FIN en functions/precios.js, que es quien cobra de verdad.
+// Este contador es solo visual; el servidor decide el precio según su propia fecha.
+const PROMO_FIN = new Date('2026-08-01T06:00:00Z')
+
+// precio = normal (de base); precioPromo = precio de lanzamiento.
 const PAQUETES = [
-  { id: 'p100', creditos: 100, precio: 100, etiqueta: '1 planeación' },
-  { id: 'p300', creditos: 300, precio: 200, etiqueta: '3 planeaciones · ahorra $100' },
-  { id: 'p500', creditos: 500, precio: 300, etiqueta: '5 planeaciones · ahorra $200' },
+  { id: 'p100', creditos: 100, etiqueta: '1 planeación',  precio: 100, precioPromo: 100 },
+  { id: 'p300', creditos: 300, etiqueta: '3 planeaciones', precio: 270, precioPromo: 200 },
+  { id: 'p500', creditos: 500, etiqueta: '5 planeaciones', precio: 400, precioPromo: 300 },
 ]
+
+function descomponerTiempo(ms) {
+  const s = Math.max(0, Math.floor(ms / 1000))
+  return {
+    dias:  Math.floor(s / 86400),
+    horas: Math.floor((s % 86400) / 3600),
+    min:   Math.floor((s % 3600) / 60),
+    seg:   s % 60,
+  }
+}
 
 export default function ComprarCreditos() {
   const { creditos } = useAuth()
   const [cargandoId, setCargandoId] = useState(null)
   const [error, setError] = useState(null)
+
+  // Tic cada segundo para la cuenta regresiva de la promo.
+  const [ahora, setAhora] = useState(() => Date.now())
+  useEffect(() => {
+    const id = setInterval(() => setAhora(Date.now()), 1000)
+    return () => clearInterval(id)
+  }, [])
+  const msRestante = PROMO_FIN.getTime() - ahora
+  const enPromo = msRestante > 0
+  const t = descomponerTiempo(msRestante)
 
   async function pagar(paqueteId) {
     setError(null)
@@ -86,12 +112,42 @@ export default function ComprarCreditos() {
             </ul>
           </div>
 
+          {/* Banner de promo de lanzamiento con cuenta regresiva */}
+          {enPromo && (
+            <div className="p-4 rounded-xl bg-accent-50 dark:bg-accent-900/20 border border-accent-200 dark:border-accent-800/40 text-center space-y-2">
+              <p className="text-xs font-bold text-accent-700 dark:text-accent-300 uppercase tracking-wide">
+                🎉 Precios de lanzamiento
+              </p>
+              <div className="flex items-center justify-center gap-2" aria-label="Tiempo restante de la promoción">
+                {[
+                  { v: t.dias,  l: 'días' },
+                  { v: t.horas, l: 'hrs' },
+                  { v: t.min,   l: 'min' },
+                  { v: t.seg,   l: 'seg' },
+                ].map((u, i) => (
+                  <div key={i} className="px-2 py-1 rounded-lg bg-white/70 dark:bg-slate-800/70 min-w-[3rem]">
+                    <p className="text-lg font-extrabold tabular-nums text-accent-700 dark:text-accent-300 leading-none">
+                      {String(u.v).padStart(2, '0')}
+                    </p>
+                    <p className="text-[10px] text-accent-500 dark:text-accent-400">{u.l}</p>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-accent-600 dark:text-accent-400">
+                Termina el 1 de agosto. Después vuelven los precios normales.
+              </p>
+            </div>
+          )}
+
           {/* Pago con tarjeta (Stripe) */}
           <div className="space-y-3 text-left">
             <p className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
               Pago con tarjeta
             </p>
-            {PAQUETES.map((p) => (
+            {PAQUETES.map((p) => {
+              const conDescuento = enPromo && p.precioPromo < p.precio
+              const precioMostrar = enPromo ? p.precioPromo : p.precio
+              return (
               <button
                 key={p.id}
                 type="button"
@@ -103,11 +159,19 @@ export default function ComprarCreditos() {
                 <span className="flex items-center gap-2">
                   <span className="text-xs opacity-80">{p.etiqueta}</span>
                   <span className="font-extrabold">
-                    {cargandoId === p.id ? 'Redirigiendo…' : `$${p.precio} MXN`}
+                    {cargandoId === p.id ? 'Redirigiendo…' : (
+                      <>
+                        {conDescuento && (
+                          <span className="line-through opacity-60 mr-1 font-semibold">${p.precio}</span>
+                        )}
+                        ${precioMostrar} MXN
+                      </>
+                    )}
                   </span>
                 </span>
               </button>
-            ))}
+              )
+            })}
             {error && (
               <p className="text-xs font-semibold text-red-600 dark:text-red-400" role="alert">
                 {error}

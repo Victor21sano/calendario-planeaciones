@@ -44,14 +44,11 @@ const Stripe                = require('stripe')
 // Base de la app para success/cancel del Checkout. Configurable por entorno.
 const APP_URL = process.env.APP_URL || 'https://planificador-docente-d48a6.web.app'
 
-// Catálogo de paquetes — FUENTE DE VERDAD. El cliente solo envía paqueteId;
-// el monto y los créditos SIEMPRE se derivan de aquí (nunca del cliente).
-// Precios de lanzamiento (1 planeación = 100 créditos).
-const PAQUETES = {
-  p100: { creditos: 100, precioMXN: 100 },
-  p300: { creditos: 300, precioMXN: 200 },
-  p500: { creditos: 500, precioMXN: 300 },
-}
+// Catálogo de paquetes y precio promocional — FUENTE DE VERDAD (ver precios.js).
+// El cliente solo envía paqueteId; el monto y los créditos SIEMPRE se derivan
+// del servidor (nunca del cliente), y el precio promo expira por fecha en el
+// servidor (no por el contador visual del cliente).
+const { PAQUETES, precioVigente } = require('./precios')
 
 const ANTHROPIC_MODEL = 'claude-opus-4-7'
 const GEMINI_MODEL    = 'gemini-2.5-flash'
@@ -724,6 +721,7 @@ exports.crearSesionCheckout = onCall(
     }
 
     const uid    = request.auth.uid
+    const precio = precioVigente(paquete) // promo o normal según la fecha del servidor
     const stripe = Stripe(STRIPE_SECRET_KEY.value() || process.env.STRIPE_SECRET_KEY)
 
     let session
@@ -735,7 +733,7 @@ exports.crearSesionCheckout = onCall(
           quantity: 1,
           price_data: {
             currency:     'mxn',
-            unit_amount:  paquete.precioMXN * 100, // Stripe opera en centavos
+            unit_amount:  precio * 100, // Stripe opera en centavos
             product_data: { name: `${paquete.creditos} créditos · Planea-Pro` },
           },
         }],
@@ -757,7 +755,7 @@ exports.crearSesionCheckout = onCall(
       estado:          'pendiente',
       paqueteId,
       creditos:        paquete.creditos,
-      monto:           paquete.precioMXN,
+      monto:           precio,
       stripeSessionId: session.id,
       fecha:           FieldValue.serverTimestamp(),
     })
