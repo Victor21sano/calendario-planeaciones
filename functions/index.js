@@ -147,6 +147,9 @@ async function registrarConsumo(userRef, adminUser, delta, tipo) {
   }).catch(e => console.error('Error al registrar consumo (%s):', tipo, e.message))
 }
 
+// Error permanente: la metadata del evento de Stripe es inservible (no reintentable).
+class StripeMetadataError extends Error {}
+
 // Acredita una compra de Stripe de forma atómica e idempotente.
 // Idempotencia por event.id: si stripeEventos/{eventId} ya existe, no re-acredita.
 async function acreditarCompraStripe(eventId, session) {
@@ -155,7 +158,7 @@ async function acreditarCompraStripe(eventId, session) {
   const sessionId = session.id
 
   if (!uid || !Number.isInteger(creditos) || creditos <= 0) {
-    throw new Error(`Metadata inválida en la sesión ${sessionId} (uid=${uid}, creditos=${creditos})`)
+    throw new StripeMetadataError(`Metadata inválida en la sesión ${sessionId} (uid=${uid}, creditos=${creditos})`)
   }
 
   const userRef   = db.collection('users').doc(uid)
@@ -785,7 +788,13 @@ exports.stripeWebhook = onRequest(
       await acreditarCompraStripe(event.id, event.data.object)
       return res.status(200).send('ok')
     } catch (err) {
-      console.error('[stripeWebhook] error al acreditar:', err.message)
+      // Metadata inválida = fallo permanente: 200 para frenar los reintentos de
+      // Stripe (el payload nunca podrá acreditarse), pero se registra como error.
+      if (err instanceof StripeMetadataError) {
+        console.error('[stripeWebhook] metadata permanentemente inválida (no reintentable):', err.message)
+        return res.status(200).send('invalid-metadata-skipped')
+      }
+      console.error('[stripeWebhook] error transitorio al acreditar:', err.message)
       return res.status(500).send('crediting failed') // Stripe reintentará
     }
   }

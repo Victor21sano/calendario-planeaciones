@@ -132,4 +132,17 @@ describe('stripeWebhook — acreditación', () => {
     expect(res.statusCode).toBe(200)
     expect(await getCreditos(uid)).toBe(50) // sin cambios
   })
+
+  it('responde 200 (permanente, no reintentable) si la metadata está incompleta', async () => {
+    const uid = uniqueUid()
+    await seedUser(uid, 50)
+    // metadata sin uid → acreditarCompraStripe lanza StripeMetadataError
+    const event = buildEvent(`evt_bad_${uid}`, { uid: undefined, creditos: undefined, sessionId: `cs_bad_${uid}`, amountTotal: 0 })
+
+    const res = await postWebhook(event)
+
+    expect(res.statusCode).toBe(200)
+    // ningún saldo cambió (no había uid que acreditar)
+    expect(await getCreditos(uid)).toBe(50)
+  })
 })
