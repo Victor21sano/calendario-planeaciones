@@ -104,6 +104,12 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // ── Eventos de Stripe (idempotencia/auditoría): bloqueado al cliente ──
+    // Solo el webhook (Admin SDK) escribe aquí; el cliente nunca accede.
+    match /stripeEventos/{eventId} {
+      allow read, write: if false;
+    }
+
     // ── Denegar todo lo no permitido explícitamente ───────────────
     match /{document=**} {
       allow read, write: if false;

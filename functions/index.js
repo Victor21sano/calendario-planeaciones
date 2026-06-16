@@ -21,7 +21,7 @@
  *   - Los créditos se descuentan ANTES de llamar a la IA y se reembolsan si falla.
  */
 
-const { onCall, HttpsError }        = require('firebase-functions/v2/https')
+const { onCall, onRequest, HttpsError } = require('firebase-functions/v2/https')
 const { setGlobalOptions }          = require('firebase-functions/v2')
 const { defineSecret }              = require('firebase-functions/params')
 const Anthropic                     = require('@anthropic-ai/sdk')
@@ -37,6 +37,18 @@ setGlobalOptions({ region: 'us-central1' })
 
 const GEMINI_API_KEY_SECRET = defineSecret('GEMINI_API_KEY')
 const OPENAI_API_KEY_SECRET = defineSecret('OPENAI_API_KEY')
+const STRIPE_SECRET_KEY     = defineSecret('STRIPE_SECRET_KEY')
+const STRIPE_WEBHOOK_SECRET = defineSecret('STRIPE_WEBHOOK_SECRET')
+const Stripe                = require('stripe')
+
+// Base de la app para success/cancel del Checkout. Configurable por entorno.
+const APP_URL = process.env.APP_URL || 'https://planificador-docente-d48a6.web.app'
+
+// Catálogo de paquetes y precio promocional — FUENTE DE VERDAD (ver precios.js).
+// El cliente solo envía paqueteId; el monto y los créditos SIEMPRE se derivan
+// del servidor (nunca del cliente), y el precio promo expira por fecha en el
+// servidor (no por el contador visual del cliente).
+const { PAQUETES, precioVigente } = require('./precios')
 
 const ANTHROPIC_MODEL = 'claude-opus-4-7'
 const GEMINI_MODEL    = 'gemini-2.5-flash'
@@ -131,6 +143,47 @@ async function registrarConsumo(userRef, adminUser, delta, tipo) {
     admin:     adminUser,
     tipo,
   }).catch(e => console.error('Error al registrar consumo (%s):', tipo, e.message))
+}
+
+// Error permanente: la metadata del evento de Stripe es inservible (no reintentable).
+class StripeMetadataError extends Error {}
+
+// Acredita una compra de Stripe de forma atómica e idempotente.
+// Idempotencia por event.id: si stripeEventos/{eventId} ya existe, no re-acredita.
+async function acreditarCompraStripe(eventId, session) {
+  const uid      = session.metadata?.uid
+  const creditos = Number(session.metadata?.creditos)
+  const sessionId = session.id
+
+  if (!uid || !Number.isInteger(creditos) || creditos <= 0) {
+    throw new StripeMetadataError(`Metadata inválida en la sesión ${sessionId} (uid=${uid}, creditos=${creditos})`)
+  }
+
+  const userRef   = db.collection('users').doc(uid)
+  const eventoRef = db.collection('stripeEventos').doc(eventId)
+  const compraRef = userRef.collection('compras').doc(sessionId)
+
+  await db.runTransaction(async (tx) => {
+    const evSnap = await tx.get(eventoRef)
+    if (evSnap.exists) return // ya procesado → idempotente
+
+    const userSnap    = await tx.get(userRef)
+    const saldoActual = userSnap.data()?.creditos ?? 0
+
+    tx.set(userRef, { creditos: saldoActual + creditos }, { merge: true })
+    tx.set(compraRef, {
+      estado:              'pagado',
+      stripePaymentIntent: session.payment_intent ?? null,
+      pagadoEn:            FieldValue.serverTimestamp(),
+    }, { merge: true })
+    tx.set(eventoRef, {
+      sessionId,
+      uid,
+      creditos,
+      monto: (session.amount_total ?? 0) / 100,
+      fecha: FieldValue.serverTimestamp(),
+    })
+  })
 }
 
 exports.generarPlaneacion = onCall(
@@ -650,6 +703,98 @@ exports.listarAcreditacionesManual = onCall(
         ...d.data(),
         fecha: d.data().fecha?.toMillis?.() ?? null,
       })),
+    }
+  }
+)
+
+// ── crearSesionCheckout: inicia una sesión de pago con Stripe ──
+exports.crearSesionCheckout = onCall(
+  { region: 'us-central1', secrets: [STRIPE_SECRET_KEY] },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError('unauthenticated', 'Debes iniciar sesión para comprar créditos.')
+    }
+    const { paqueteId } = request.data || {}
+    const paquete = PAQUETES[paqueteId]
+    if (!paquete) {
+      throw new HttpsError('invalid-argument', 'Paquete de créditos no válido.')
+    }
+
+    const uid    = request.auth.uid
+    const precio = precioVigente(paquete) // promo o normal según la fecha del servidor
+    const stripe = Stripe(STRIPE_SECRET_KEY.value() || process.env.STRIPE_SECRET_KEY)
+
+    let session
+    try {
+      session = await stripe.checkout.sessions.create({
+        mode: 'payment',
+        payment_method_types: ['card'],
+        line_items: [{
+          quantity: 1,
+          price_data: {
+            currency:     'mxn',
+            unit_amount:  precio * 100, // Stripe opera en centavos
+            product_data: { name: `${paquete.creditos} créditos · Planea-Pro` },
+          },
+        }],
+        client_reference_id: uid,
+        metadata: { uid, paqueteId, creditos: String(paquete.creditos) },
+        success_url: `${APP_URL}/compra-exitosa?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url:  `${APP_URL}/compra-cancelada`,
+      })
+    } catch (err) {
+      console.error('[crearSesionCheckout] error de Stripe:', err.message)
+      throw new HttpsError('internal', 'No se pudo iniciar el pago. Intenta de nuevo.')
+    }
+
+    // Registro "pendiente": el webhook lo marcará "pagado" al confirmarse.
+    // Si este set falla, el usuario no recibe la URL; sin impacto en la acreditación
+    // (el webhook usa el evento de Stripe, no este registro informativo).
+    await db.collection('users').doc(uid).collection('compras').doc(session.id).set({
+      tipo:            'stripe',
+      estado:          'pendiente',
+      paqueteId,
+      creditos:        paquete.creditos,
+      monto:           precio,
+      stripeSessionId: session.id,
+      fecha:           FieldValue.serverTimestamp(),
+    })
+
+    return { url: session.url, sessionId: session.id }
+  }
+)
+
+// ── stripeWebhook: recibe eventos de Stripe y acredita créditos ──
+exports.stripeWebhook = onRequest(
+  { region: 'us-central1', secrets: [STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET] },
+  async (req, res) => {
+    const stripe   = Stripe(STRIPE_SECRET_KEY.value() || process.env.STRIPE_SECRET_KEY)
+    const whSecret = STRIPE_WEBHOOK_SECRET.value() || process.env.STRIPE_WEBHOOK_SECRET
+
+    let event
+    try {
+      event = stripe.webhooks.constructEvent(req.rawBody, req.headers['stripe-signature'], whSecret)
+    } catch (err) {
+      console.error('[stripeWebhook] firma inválida:', err.message)
+      return res.status(400).send('Webhook signature verification failed')
+    }
+
+    if (event.type !== 'checkout.session.completed') {
+      return res.status(200).send('ignored')
+    }
+
+    try {
+      await acreditarCompraStripe(event.id, event.data.object)
+      return res.status(200).send('ok')
+    } catch (err) {
+      // Metadata inválida = fallo permanente: 200 para frenar los reintentos de
+      // Stripe (el payload nunca podrá acreditarse), pero se registra como error.
+      if (err instanceof StripeMetadataError) {
+        console.error('[stripeWebhook] metadata permanentemente inválida (no reintentable):', err.message)
+        return res.status(200).send('invalid-metadata-skipped')
+      }
+      console.error('[stripeWebhook] error transitorio al acreditar:', err.message)
+      return res.status(500).send('crediting failed') // Stripe reintentará
     }
   }
 )
