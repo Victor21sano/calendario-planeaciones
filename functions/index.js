@@ -668,6 +668,60 @@ exports.listarAcreditacionesManual = onCall(
   }
 )
 
+// ── crearSesionCheckout: inicia una sesión de pago con Stripe ──
+exports.crearSesionCheckout = onCall(
+  { region: 'us-central1', secrets: [STRIPE_SECRET_KEY] },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError('unauthenticated', 'Debes iniciar sesión para comprar créditos.')
+    }
+    const { paqueteId } = request.data || {}
+    const paquete = PAQUETES[paqueteId]
+    if (!paquete) {
+      throw new HttpsError('invalid-argument', 'Paquete de créditos no válido.')
+    }
+
+    const uid    = request.auth.uid
+    const stripe = Stripe(STRIPE_SECRET_KEY.value() || process.env.STRIPE_SECRET_KEY)
+
+    let session
+    try {
+      session = await stripe.checkout.sessions.create({
+        mode: 'payment',
+        payment_method_types: ['card'],
+        line_items: [{
+          quantity: 1,
+          price_data: {
+            currency:     'mxn',
+            unit_amount:  paquete.precioMXN * 100, // Stripe opera en centavos
+            product_data: { name: `${paquete.creditos} créditos · Planea-Pro` },
+          },
+        }],
+        client_reference_id: uid,
+        metadata: { uid, paqueteId, creditos: String(paquete.creditos) },
+        success_url: `${APP_URL}/compra-exitosa?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url:  `${APP_URL}/compra-cancelada`,
+      })
+    } catch (err) {
+      console.error('[crearSesionCheckout] error de Stripe:', err.message)
+      throw new HttpsError('internal', 'No se pudo iniciar el pago. Intenta de nuevo.')
+    }
+
+    // Registro "pendiente": el webhook lo marcará "pagado" al confirmarse.
+    await db.collection('users').doc(uid).collection('compras').doc(session.id).set({
+      tipo:            'stripe',
+      estado:          'pendiente',
+      paqueteId,
+      creditos:        paquete.creditos,
+      monto:           paquete.precioMXN,
+      stripeSessionId: session.id,
+      fecha:           FieldValue.serverTimestamp(),
+    })
+
+    return { url: session.url, sessionId: session.id }
+  }
+)
+
 // ── Gemini via REST (Node 20 tiene fetch nativo) ───────────────
 async function callGemini({
   geminiKey,
