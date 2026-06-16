@@ -15,6 +15,8 @@ import HorarioDocenteConalep     from './pages/HorarioDocenteConalep'
 const DashboardPage    = lazy(() => import('./pages/DashboardPage'))
 const PlanificadorPage = lazy(() => import('./pages/PlanificadorPage'))
 const ComprarCreditos  = lazy(() => import('./pages/ComprarCreditos'))
+const CompraExitosa    = lazy(() => import('./pages/CompraExitosa'))
+const CompraCancelada  = lazy(() => import('./pages/CompraCancelada'))
 const AdminPage        = lazy(() => import('./pages/AdminPage'))
 const PerfilPage       = lazy(() => import('./pages/PerfilPage'))
 
@@ -51,6 +53,8 @@ export default function App() {
             <Route path="/"                  element={<DashboardPage />} />
             <Route path="/materia/:id"       element={<PlanificadorPage />} />
             <Route path="/comprar-creditos"  element={<ComprarCreditos />} />
+            <Route path="/compra-exitosa"    element={<CompraExitosa />} />
+            <Route path="/compra-cancelada"  element={<CompraCancelada />} />
             <Route path="/perfil"            element={<PerfilPage />} />
           </Route>
 
