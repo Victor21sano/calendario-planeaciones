@@ -708,6 +708,8 @@ exports.crearSesionCheckout = onCall(
     }
 
     // Registro "pendiente": el webhook lo marcará "pagado" al confirmarse.
+    // Si este set falla, el usuario no recibe la URL; sin impacto en la acreditación
+    // (el webhook usa el evento de Stripe, no este registro informativo).
     await db.collection('users').doc(uid).collection('compras').doc(session.id).set({
       tipo:            'stripe',
       estado:          'pendiente',
