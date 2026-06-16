@@ -21,7 +21,7 @@
  *   - Los créditos se descuentan ANTES de llamar a la IA y se reembolsan si falla.
  */
 
-const { onCall, HttpsError }        = require('firebase-functions/v2/https')
+const { onCall, onRequest, HttpsError } = require('firebase-functions/v2/https')
 const { setGlobalOptions }          = require('firebase-functions/v2')
 const { defineSecret }              = require('firebase-functions/params')
 const Anthropic                     = require('@anthropic-ai/sdk')
@@ -145,6 +145,44 @@ async function registrarConsumo(userRef, adminUser, delta, tipo) {
     admin:     adminUser,
     tipo,
   }).catch(e => console.error('Error al registrar consumo (%s):', tipo, e.message))
+}
+
+// Acredita una compra de Stripe de forma atómica e idempotente.
+// Idempotencia por event.id: si stripeEventos/{eventId} ya existe, no re-acredita.
+async function acreditarCompraStripe(eventId, session) {
+  const uid      = session.metadata?.uid
+  const creditos = Number(session.metadata?.creditos)
+  const sessionId = session.id
+
+  if (!uid || !Number.isInteger(creditos) || creditos <= 0) {
+    throw new Error(`Metadata inválida en la sesión ${sessionId} (uid=${uid}, creditos=${creditos})`)
+  }
+
+  const userRef   = db.collection('users').doc(uid)
+  const eventoRef = db.collection('stripeEventos').doc(eventId)
+  const compraRef = userRef.collection('compras').doc(sessionId)
+
+  await db.runTransaction(async (tx) => {
+    const evSnap = await tx.get(eventoRef)
+    if (evSnap.exists) return // ya procesado → idempotente
+
+    const userSnap    = await tx.get(userRef)
+    const saldoActual = userSnap.data()?.creditos ?? 0
+
+    tx.set(userRef, { creditos: saldoActual + creditos }, { merge: true })
+    tx.set(compraRef, {
+      estado:              'pagado',
+      stripePaymentIntent: session.payment_intent ?? null,
+      pagadoEn:            FieldValue.serverTimestamp(),
+    }, { merge: true })
+    tx.set(eventoRef, {
+      sessionId,
+      uid,
+      creditos,
+      monto: (session.amount_total ?? 0) / 100,
+      fecha: FieldValue.serverTimestamp(),
+    })
+  })
 }
 
 exports.generarPlaneacion = onCall(
@@ -721,6 +759,35 @@ exports.crearSesionCheckout = onCall(
     })
 
     return { url: session.url, sessionId: session.id }
+  }
+)
+
+// ── stripeWebhook: recibe eventos de Stripe y acredita créditos ──
+exports.stripeWebhook = onRequest(
+  { region: 'us-central1', secrets: [STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET] },
+  async (req, res) => {
+    const stripe   = Stripe(STRIPE_SECRET_KEY.value() || process.env.STRIPE_SECRET_KEY)
+    const whSecret = STRIPE_WEBHOOK_SECRET.value() || process.env.STRIPE_WEBHOOK_SECRET
+
+    let event
+    try {
+      event = stripe.webhooks.constructEvent(req.rawBody, req.headers['stripe-signature'], whSecret)
+    } catch (err) {
+      console.error('[stripeWebhook] firma inválida:', err.message)
+      return res.status(400).send('Webhook signature verification failed')
+    }
+
+    if (event.type !== 'checkout.session.completed') {
+      return res.status(200).send('ignored')
+    }
+
+    try {
+      await acreditarCompraStripe(event.id, event.data.object)
+      return res.status(200).send('ok')
+    } catch (err) {
+      console.error('[stripeWebhook] error al acreditar:', err.message)
+      return res.status(500).send('crediting failed') // Stripe reintentará
+    }
   }
 )
 
