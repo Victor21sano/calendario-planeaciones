@@ -113,6 +113,14 @@ export const scoreRubric = {
     factor: '1', subfactor: '1.5 Certificación vigente en competencias', max: 50,
     options: [['', 'Seleccionar total de certificados vigentes', 0], ['4', 'Cuatro certificados', 50], ['3', 'Tres certificados', 40], ['2', 'Dos certificados', 30], ['1', 'Un certificado', 20]]
   },
+  'ev-certificados-habilidades': {
+    factor: '1', subfactor: '1.5', max: 20,
+    options: [
+      ['0', 'Sin certificados', 0],
+      ['10', '1 certificado', 10],
+      ['20', '2 o más certificados', 20],
+    ]
+  },
   'pevidd-observacion': {
     factor: '1', subfactor: '1.6 Observación de una sesión', max: 40,
     options: [['', 'Seleccionar calificación', 0], ['10', 'Calificación 10', 40], ['9', 'Calificación 9 a 9.99', 25], ['8', 'Calificación 8 a 8.99', 10]]

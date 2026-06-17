@@ -146,7 +146,7 @@ function EstimuloCard() {
   })()
   const checks = stored.checks || {}
   const done = Object.values(checks).filter(Boolean).length
-  const TOTAL = 34
+  const TOTAL = 31
   const pct = TOTAL ? Math.round((done / TOTAL) * 100) : 0
   const hasProgress = done > 0
 
