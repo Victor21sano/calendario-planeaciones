@@ -3,7 +3,7 @@ export default function StatusBar({ totalProgress, scoreResult, onPrint, onExpor
   const { total: scoreTotal, level } = scoreResult
 
   return (
-    <div className="sticky top-14 z-30 border-b border-slate-200/80 dark:border-white/5 bg-[#fffdf8]/90 dark:bg-[#182420]/90 backdrop-blur-xl"
+    <div className="sticky top-14 z-30 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 backdrop-blur-xl"
          data-no-print>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center gap-3">
 
@@ -17,7 +17,7 @@ export default function StatusBar({ totalProgress, scoreResult, onPrint, onExpor
             className="h-2.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden w-32 sm:w-44 shrink-0"
           >
             <div
-              className="h-full rounded-full bg-gradient-to-r from-brand-700 to-brand-400 transition-[width] duration-200"
+              className="h-full rounded-full bg-brand-500 transition-[width] duration-200"
               style={{ width: `${pct}%` }}
             />
           </div>
