@@ -38,8 +38,8 @@ export default function BotonDescargarWord2023({ planeacion, className = '' }) {
       onClick={handleDescargar}
       disabled={descargando}
       className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white
-        bg-gradient-to-r from-violet-600 to-primary-600
-        hover:from-violet-500 hover:to-primary-500
+        bg-gradient-to-r from-info-600 to-primary-600
+        hover:from-info-500 hover:to-primary-500
         disabled:opacity-50 disabled:cursor-not-allowed
         shadow-sm hover:shadow-md transition-all duration-200
         ${className}`}
@@ -57,7 +57,7 @@ export default function BotonDescargarWord2023({ planeacion, className = '' }) {
             d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
         </svg>
       )}
-      {descargando ? 'Generando…' : 'Descargar Word'}
+      {descargando ? <span className="text-shimmer">Generando…</span> : 'Descargar Word'}
     </button>
   )
 }

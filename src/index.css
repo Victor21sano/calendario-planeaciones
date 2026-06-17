@@ -5,19 +5,19 @@
 /* ─── Design Tokens ──────────────────────────────────────────── */
 @layer base {
   :root {
-    --surface-primary:   #ffffff;
-    --surface-elevated:  #f6f9f8;
-    --surface-sunken:    #edf5f4;
-    --border-default:    #dbe7e5;
-    --border-hover:      #b8cfca;
-    --accent-primary:    #0e7490;
-    --text-primary:      #0f172a;
-    --text-secondary:    #64748b;
-    --text-tertiary:     #94a3b8;
+    --surface-primary:   #fffdf8;
+    --surface-elevated:  #f7f3ea;
+    --surface-sunken:    #ece7dd;
+    --border-default:    #e6dfd0;
+    --border-hover:      #d3c8b2;
+    --accent-primary:    #0f766e;
+    --text-primary:      #17201d;
+    --text-secondary:    #5c655f;
+    --text-tertiary:     #8a8f86;
     --radius-card:       1rem;
-    --shadow-card:       0 1px 3px 0 rgba(15,76,92,0.06), 0 1px 2px -1px rgba(0,0,0,0.04);
-    --shadow-card-hover: 0 8px 24px 0 rgba(14,116,144,0.11), 0 2px 8px 0 rgba(0,0,0,0.06);
-    --shadow-xl:         0 10px 40px 0 rgba(14,116,144,0.08);
+    --shadow-card:       0 1px 3px 0 rgba(28,40,36,0.06), 0 1px 2px -1px rgba(0,0,0,0.04);
+    --shadow-card-hover: 0 8px 24px 0 rgba(15,118,110,0.12), 0 2px 8px 0 rgba(28,40,36,0.06);
+    --shadow-xl:         0 10px 40px 0 rgba(15,118,110,0.08);
 
     /* Curvas de animación — disponibles como var() en CSS y como ease-* en Tailwind */
     --spring:            cubic-bezier(0.16, 1, 0.3, 1);
@@ -28,17 +28,17 @@
   }
 
   .dark {
-    --surface-primary:   #0f172a;
-    --surface-elevated:  #1e293b;
-    --surface-sunken:    #0f172a;
-    --border-default:    rgba(255,255,255,0.07);
-    --border-hover:      rgba(255,255,255,0.12);
-    --accent-primary:    #67e8f9;
-    --text-primary:      #f1f5f9;
-    --text-secondary:    #94a3b8;
-    --text-tertiary:     #475569;
+    --surface-primary:   #182420;
+    --surface-elevated:  #20302b;
+    --surface-sunken:    #111a18;
+    --border-default:    rgba(255,255,255,0.08);
+    --border-hover:      rgba(255,255,255,0.14);
+    --accent-primary:    #5eead4;
+    --text-primary:      #f1f5f2;
+    --text-secondary:    #9aa7a0;
+    --text-tertiary:     #5a6862;
     --shadow-card:       0 1px 3px 0 rgba(0,0,0,0.3);
-    --shadow-card-hover: 0 8px 24px 0 rgba(34,211,238,0.16), 0 2px 8px 0 rgba(0,0,0,0.2);
+    --shadow-card-hover: 0 8px 24px 0 rgba(94,234,212,0.16), 0 2px 8px 0 rgba(0,0,0,0.2);
     --shadow-xl:         0 10px 40px 0 rgba(0,0,0,0.4);
   }
 
@@ -89,6 +89,51 @@
 
 /* ─── Components ─────────────────────────────────────────────── */
 @layer components {
+
+  /*
+   * SURFACE-ATMOSPHERE — radiales cálidos muy tenues para superficies amplias
+   * (dashboard). Da profundidad sin ruido y refuerza la paleta de papel del
+   * sistema "Archivo Vivo". Reemplaza el fondo plano var(--surface-sunken).
+   */
+  .surface-atmosphere {
+    background-color: var(--surface-sunken);
+    background-image:
+      radial-gradient(55rem 38rem at 10% -12%, rgba(15, 118, 110, 0.06), transparent 60%),
+      radial-gradient(45rem 32rem at 100% -6%, rgba(232, 93, 63, 0.05), transparent 55%);
+    background-repeat: no-repeat;
+  }
+  .dark .surface-atmosphere {
+    background-image:
+      radial-gradient(55rem 38rem at 10% -12%, rgba(94, 234, 212, 0.055), transparent 60%),
+      radial-gradient(45rem 32rem at 100% -6%, rgba(232, 93, 63, 0.04), transparent 55%);
+  }
+
+  /*
+   * SURFACE-GRAIN — grano de papel sutil (ruido fractal SVG) sobre
+   * superficies amplias. Overlay ::after sin eventos; opacidad mínima
+   * para textura editorial sin ensuciar el texto. Solo se usa fuera
+   * del flujo de trabajo (landings, compra de créditos).
+   */
+  .surface-grain {
+    position: relative;
+    isolation: isolate;
+  }
+  .surface-grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    opacity: 0.045;
+  }
+  .dark .surface-grain::after {
+    opacity: 0.06;
+  }
+  @media print {
+    .surface-grain::after { display: none; }
+  }
 
   /*
    * [3] CARDS CON LIFT FÍSICO
@@ -168,6 +213,82 @@
   .btn-primary:not(:disabled):active { transform: scale(0.96); }
 
   /*
+   * BTN-ACCENT — CTA primario cálido (coral). Reservado para LA acción
+   * principal de cada vista (Archivo Vivo). Misma física que btn-primary.
+   */
+  .btn-accent {
+    @apply inline-flex items-center gap-1.5
+           px-4 py-2 rounded-xl text-sm font-semibold text-white
+           bg-gradient-to-r from-accent-600 to-accent-700
+           hover:from-accent-500 hover:to-accent-600
+           shadow-sm hover:shadow-md hover:shadow-accent-200 dark:hover:shadow-accent-900/40
+           disabled:opacity-50 disabled:cursor-not-allowed
+           outline-none
+           focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2;
+    transition: transform  200ms var(--spring),
+                box-shadow 200ms var(--spring),
+                opacity    150ms linear;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .btn-accent:not(:disabled):hover { transform: scale(1.025) translateY(-1px); }
+  }
+  .btn-accent:not(:disabled):active { transform: scale(0.96); }
+
+  /*
+   * SHINE — destello diagonal que barre el btn-accent al hover (estilo 21st.dev).
+   * overflow-hidden recorta el barrido a las esquinas redondeadas; el box-shadow
+   * del focus-ring NO se recorta (no lo afecta overflow).
+   */
+  .btn-accent { position: relative; overflow: hidden; }
+  .btn-accent::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 35%, rgba(255,255,255,0.35) 50%, transparent 65%);
+    transform: translateX(-130%);
+    transition: transform 650ms var(--spring);
+    pointer-events: none;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .btn-accent:hover::before { transform: translateX(130%); }
+  }
+
+  /*
+   * SPOTLIGHT — resalte radial petróleo que sigue el cursor en cards.
+   * El JS (useSpotlight) actualiza --spot-x/--spot-y. El contenido de la card
+   * debe ir en una capa relative z-[1] para quedar por encima de este ::before.
+   */
+  .card-spotlight::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(360px circle at var(--spot-x, 50%) var(--spot-y, -20%),
+                rgba(15,118,110,0.10), transparent 60%);
+    opacity: 0;
+    transition: opacity 250ms var(--spring);
+    pointer-events: none;
+    z-index: 0;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .card-spotlight:hover::before { opacity: 1; }
+  }
+
+  /*
+   * SHIMMER TEXT — barrido de brillo sobre texto blanco (estados "Generando…").
+   * Pensado para usarse sobre superficies de color (botones).
+   */
+  .text-shimmer {
+    background-image: linear-gradient(110deg, rgba(255,255,255,0.5) 35%, #fff 50%, rgba(255,255,255,0.5) 65%);
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    animation: textShimmer 1.8s linear infinite;
+  }
+
+  /*
    * [2] BTN-SECONDARY — escala sutil (sin lift vertical para acciones secundarias)
    */
   .btn-secondary {
@@ -191,12 +312,12 @@
   .btn-danger {
     @apply inline-flex items-center gap-1.5
            px-3 py-1.5 rounded-lg text-xs font-semibold
-           text-rose-600 dark:text-rose-400
-           bg-rose-50 dark:bg-rose-900/20
-           border border-rose-200 dark:border-rose-800/40
-           hover:bg-rose-100 dark:hover:bg-rose-900/40
+           text-danger-600 dark:text-danger-400
+           bg-danger-50 dark:bg-danger-900/20
+           border border-danger-200 dark:border-danger-800/40
+           hover:bg-danger-100 dark:hover:bg-danger-900/40
            outline-none
-           focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2;
+           focus-visible:ring-2 focus-visible:ring-danger-500 focus-visible:ring-offset-2;
     transition: transform        200ms var(--spring),
                 background-color 150ms var(--spring);
   }
@@ -283,10 +404,10 @@
   /* [2] BTN-ICON-DELETE — escala más pronunciada (acción destructiva = feedback claro) */
   .btn-icon-delete {
     @apply p-1.5 rounded-lg text-slate-400
-           hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20
+           hover:text-danger-500 hover:bg-danger-50 dark:hover:bg-danger-900/20
            opacity-0 group-hover:opacity-100
            outline-none
-           focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-1;
+           focus-visible:ring-2 focus-visible:ring-danger-500 focus-visible:ring-offset-1;
     transition: opacity          150ms var(--spring),
                 color            150ms var(--spring),
                 background-color 150ms var(--spring),
@@ -303,6 +424,49 @@
   .badge {
     @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold;
   }
+
+  /*
+   * REVEAL — entrada al hacer scroll (sobrio, estilo editorial).
+   * El hook useReveal añade .is-revealed vía IntersectionObserver.
+   * Solo opacity/transform: el contenido permanece en el árbol de
+   * accesibilidad desde el primer render.
+   * No aplicar .reveal al mismo nodo que .card/.pressable (usa un wrapper).
+   */
+  .reveal {
+    transition: opacity 550ms var(--spring), transform 550ms var(--spring);
+  }
+  .reveal:not(.is-revealed) {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  /*
+   * REVEAL-STAGGER — los hijos directos entran escalonados (80ms entre sí,
+   * hasta 6 hijos). Para listas <ol>/<ul>/<dl> de las páginas SEO.
+   */
+  .reveal-stagger > * {
+    transition: opacity 550ms var(--spring), transform 550ms var(--spring);
+  }
+  .reveal-stagger:not(.is-revealed) > * {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  .reveal-stagger.is-revealed > *:nth-child(2) { transition-delay: 80ms; }
+  .reveal-stagger.is-revealed > *:nth-child(3) { transition-delay: 160ms; }
+  .reveal-stagger.is-revealed > *:nth-child(4) { transition-delay: 240ms; }
+  .reveal-stagger.is-revealed > *:nth-child(5) { transition-delay: 320ms; }
+  .reveal-stagger.is-revealed > *:nth-child(6) { transition-delay: 400ms; }
+  .reveal-stagger.is-revealed > *:nth-child(n+7) { transition-delay: 400ms; }
+
+  /*
+   * REVEAL-HERO — entrada al CARGAR la página (no por scroll).
+   * H1 primero, subtítulo +120ms, tercer elemento +240ms.
+   */
+  .reveal-hero {
+    animation: revealHero 600ms var(--spring) both;
+  }
+  .reveal-hero-delay-1 { animation-delay: 120ms; }
+  .reveal-hero-delay-2 { animation-delay: 240ms; }
 }
 
 /*
@@ -316,6 +480,7 @@
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration:        0.01ms !important;
+    animation-delay:           0ms    !important;
     animation-iteration-count: 1      !important;
     transition-duration:       0.01ms !important;
     scroll-behavior:           auto   !important;
@@ -324,6 +489,8 @@
   .card:hover,
   .btn-primary:not(:disabled):hover,
   .btn-primary:not(:disabled):active,
+  .btn-accent:not(:disabled):hover,
+  .btn-accent:not(:disabled):active,
   .btn-secondary:not(:disabled):hover,
   .btn-secondary:not(:disabled):active,
   .btn-danger:hover, .btn-danger:active,
@@ -351,6 +518,7 @@
   footer,
   .no-print,
   .btn-primary,
+  .btn-accent,
   .btn-secondary,
   .btn-danger,
   .btn-ghost {
@@ -377,5 +545,87 @@
   .print-full-width {
     grid-column: 1 / -1 !important;
     position: static !important;
+  }
+}
+
+/* ─── Dinamismo 21st.dev: keyframes + respeto a reduced-motion ─── */
+@keyframes textShimmer {
+  0%   { background-position: 220% 0; }
+  100% { background-position: -120% 0; }
+}
+
+@keyframes revealHero {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Texto legible sin barrido */
+  .text-shimmer {
+    animation: none;
+    background: none;
+    -webkit-text-fill-color: currentColor;
+    color: inherit;
+  }
+  /* Sin destello ni spotlight */
+  .btn-accent::before,
+  .card-spotlight::before {
+    display: none !important;
+  }
+  /* Reveal: contenido visible sin animación */
+  .reveal,
+  .reveal-stagger > * {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .reveal-hero,
+  .reveal-hero-delay-1,
+  .reveal-hero-delay-2 {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* ─── Tablas PaginaActividad – dark mode ─────────────────────────
+   Los inline styles usan colores fijos; !important los sobreescribe
+   en modo oscuro sin tocar el HTML de exportación Word.            */
+.dark .preview-2023-pagina table th {
+  background-color: #1E293B !important;
+  color: #F1F5F9 !important;
+  border-color: #334155 !important;
+}
+.dark .preview-2023-pagina table td:not([aria-hidden="true"]) {
+  background-color: #0F172A !important;
+  color: #CBD5E1 !important;
+  border-color: #334155 !important;
+}
+.dark .preview-2023-pagina table td[aria-hidden="true"] {
+  border-color: #334155 !important;
+}
+
+/* ─── Estimulo Docente: print ─────────────────────────────── */
+@media print {
+  .estimulo-page [data-no-print],
+  .estimulo-page header,
+  .estimulo-page aside,
+  .estimulo-page [role="toolbar"],
+  .estimulo-page button,
+  .estimulo-page details,
+  .estimulo-page a[href="/"] {
+    display: none !important;
+  }
+
+  .estimulo-page { background: white !important; }
+
+  .estimulo-page .md\:grid-cols-\[280px_1fr\] {
+    grid-template-columns: 1fr !important;
+  }
+
+  .estimulo-page .card {
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+    break-inside: avoid;
   }
 }

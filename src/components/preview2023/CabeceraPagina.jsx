@@ -19,7 +19,7 @@ export default function CabeceraPagina({ cabecera, unidad, bloqueado = false }) 
     <div className="space-y-3">
 
       {/* Encabezado oficial */}
-      <div className="flex items-center gap-4 pb-3 border-b-2 border-emerald-600">
+      <div className="flex items-center gap-4 pb-3 border-b-2 border-success-600">
         <img
           src="/conalep-logo.svg"
           alt="CONALEP"

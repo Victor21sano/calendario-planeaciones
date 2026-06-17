@@ -42,7 +42,7 @@ function DropZone({ label, sublabel, file, onFile, accept = '.pdf', disabled, on
         ${!bloqueado && dragging
           ? 'border-primary-400 bg-primary-50 dark:bg-primary-900/20'
           : !bloqueado && file
-            ? 'border-emerald-400 bg-emerald-50 dark:bg-emerald-900/20'
+            ? 'border-success-400 bg-success-50 dark:bg-success-900/20'
             : !bloqueado
               ? 'border-slate-300 dark:border-slate-600 hover:border-primary-400 hover:bg-primary-50/50 dark:hover:bg-primary-900/10'
               : ''
@@ -52,16 +52,16 @@ function DropZone({ label, sublabel, file, onFile, accept = '.pdf', disabled, on
 
       {file ? (
         <>
-          <svg className="w-8 h-8 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="w-8 h-8 text-success-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <div className="text-center">
-            <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300 truncate max-w-[200px]">{file.name}</p>
-            <p className="text-xs text-emerald-600 dark:text-emerald-400">{fileSizeMB(file).toFixed(1)} MB</p>
+            <p className="text-sm font-semibold text-success-700 dark:text-success-300 truncate max-w-[200px]">{file.name}</p>
+            <p className="text-xs text-success-600 dark:text-success-400">{fileSizeMB(file).toFixed(1)} MB</p>
           </div>
           <button
             onClick={e => { e.stopPropagation(); onFile(null) }}
-            className="absolute top-2 right-2 w-6 h-6 rounded-full bg-rose-100 dark:bg-rose-900/40 text-rose-500 flex items-center justify-center hover:bg-rose-200 transition-colors text-xs font-bold"
+            className="absolute top-2 right-2 w-6 h-6 rounded-full bg-danger-100 dark:bg-danger-900/40 text-danger-500 flex items-center justify-center hover:bg-danger-200 transition-colors text-xs font-bold"
           >✕</button>
         </>
       ) : (
@@ -92,7 +92,7 @@ function ProgressBar({ progress, errors }) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between text-xs font-medium">
-        <span className={`${isDone ? 'text-emerald-600 dark:text-emerald-400' : isWaiting ? 'text-amber-600 dark:text-amber-400' : 'text-primary-600 dark:text-primary-400'}`}>
+        <span className={`${isDone ? 'text-success-600 dark:text-success-400' : isWaiting ? 'text-warning-600 dark:text-warning-400' : 'text-primary-600 dark:text-primary-400'}`}>
           {isWaiting
             ? `La API de Google necesita un momento, continuamos en ${progress.waitSeconds}s…`
             : progress.message}
@@ -101,7 +101,7 @@ function ProgressBar({ progress, errors }) {
           <span className="text-slate-400 dark:text-slate-500">{progress.current}/{progress.total}</span>
         )}
         {isWaiting && (
-          <span className="text-2xl font-black text-amber-500 dark:text-amber-400 tabular-nums leading-none">
+          <span className="text-2xl font-black text-warning-500 dark:text-warning-400 tabular-nums leading-none">
             {progress.waitSeconds}s
           </span>
         )}
@@ -110,7 +110,7 @@ function ProgressBar({ progress, errors }) {
       <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden">
         <div
           className={`h-2.5 rounded-full transition-all duration-500
-            ${isDone ? 'bg-emerald-400 dark:bg-emerald-500' : 'bg-gradient-to-r from-primary-500 to-violet-600'}
+            ${isDone ? 'bg-success-400 dark:bg-success-500' : 'bg-gradient-to-r from-brand-600 to-academic-600'}
             ${isConverting || isStructure ? 'animate-pulse' : ''}`}
           style={{ width: isConverting || isStructure ? '20%' : `${isDone ? 100 : pct}%` }}
         />
@@ -123,9 +123,9 @@ function ProgressBar({ progress, errors }) {
             const current = i === (progress.current - 1)
             return (
               <span key={i} className={`w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold transition-all
-                ${done    ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300' :
+                ${done    ? 'bg-success-100 dark:bg-success-900/30 text-success-700 dark:text-success-300' :
                   current ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 animate-pulse' :
-                  'bg-slate-100 dark:bg-slate-800 text-slate-400'}`}>
+                  'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'}`}>
                 {i + 1}
               </span>
             )
@@ -134,7 +134,7 @@ function ProgressBar({ progress, errors }) {
       )}
 
       {isDone && errors && Object.keys(errors).length > 0 && (
-        <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 text-xs text-amber-800 dark:text-amber-300">
+        <div className="p-3 rounded-xl bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-800/40 text-xs text-warning-800 dark:text-warning-300">
           <p className="font-semibold mb-1">Algunos RAs tuvieron errores (puedes reintentarlos por pestaña):</p>
           {Object.entries(errors).map(([ra, msg]) => (
             <p key={ra}>• RA {ra}: {msg.slice(0, 80)}</p>
@@ -183,7 +183,7 @@ function EstructuraPreview({ estructura, hasExisting, onConfirm, onCancel }) {
 
       {/* Aviso de reemplazo */}
       {hasExisting && (
-        <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 text-xs text-amber-800 dark:text-amber-300">
+        <div className="flex items-start gap-2 p-3 rounded-xl bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-800/40 text-xs text-warning-800 dark:text-warning-300">
           <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
           </svg>
@@ -210,7 +210,7 @@ function EstructuraPreview({ estructura, hasExisting, onConfirm, onCancel }) {
 }
 
 // ─── Main Component ───────────────────────────────────────────
-export default function GeneradorIA({ onGenerated, onUpdateUnidades, raList, onSinCreditos = () => {}, modelo = '2018' }) {
+export default function GeneradorIA({ onGenerated, onUpdateUnidades, raList, onSinCreditos = () => {}, modelo = '2018', materiaId = null }) {
   const { creditos, esAdmin, sinCreditosDisponibles: modoGratis } = useAuth()
   const [pdfPE,  setPdfPE]  = useState(null)
   const [pdfGPE, setPdfGPE] = useState(null)
@@ -249,7 +249,7 @@ export default function GeneradorIA({ onGenerated, onUpdateUnidades, raList, onS
 
     let sid
     try {
-      sid = await iniciarSesionGeneracion()
+      sid = await iniciarSesionGeneracion('completa', materiaId)
     } catch (err) {
       if (err.code === 'functions/failed-precondition') onSinCreditos()
       else setGlobalError(err.message || 'No se pudo iniciar la generación. Intenta de nuevo.')
@@ -330,7 +330,7 @@ export default function GeneradorIA({ onGenerated, onUpdateUnidades, raList, onS
         className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-primary-600 flex items-center justify-center flex-shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-info-500 to-primary-600 flex items-center justify-center flex-shrink-0">
             <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
@@ -340,10 +340,10 @@ export default function GeneradorIA({ onGenerated, onUpdateUnidades, raList, onS
             <p className="text-xs text-slate-400 dark:text-slate-500">Sube los dos PDFs oficiales y {provider.name} genera todas las planeaciones</p>
           </div>
           {isDone && (
-            <span className="badge bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 ml-2">Completado</span>
+            <span className="badge bg-success-100 dark:bg-success-900/30 text-success-700 dark:text-success-300 ml-2">Completado</span>
           )}
           {esAdmin && (
-            <span className="badge bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 ml-2">
+            <span className="badge bg-info-100 dark:bg-info-900/30 text-info-700 dark:text-info-300 ml-2">
               MODO ADMIN
             </span>
           )}
@@ -359,9 +359,9 @@ export default function GeneradorIA({ onGenerated, onUpdateUnidades, raList, onS
           {/* ── Modo gratis: bloqueo con CTA ── */}
           {modoGratis && (
             <div className="space-y-4">
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-primary-50 to-violet-50 dark:from-primary-900/20 dark:to-violet-900/20 border border-primary-200 dark:border-primary-800/40 space-y-4">
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-brand-50 to-academic-50 dark:from-brand-900/20 dark:to-academic-900/20 border border-primary-200 dark:border-primary-800/40 space-y-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-violet-600 flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-600 to-academic-600 flex items-center justify-center flex-shrink-0">
                     <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z"/>
                     </svg>
@@ -391,13 +391,13 @@ export default function GeneradorIA({ onGenerated, onUpdateUnidades, raList, onS
                 </ul>
 
                 <div className="flex items-center gap-3 pt-1">
-                  <Link to="/comprar-creditos" className="btn-primary gap-2 text-sm">
+                  <Link to="/comprar-creditos" className="btn-accent gap-2 text-sm">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z"/>
                     </svg>
                     Adquirir créditos
                   </Link>
-                  <span className="text-xs text-slate-400 dark:text-slate-500">1 crédito = 1 módulo completo</span>
+                  <span className="text-xs text-slate-400 dark:text-slate-500">Planeación completa: 100 créditos (75 si ya pagaste el horario)</span>
                 </div>
               </div>
             </div>
@@ -405,17 +405,17 @@ export default function GeneradorIA({ onGenerated, onUpdateUnidades, raList, onS
 
           {/* Modo activo */}
           {!modoGratis && provider.mode === 'gemini' ? (
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/40 text-xs text-emerald-800 dark:text-emerald-300">
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-success-50 dark:bg-success-900/20 border border-success-200 dark:border-success-800/40 text-xs text-success-800 dark:text-success-300">
               <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-              <span><strong>Gemini ({provider.model}) — Gratuito:</strong> Usando Google AI Studio directamente.</span>
+              <span><strong>Gemini ({provider.model}):</strong> Usando Google AI Studio directamente.</span>
             </div>
           ) : !modoGratis && provider.mode === 'anthropic' ? (
-            <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 text-xs text-amber-800 dark:text-amber-300">
+            <div className="flex items-start gap-2 p-3 rounded-xl bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-800/40 text-xs text-warning-800 dark:text-warning-300">
               <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
               <span><strong>Modo de desarrollo (Claude directo):</strong> Solo usar para pruebas locales.</span>
             </div>
           ) : !modoGratis ? (
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/40 text-xs text-emerald-800 dark:text-emerald-300">
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-success-50 dark:bg-success-900/20 border border-success-200 dark:border-success-800/40 text-xs text-success-800 dark:text-success-300">
               <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
               <span><strong>Modo seguro (Cloud Function):</strong> La API key está protegida en el servidor.</span>
             </div>
@@ -450,7 +450,7 @@ export default function GeneradorIA({ onGenerated, onUpdateUnidades, raList, onS
               })()}
 
               {isError && globalError && (
-                <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800/40 text-xs text-rose-800 dark:text-rose-300 space-y-2">
+                <div className="p-4 rounded-xl bg-danger-50 dark:bg-danger-900/20 border border-danger-200 dark:border-danger-800/40 text-xs text-danger-800 dark:text-danger-300 space-y-2">
                   <p className="font-semibold">Error:</p>
                   <pre className="whitespace-pre-wrap break-all font-mono">{globalError}</pre>
                 </div>
@@ -459,7 +459,7 @@ export default function GeneradorIA({ onGenerated, onUpdateUnidades, raList, onS
               <button
                 onClick={handleExtraer}
                 disabled={!pdfPE || !pdfGPE}
-                className="btn-primary gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-accent gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -512,7 +512,7 @@ export default function GeneradorIA({ onGenerated, onUpdateUnidades, raList, onS
                       <p className="font-semibold text-slate-600 dark:text-slate-300">Unidad {u.numero}: {u.nombre} ({u.horas} hrs)</p>
                       <ul className="ml-3 mt-0.5 space-y-0.5">
                         {(u.resultados || []).map(r => (
-                          <li key={r.raLabel} className={lastResult.rasData[r.raLabel] ? 'text-slate-500 dark:text-slate-400' : 'text-rose-500 dark:text-rose-400'}>
+                          <li key={r.raLabel} className={lastResult.rasData[r.raLabel] ? 'text-slate-500 dark:text-slate-400' : 'text-danger-500 dark:text-danger-400'}>
                             {r.raLabel}: {r.nombre.slice(0, 60)}{r.nombre.length > 60 ? '…' : ''} · {r.horas} hrs
                             {!lastResult.rasData[r.raLabel] && ' ⚠ Error'}
                           </li>

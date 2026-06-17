@@ -75,6 +75,14 @@ service cloud.firestore {
       match /sesionesGeneracion/{sesionId} {
         allow read, write: if false;
       }
+
+      // ── Ledger de cobros por materia (anticipo horario → completa) ──
+      // Server-only: registra si una materia ya pagó horario/completa para
+      // aplicar el descuento del anticipo. El cliente NO puede leerlo ni
+      // escribirlo (si no, podría fingir un anticipo y pagar de menos).
+      match /cobrosMateria/{materiaId} {
+        allow read, write: if false;
+      }
     }
 
     // ── Acreditaciones manuales: admins leen y escriben ──────────
@@ -93,6 +101,12 @@ service cloud.firestore {
 
     // ── Pagos (idempotencia): bloqueado al cliente ────────────────
     match /pagos/{paymentId} {
+      allow read, write: if false;
+    }
+
+    // ── Eventos de Stripe (idempotencia/auditoría): bloqueado al cliente ──
+    // Solo el webhook (Admin SDK) escribe aquí; el cliente nunca accede.
+    match /stripeEventos/{eventId} {
       allow read, write: if false;
     }
 

@@ -53,7 +53,7 @@ export default function EditorRA({ ra, onCambio, cabecera, pdfPE, pdfGPE }) {
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             {ra.duracionHoras}h · {ra.actividadesEspecificas?.length ?? 0} actividades
             {!cuadran && (
-              <span className="ml-2 text-rose-600 dark:text-rose-400 font-medium">
+              <span className="ml-2 text-danger-600 dark:text-danger-400 font-medium">
                 · ⚠ {ra.duracionHoras - sumaHoras}h sin distribuir
               </span>
             )}
@@ -96,7 +96,7 @@ export default function EditorRA({ ra, onCambio, cabecera, pdfPE, pdfGPE }) {
             className="w-full flex items-center justify-center gap-2 py-3 rounded-xl
                        border-2 border-dashed border-slate-300 dark:border-slate-600
                        text-sm font-medium text-slate-600 dark:text-slate-300
-                       hover:border-violet-400 dark:hover:border-violet-600 hover:text-violet-600 dark:hover:text-violet-400 transition"
+                       hover:border-info-400 dark:hover:border-info-600 hover:text-info-600 dark:hover:text-info-400 transition"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

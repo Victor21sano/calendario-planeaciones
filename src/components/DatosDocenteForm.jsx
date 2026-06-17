@@ -51,7 +51,7 @@ function Field({ label, value, onChange, placeholder = '', type = 'text', readOn
         placeholder={placeholder}
         className={`input-base ${readOnly ? 'bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 cursor-default' : ''}`}
       />
-      {hint && <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">{hint}</p>}
+      {hint && <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">{hint}</p>}
     </div>
   )
 }
@@ -125,7 +125,7 @@ export default function DatosDocenteForm({ datosDocente, modulo, onChangeDatosDo
           className="w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
         >
           <div className="flex items-center gap-2">
-            <span className="w-6 h-6 rounded-lg bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+            <span className="w-6 h-6 rounded-lg bg-brand-100 dark:bg-brand-900/40 flex items-center justify-center text-brand-600 dark:text-brand-400">
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
@@ -165,7 +165,7 @@ export default function DatosDocenteForm({ datosDocente, modulo, onChangeDatosDo
                   ))}
                 </select>
                 {perfilDocente?.plantel && (
-                  <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
                     Guardado en tu perfil para todas las materias.
                   </p>
                 )}
@@ -189,7 +189,7 @@ export default function DatosDocenteForm({ datosDocente, modulo, onChangeDatosDo
           className="w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
         >
           <div className="flex items-center gap-2">
-            <span className="w-6 h-6 rounded-lg bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center text-violet-600 dark:text-violet-400">
+            <span className="w-6 h-6 rounded-lg bg-info-100 dark:bg-info-900/40 flex items-center justify-center text-info-600 dark:text-info-400">
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>

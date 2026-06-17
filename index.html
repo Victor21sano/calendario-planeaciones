@@ -3,14 +3,88 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Planifica y distribuye las horas de tu materia por semana hábil del semestre de forma automática." />
-    <meta name="theme-color" content="#6366f1" />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>" />
-    <title>Planificador Docente — Distribución Semestral</title>
-    <!-- Plus Jakarta Sans — Premium Typography -->
+
+    <title>Planea Pro — Planificador Docente con IA para CONALEP</title>
+    <meta name="description" content="Planea Pro: genera tu planeación didáctica y horario automático para CONALEP en minutos. IA adapta el formato 2023 a tu módulo. Prueba gratis." />
+    <meta name="keywords" content="planea pro, planificador docente CONALEP, planeación didáctica con IA, planeación CONALEP formato 2023, horario automático CONALEP, planea-pro" />
+    <meta name="author" content="Planea Pro" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#0F766E" />
+    <link rel="canonical" href="https://planea-pro.com.mx/" />
+
+    <!-- Open Graph (WhatsApp, Facebook, LinkedIn) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://planea-pro.com.mx/" />
+    <meta property="og:title" content="Planea Pro — Planificador Docente con IA para CONALEP" />
+    <meta property="og:description" content="Planea Pro: genera tu planeación didáctica y horario automático para CONALEP en minutos. IA adapta el formato 2023 a tu módulo." />
+    <meta property="og:image" content="https://planea-pro.com.mx/og-image.svg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Planea Pro — Planificador Docente con IA para CONALEP" />
+    <meta property="og:locale" content="es_MX" />
+    <meta property="og:site_name" content="Planea Pro" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Planea Pro — Planificador Docente con IA para CONALEP" />
+    <meta name="twitter:description" content="Planea Pro: genera tu planeación didáctica y horario automático para CONALEP en minutos." />
+    <meta name="twitter:image" content="https://planea-pro.com.mx/og-image.svg" />
+
+    <!-- Structured Data – SoftwareApplication + Organization -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "SoftwareApplication",
+          "name": "Planea Pro",
+          "alternateName": "Planea-Pro",
+          "url": "https://planea-pro.com.mx",
+          "description": "Planificador docente con IA para CONALEP. Genera planeación didáctica en formato 2023 y horario semestral automático.",
+          "applicationCategory": "EducationApplication",
+          "operatingSystem": "Web",
+          "inLanguage": "es-MX",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "MXN",
+            "description": "Prueba gratuita disponible"
+          },
+          "audience": {
+            "@type": "EducationalAudience",
+            "educationalRole": "teacher"
+          },
+          "provider": {
+            "@type": "Organization",
+            "name": "Planea Pro",
+            "url": "https://planea-pro.com.mx"
+          }
+        },
+        {
+          "@type": "Organization",
+          "name": "Planea Pro",
+          "alternateName": "Planea-Pro",
+          "url": "https://planea-pro.com.mx",
+          "logo": "https://planea-pro.com.mx/favicon.svg",
+          "description": "Plataforma de planificación docente con IA para docentes CONALEP en México.",
+          "areaServed": "MX",
+          "knowsAbout": ["CONALEP", "planeación didáctica", "formato 2023", "horario semestral"]
+        }
+      ]
+    }
+    </script>
+
+    <!-- Favicon -->
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Tipografía — Fraunces (display editorial) + Plus Jakarta Sans (cuerpo) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   </head>
   <body>
     <div id="root"></div>

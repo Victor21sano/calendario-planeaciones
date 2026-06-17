@@ -53,26 +53,26 @@ export default function RegisterPage() {
 
   // Password strength indicator
   const strength = password.length === 0 ? 0 : password.length < 6 ? 1 : password.length < 10 ? 2 : 3
-  const strengthColors = ['bg-slate-200 dark:bg-slate-700', 'bg-rose-500', 'bg-amber-500', 'bg-emerald-500']
+  const strengthColors = ['bg-slate-200 dark:bg-slate-700', 'bg-danger-500', 'bg-warning-500', 'bg-success-500']
   const strengthText = ['', 'Débil', 'Media', 'Fuerte']
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4">
-      {/* Premium Background Elements */}
+    <div className="min-h-screen flex items-center justify-center bg-[radial-gradient(circle_at_top_left,#d6efe9,transparent_40%),linear-gradient(135deg,#fffdf8_0%,#f7f3ea_55%,#fdf0e9_100%)] dark:bg-[linear-gradient(135deg,#0d1614_0%,#111a18_55%,#1a1512_100%)] p-4">
+      {/* Halos cálidos — Archivo Vivo */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-violet-400/10 dark:bg-violet-900/20 blur-3xl" />
-        <div className="absolute -bottom-[20%] -right-[10%] w-[50%] h-[50%] rounded-full bg-cyan-400/10 dark:bg-cyan-900/20 blur-3xl" />
+        <div className="absolute top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-brand-300/20 dark:bg-brand-900/25 blur-3xl" />
+        <div className="absolute -bottom-[20%] -right-[10%] w-[50%] h-[50%] rounded-full bg-accent-300/15 dark:bg-accent-900/20 blur-3xl" />
       </div>
 
       <div className="card w-full max-w-md p-8 relative z-10 animate-slide-up">
         
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">Crea tu cuenta</h1>
+          <h1 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-900 dark:text-white">Crea tu cuenta</h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Únete para guardar todas tus planeaciones</p>
         </div>
 
         {error && (
-          <div className="mb-6 p-3 rounded-xl bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800/40 text-rose-600 dark:text-rose-400 text-sm text-center font-medium">
+          <div className="mb-6 p-3 rounded-xl bg-danger-50 dark:bg-danger-900/20 border border-danger-200 dark:border-danger-800/40 text-danger-600 dark:text-danger-400 text-sm text-center font-medium">
             {error}
           </div>
         )}
@@ -146,7 +146,7 @@ export default function RegisterPage() {
                   <div className={`flex-1 rounded-full ${strength >= 2 ? strengthColors[strength] : strengthColors[0]} transition-colors`} />
                   <div className={`flex-1 rounded-full ${strength >= 3 ? strengthColors[strength] : strengthColors[0]} transition-colors`} />
                 </div>
-                <span className={`text-[10px] font-bold w-10 text-right ${strength === 1 ? 'text-rose-500' : strength === 2 ? 'text-amber-500' : 'text-emerald-500'}`}>
+                <span className={`text-[10px] font-bold w-10 text-right ${strength === 1 ? 'text-danger-500' : strength === 2 ? 'text-warning-500' : 'text-success-500'}`}>
                   {strengthText[strength]}
                 </span>
               </div>
@@ -177,13 +177,13 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="btn-primary w-full justify-center py-2.5 mt-4 text-base"
+            className="btn-accent w-full justify-center py-2.5 mt-4 text-base"
           >
             {loading ? 'Creando cuenta...' : 'Crear Cuenta'}
           </button>
         </form>
 
-        <div className="mt-6 flex items-center text-sm text-slate-400 before:flex-1 before:border-t before:border-slate-200 dark:before:border-slate-700 before:mr-4 after:flex-1 after:border-t after:border-slate-200 dark:after:border-slate-700 after:ml-4">
+        <div className="mt-6 flex items-center text-sm text-slate-500 dark:text-slate-400 before:flex-1 before:border-t before:border-slate-200 dark:before:border-slate-700 before:mr-4 after:flex-1 after:border-t after:border-slate-200 dark:after:border-slate-700 after:ml-4">
           o regístrate con
         </div>
 

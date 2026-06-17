@@ -21,7 +21,7 @@
  *   - Los créditos se descuentan ANTES de llamar a la IA y se reembolsan si falla.
  */
 
-const { onCall, HttpsError }        = require('firebase-functions/v2/https')
+const { onCall, onRequest, HttpsError } = require('firebase-functions/v2/https')
 const { setGlobalOptions }          = require('firebase-functions/v2')
 const { defineSecret }              = require('firebase-functions/params')
 const Anthropic                     = require('@anthropic-ai/sdk')
@@ -37,10 +37,22 @@ setGlobalOptions({ region: 'us-central1' })
 
 const GEMINI_API_KEY_SECRET = defineSecret('GEMINI_API_KEY')
 const OPENAI_API_KEY_SECRET = defineSecret('OPENAI_API_KEY')
+const STRIPE_SECRET_KEY     = defineSecret('STRIPE_SECRET_KEY')
+const STRIPE_WEBHOOK_SECRET = defineSecret('STRIPE_WEBHOOK_SECRET')
+const Stripe                = require('stripe')
+
+// Base de la app para success/cancel del Checkout. Configurable por entorno.
+const APP_URL = process.env.APP_URL || 'https://planificador-docente-d48a6.web.app'
+
+// Catálogo de paquetes y precio promocional — FUENTE DE VERDAD (ver precios.js).
+// El cliente solo envía paqueteId; el monto y los créditos SIEMPRE se derivan
+// del servidor (nunca del cliente), y el precio promo expira por fecha en el
+// servidor (no por el contador visual del cliente).
+const { PAQUETES, precioVigente } = require('./precios')
 
 const ANTHROPIC_MODEL = 'claude-opus-4-7'
 const GEMINI_MODEL    = 'gemini-2.5-flash'
-const OPENAI_MODEL    = 'gpt-4o-mini'
+const OPENAI_MODEL    = 'gpt-4.1-mini'
 const MAX_TOKENS      = 16000
 const GEMINI_2023_MODELS = new Set([
   'gemini-2.5-flash',
@@ -53,7 +65,17 @@ const MAX_PROMPT_CHARS = 100_000   // ~25 k tokens sistema+usuario, margen gener
 const MAX_PDF_B64_LEN  = 50_000_000 // ~37.5 MB en base64 ≈ ~28 MB de PDF original
 
 // ── Sistema de créditos ────────────────────────────────────────
-const CREDITOS_POR_GENERACION = 1
+// 1 crédito = 1 peso. El costo depende del tipo de flujo.
+const CREDITOS_POR_GENERACION = 1 // legacy (modo sin sesión / compatibilidad)
+
+// Costo en créditos por tipo de flujo.
+//   completa → planeación didáctica completa (100)
+//   horario  → solo planificador de horarios / estructura (25)
+//   regenRA  → regeneración de 1 RA individual (gratis)
+const COSTO_POR_FLUJO = { completa: 100, horario: 25, regenRA: 0 }
+// El horario (25) funciona como anticipo: si el docente ya pagó el horario de una
+// materia, la planeación completa solo cobra la diferencia (100 - 25 = 75).
+const DESCUENTO_HORARIO_PREVIO = 25
 
 // ── Sesiones de generación 2023 ────────────────────────────────
 // El flujo 2023 hace muchas llamadas a la IA (estructura + N RAs) pero
@@ -68,6 +90,7 @@ const CREDITOS_POR_GENERACION = 1
 //   regenRA  → regeneración de 1 RA (solo reintentos de esa llamada)
 const LIMITES_POR_FLUJO = {
   completa: 60,
+  horario:  8,  // solo extrae la estructura (pocas llamadas)
   regenRA:  8,
 }
 const DEFAULT_MAX_LLAMADAS = LIMITES_POR_FLUJO.completa
@@ -115,11 +138,52 @@ async function reembolsarCredito(userRef, adminUser) {
 async function registrarConsumo(userRef, adminUser, delta, tipo) {
   userRef.collection('consumos').add({
     timestamp: FieldValue.serverTimestamp(),
-    cantidad:  CREDITOS_POR_GENERACION,
+    cantidad:  Math.abs(delta),
     delta,
     admin:     adminUser,
     tipo,
   }).catch(e => console.error('Error al registrar consumo (%s):', tipo, e.message))
+}
+
+// Error permanente: la metadata del evento de Stripe es inservible (no reintentable).
+class StripeMetadataError extends Error {}
+
+// Acredita una compra de Stripe de forma atómica e idempotente.
+// Idempotencia por event.id: si stripeEventos/{eventId} ya existe, no re-acredita.
+async function acreditarCompraStripe(eventId, session) {
+  const uid      = session.metadata?.uid
+  const creditos = Number(session.metadata?.creditos)
+  const sessionId = session.id
+
+  if (!uid || !Number.isInteger(creditos) || creditos <= 0) {
+    throw new StripeMetadataError(`Metadata inválida en la sesión ${sessionId} (uid=${uid}, creditos=${creditos})`)
+  }
+
+  const userRef   = db.collection('users').doc(uid)
+  const eventoRef = db.collection('stripeEventos').doc(eventId)
+  const compraRef = userRef.collection('compras').doc(sessionId)
+
+  await db.runTransaction(async (tx) => {
+    const evSnap = await tx.get(eventoRef)
+    if (evSnap.exists) return // ya procesado → idempotente
+
+    const userSnap    = await tx.get(userRef)
+    const saldoActual = userSnap.data()?.creditos ?? 0
+
+    tx.set(userRef, { creditos: saldoActual + creditos }, { merge: true })
+    tx.set(compraRef, {
+      estado:              'pagado',
+      stripePaymentIntent: session.payment_intent ?? null,
+      pagadoEn:            FieldValue.serverTimestamp(),
+    }, { merge: true })
+    tx.set(eventoRef, {
+      sessionId,
+      uid,
+      creditos,
+      monto: (session.amount_total ?? 0) / 100,
+      fecha: FieldValue.serverTimestamp(),
+    })
+  })
 }
 
 exports.generarPlaneacion = onCall(
@@ -167,7 +231,7 @@ exports.generarPlaneacion = onCall(
     let sessionRef = null
     if (usaSesion) {
       sessionRef = userRef.collection('sesionesGeneracion').doc(sessionId)
-      await consumirLlamadaSesion(sessionRef, ['completa'])
+      await consumirLlamadaSesion(sessionRef, ['completa', 'horario'])
     } else {
       // ── Modo 1 llamada = 1 crédito: pre-check rápido de saldo ──
       const userSnap    = await userRef.get()
@@ -284,24 +348,44 @@ exports.iniciarGeneracion = onCall({ cors: true }, async (request) => {
   const uid        = request.auth.uid
   const userRef    = db.collection('users').doc(uid)
   const sessionRef = userRef.collection('sesionesGeneracion').doc()
-  const delta      = adminUser ? 0 : -CREDITOS_POR_GENERACION
 
-  // Tipo de flujo declarado por el cliente → fija el límite de llamadas en el servidor.
-  const tipoFlujo   = (request.data?.tipoFlujo === 'regenRA') ? 'regenRA' : 'completa'
-  const maxLlamadas = LIMITES_POR_FLUJO[tipoFlujo] ?? DEFAULT_MAX_LLAMADAS
+  // Tipo de flujo declarado por el cliente → fija el límite de llamadas y el costo.
+  const tiposValidos = ['completa', 'horario', 'regenRA']
+  const tipoFlujo    = tiposValidos.includes(request.data?.tipoFlujo) ? request.data.tipoFlujo : 'completa'
+  const materiaId    = typeof request.data?.materiaId === 'string' ? request.data.materiaId : null
+  const maxLlamadas  = LIMITES_POR_FLUJO[tipoFlujo] ?? DEFAULT_MAX_LLAMADAS
 
+  let delta = 0
+  let costoCobrado = 0
   await db.runTransaction(async (tx) => {
+    // Costo base por flujo. La planeación completa (100) aplica el anticipo del
+    // horario (si esta materia ya pagó su horario y aún no se ha pagado la completa),
+    // de modo que solo cobra la diferencia (75).
+    let costo = COSTO_POR_FLUJO[tipoFlujo] ?? COSTO_POR_FLUJO.completa
+    if (tipoFlujo === 'completa' && materiaId) {
+      const ledgerSnap = await tx.get(userRef.collection('cobrosMateria').doc(materiaId))
+      const led = ledgerSnap.data() || {}
+      if (led.horarioPagado === true && led.completaPagada !== true) {
+        costo = Math.max(0, costo - DESCUENTO_HORARIO_PREVIO)
+      }
+    }
+
+    const cobra = !adminUser && costo > 0
     const snap   = await tx.get(userRef)
     const actual = snap.data()?.creditos ?? 0
-    if (!adminUser && actual < CREDITOS_POR_GENERACION) {
+    if (cobra && actual < costo) {
       throw new HttpsError('failed-precondition', 'Saldo insuficiente. Adquiere más créditos para continuar.')
     }
-    tx.set(userRef, { creditos: actual + delta }, { merge: true })
+    delta        = cobra ? -costo : 0
+    costoCobrado = cobra ? costo : 0
+    if (delta !== 0) tx.set(userRef, { creditos: actual + delta }, { merge: true })
     tx.set(sessionRef, {
       estado:            'activa',
       admin:             adminUser,
-      creditoDescontado: !adminUser,
+      creditoDescontado: cobra,
+      costo:             costoCobrado, // monto exacto a reembolsar si la sesión falla
       tipoFlujo,
+      materiaId,
       maxLlamadas,       // límite fijado en servidor; el cliente no puede ampliarlo después
       llamadas:          0, // intentos de IA (para el tope maxLlamadas)
       exitos:            0, // respuestas de IA exitosas (decide el reembolso, no el cliente)
@@ -309,7 +393,7 @@ exports.iniciarGeneracion = onCall({ cors: true }, async (request) => {
     })
   })
 
-  registrarConsumo(userRef, adminUser, delta, 'generacion')
+  if (delta !== 0) registrarConsumo(userRef, adminUser, delta, 'generacion')
   return { sessionId: sessionRef.id }
 })
 
@@ -334,27 +418,42 @@ exports.finalizarGeneracion = onCall({ cors: true }, async (request) => {
   const sessionRef = userRef.collection('sesionesGeneracion').doc(sessionId)
 
   let reembolsado = false
+  let montoReembolso = 0
   await db.runTransaction(async (tx) => {
     const sesSnap = await tx.get(sessionRef)
     if (!sesSnap.exists) throw new HttpsError('not-found', 'Sesión no encontrada.')
     const ses = sesSnap.data()
     if (ses.estado !== 'activa') return // ya cerrada: idempotente
 
+    const monto = ses.costo ?? 0
     // Reembolso server-owned: solo si no hubo ninguna generación exitosa.
-    const procedeReembolso = (ses.exitos ?? 0) === 0 && ses.creditoDescontado
+    const procedeReembolso = (ses.exitos ?? 0) === 0 && ses.creditoDescontado && monto > 0
     if (procedeReembolso) {
       const userSnap = await tx.get(userRef)
       const actual   = userSnap.data()?.creditos ?? 0
-      tx.set(userRef, { creditos: actual + CREDITOS_POR_GENERACION }, { merge: true })
+      tx.set(userRef, { creditos: actual + monto }, { merge: true })
     }
     tx.update(sessionRef, {
       estado:    procedeReembolso ? 'reembolsada' : (exito ? 'completada' : 'cerrada'),
       closedAt:  FieldValue.serverTimestamp(),
     })
-    reembolsado = procedeReembolso
+
+    // Si la generación fue exitosa (no reembolsada), registrar el cobro de la
+    // materia en el ledger server-only. Permite el anticipo: horario → completa = 75.
+    if (!procedeReembolso && ses.materiaId && ses.creditoDescontado) {
+      const ledgerRef = userRef.collection('cobrosMateria').doc(ses.materiaId)
+      if (ses.tipoFlujo === 'horario') {
+        tx.set(ledgerRef, { horarioPagado: true, updatedAt: FieldValue.serverTimestamp() }, { merge: true })
+      } else if (ses.tipoFlujo === 'completa') {
+        tx.set(ledgerRef, { completaPagada: true, updatedAt: FieldValue.serverTimestamp() }, { merge: true })
+      }
+    }
+
+    reembolsado    = procedeReembolso
+    montoReembolso = procedeReembolso ? monto : 0
   })
 
-  if (reembolsado) registrarConsumo(userRef, false, CREDITOS_POR_GENERACION, 'reembolso')
+  if (reembolsado) registrarConsumo(userRef, false, montoReembolso, 'reembolso')
   return { ok: true, reembolsado }
 })
 
@@ -416,7 +515,7 @@ exports.generarGemini2023 = onCall(
     }
     const sessionRef = db.collection('users').doc(request.auth.uid)
       .collection('sesionesGeneracion').doc(sessionId)
-    await consumirLlamadaSesion(sessionRef, ['completa', 'regenRA'])
+    await consumirLlamadaSesion(sessionRef, ['completa', 'regenRA', 'horario'])
 
     const {
       systemPrompt = null,
@@ -604,6 +703,98 @@ exports.listarAcreditacionesManual = onCall(
         ...d.data(),
         fecha: d.data().fecha?.toMillis?.() ?? null,
       })),
+    }
+  }
+)
+
+// ── crearSesionCheckout: inicia una sesión de pago con Stripe ──
+exports.crearSesionCheckout = onCall(
+  { region: 'us-central1', secrets: [STRIPE_SECRET_KEY] },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError('unauthenticated', 'Debes iniciar sesión para comprar créditos.')
+    }
+    const { paqueteId } = request.data || {}
+    const paquete = PAQUETES[paqueteId]
+    if (!paquete) {
+      throw new HttpsError('invalid-argument', 'Paquete de créditos no válido.')
+    }
+
+    const uid    = request.auth.uid
+    const precio = precioVigente(paquete) // promo o normal según la fecha del servidor
+    const stripe = Stripe(STRIPE_SECRET_KEY.value() || process.env.STRIPE_SECRET_KEY)
+
+    let session
+    try {
+      session = await stripe.checkout.sessions.create({
+        mode: 'payment',
+        payment_method_types: ['card'],
+        line_items: [{
+          quantity: 1,
+          price_data: {
+            currency:     'mxn',
+            unit_amount:  precio * 100, // Stripe opera en centavos
+            product_data: { name: `${paquete.creditos} créditos · Planea-Pro` },
+          },
+        }],
+        client_reference_id: uid,
+        metadata: { uid, paqueteId, creditos: String(paquete.creditos) },
+        success_url: `${APP_URL}/compra-exitosa?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url:  `${APP_URL}/compra-cancelada`,
+      })
+    } catch (err) {
+      console.error('[crearSesionCheckout] error de Stripe:', err.message)
+      throw new HttpsError('internal', 'No se pudo iniciar el pago. Intenta de nuevo.')
+    }
+
+    // Registro "pendiente": el webhook lo marcará "pagado" al confirmarse.
+    // Si este set falla, el usuario no recibe la URL; sin impacto en la acreditación
+    // (el webhook usa el evento de Stripe, no este registro informativo).
+    await db.collection('users').doc(uid).collection('compras').doc(session.id).set({
+      tipo:            'stripe',
+      estado:          'pendiente',
+      paqueteId,
+      creditos:        paquete.creditos,
+      monto:           precio,
+      stripeSessionId: session.id,
+      fecha:           FieldValue.serverTimestamp(),
+    })
+
+    return { url: session.url, sessionId: session.id }
+  }
+)
+
+// ── stripeWebhook: recibe eventos de Stripe y acredita créditos ──
+exports.stripeWebhook = onRequest(
+  { region: 'us-central1', secrets: [STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET] },
+  async (req, res) => {
+    const stripe   = Stripe(STRIPE_SECRET_KEY.value() || process.env.STRIPE_SECRET_KEY)
+    const whSecret = STRIPE_WEBHOOK_SECRET.value() || process.env.STRIPE_WEBHOOK_SECRET
+
+    let event
+    try {
+      event = stripe.webhooks.constructEvent(req.rawBody, req.headers['stripe-signature'], whSecret)
+    } catch (err) {
+      console.error('[stripeWebhook] firma inválida:', err.message)
+      return res.status(400).send('Webhook signature verification failed')
+    }
+
+    if (event.type !== 'checkout.session.completed') {
+      return res.status(200).send('ignored')
+    }
+
+    try {
+      await acreditarCompraStripe(event.id, event.data.object)
+      return res.status(200).send('ok')
+    } catch (err) {
+      // Metadata inválida = fallo permanente: 200 para frenar los reintentos de
+      // Stripe (el payload nunca podrá acreditarse), pero se registra como error.
+      if (err instanceof StripeMetadataError) {
+        console.error('[stripeWebhook] metadata permanentemente inválida (no reintentable):', err.message)
+        return res.status(200).send('invalid-metadata-skipped')
+      }
+      console.error('[stripeWebhook] error transitorio al acreditar:', err.message)
+      return res.status(500).send('crediting failed') // Stripe reintentará
     }
   }
 )

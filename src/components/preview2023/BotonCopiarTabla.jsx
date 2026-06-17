@@ -33,7 +33,7 @@ export default function BotonCopiarTabla({ getHTML, etiqueta = 'Copiar', bloquea
       <button
         onClick={handleCopiar}
         aria-label={ariaLabel || `Copiar ${etiqueta}`}
-        className={`${base} bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed
+        className={`${base} bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 cursor-not-allowed
           ${bloqAnimado ? 'scale-95' : ''}`}
       >
         {/* Lock icon */}
@@ -48,7 +48,7 @@ export default function BotonCopiarTabla({ getHTML, etiqueta = 'Copiar', bloquea
 
   if (copiado) {
     return (
-      <button className={`${base} bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700`}>
+      <button className={`${base} bg-success-50 dark:bg-success-900/30 text-success-700 dark:text-success-300 border border-success-200 dark:border-success-700`}>
         {/* Check icon */}
         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />

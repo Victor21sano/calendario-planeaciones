@@ -12,7 +12,7 @@ import { PROMPT_ACTIVIDADES_2023 } from './prompts2023/promptActividades.js'
 
 const MODEL_ESTRUCTURA = import.meta.env.VITE_GEMINI_MODEL_ESTRUCTURA || 'gemini-2.5-flash'
 const MODEL_ACTIVIDADES = import.meta.env.VITE_GEMINI_MODEL_ACTIVIDADES || 'gemini-2.5-flash'
-const generarGemini2023Fn   = httpsCallable(functions, 'generarGemini2023',   { timeout: 540000 })
+const generarGemini2023Fn   = httpsCallable(functions, 'generarGemini2023', { timeout: 540000 })
 const iniciarGeneracionFn   = httpsCallable(functions, 'iniciarGeneracion')
 const finalizarGeneracionFn = httpsCallable(functions, 'finalizarGeneracion')
 
@@ -21,8 +21,8 @@ const finalizarGeneracionFn = httpsCallable(functions, 'finalizarGeneracion')
  * de forma atómica). Devuelve el sessionId que debe pasarse a cada llamada.
  * Lanza HttpsError 'failed-precondition' si el saldo es insuficiente.
  */
-export async function iniciarSesion2023() {
-  const res = await iniciarGeneracionFn({ tipoFlujo: 'completa' })
+export async function iniciarSesion2023(materiaId = null) {
+  const res = await iniciarGeneracionFn({ tipoFlujo: 'completa', materiaId })
   return res.data?.sessionId
 }
 
@@ -68,6 +68,8 @@ async function llamarGemini({
   const MAX_INTENTOS = 5
   let lastErr
 
+  const fn = generarGemini2023Fn
+
   for (let intento = 0; intento < MAX_INTENTOS; intento++) {
     if (intento > 0) {
       const espera = Math.min(60000, 4000 * Math.pow(2, intento - 1))
@@ -75,7 +77,7 @@ async function llamarGemini({
     }
 
     try {
-      const res = await generarGemini2023Fn({
+      const res = await fn({
         systemPrompt: sistemPrompt,
         userPrompt: textoPrompt,
         pdfPEBase64: partesInlineData[0] || null,

@@ -1,19 +1,25 @@
 import { lazy, Suspense } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import ErrorBoundary from './components/ErrorBoundary'
 
 // Páginas de auth — carga inmediata (pequeñas, necesarias sin login)
-import LoginPage        from './pages/LoginPage'
-import RegisterPage     from './pages/RegisterPage'
-import ResetPasswordPage from './pages/ResetPasswordPage'
+import LoginPage           from './pages/LoginPage'
+import RegisterPage        from './pages/RegisterPage'
+import ResetPasswordPage   from './pages/ResetPasswordPage'
+import PlaneacionesConalep       from './pages/PlaneacionesConalep'
+import GeneradorPlaneacionesIA   from './pages/GeneradorPlaneacionesIA'
+import HorarioDocenteConalep     from './pages/HorarioDocenteConalep'
 
 // Páginas principales — carga diferida (pesadas: Firebase, date-fns, IA)
 const DashboardPage    = lazy(() => import('./pages/DashboardPage'))
 const PlanificadorPage = lazy(() => import('./pages/PlanificadorPage'))
 const ComprarCreditos  = lazy(() => import('./pages/ComprarCreditos'))
-const AdminPage        = lazy(() => import('./pages/AdminPage'))
-const PerfilPage       = lazy(() => import('./pages/PerfilPage'))
+const CompraExitosa    = lazy(() => import('./pages/CompraExitosa'))
+const CompraCancelada  = lazy(() => import('./pages/CompraCancelada'))
+const AdminPage            = lazy(() => import('./pages/AdminPage'))
+const PerfilPage           = lazy(() => import('./pages/PerfilPage'))
+const EstimuloDocentePage  = lazy(() => import('./pages/EstimuloDocentePage'))
 
 function PageLoader() {
   return (
@@ -24,21 +30,34 @@ function PageLoader() {
 }
 
 export default function App() {
+  const location = useLocation()
   return (
     <ErrorBoundary>
       <Suspense fallback={<PageLoader />}>
-        <Routes>
+        {/* Transición de ruta: fade de opacidad por pathname.
+            Solo opacidad a propósito — un transform/filter en este
+            wrapper rompería los position:fixed (fondos auth) y el
+            header sticky del dashboard. Respeta prefers-reduced-motion
+            vía el bloque global de index.css. */}
+        <div key={location.pathname} className="animate-fade-in">
+        <Routes location={location}>
           {/* Rutas públicas */}
-          <Route path="/login"          element={<LoginPage />} />
-          <Route path="/register"       element={<RegisterPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/login"                      element={<LoginPage />} />
+          <Route path="/register"                   element={<RegisterPage />} />
+          <Route path="/reset-password"             element={<ResetPasswordPage />} />
+          <Route path="/planeaciones-conalep"       element={<PlaneacionesConalep />} />
+          <Route path="/generador-planeaciones-ia"  element={<GeneradorPlaneacionesIA />} />
+          <Route path="/horario-docente-conalep"    element={<HorarioDocenteConalep />} />
 
           {/* Rutas protegidas — todos los usuarios autenticados */}
           <Route element={<ProtectedRoute />}>
             <Route path="/"                  element={<DashboardPage />} />
             <Route path="/materia/:id"       element={<PlanificadorPage />} />
             <Route path="/comprar-creditos"  element={<ComprarCreditos />} />
-            <Route path="/perfil"            element={<PerfilPage />} />
+            <Route path="/compra-exitosa"    element={<CompraExitosa />} />
+            <Route path="/compra-cancelada"  element={<CompraCancelada />} />
+            <Route path="/perfil"              element={<PerfilPage />} />
+            <Route path="/asistente-estimulo" element={<EstimuloDocentePage />} />
           </Route>
 
           {/* Rutas protegidas — solo admin */}
@@ -46,6 +65,7 @@ export default function App() {
             <Route path="/admin" element={<AdminPage />} />
           </Route>
         </Routes>
+        </div>
       </Suspense>
     </ErrorBoundary>
   )

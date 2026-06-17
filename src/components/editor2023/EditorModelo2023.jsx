@@ -81,8 +81,8 @@ export default function EditorModelo2023({ planeacion: planeacionInicial, materi
           </button>
           <button
             onClick={forzarGuardado}
-            className="text-xs px-3 py-1.5 rounded-lg border border-violet-300 dark:border-violet-700
-                       text-violet-700 dark:text-violet-300 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors"
+            className="text-xs px-3 py-1.5 rounded-lg border border-info-300 dark:border-info-700
+                       text-info-700 dark:text-info-300 hover:bg-info-50 dark:hover:bg-info-900/20 transition-colors"
           >
             Guardar ahora
           </button>

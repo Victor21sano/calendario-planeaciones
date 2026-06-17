@@ -28,8 +28,8 @@ export default function PerfilIncompletoModal({ onCerrar }) {
         </button>
 
         {/* Icono */}
-        <div className="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center mx-auto">
-          <svg className="w-7 h-7 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="w-14 h-14 rounded-2xl bg-warning-50 dark:bg-warning-900/20 flex items-center justify-center mx-auto">
+          <svg className="w-7 h-7 text-warning-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
               d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
@@ -50,7 +50,7 @@ export default function PerfilIncompletoModal({ onCerrar }) {
         <div className="space-y-2">
           <button
             onClick={() => { onCerrar(); navigate('/perfil') }}
-            className="btn-primary w-full justify-center py-2.5 text-sm"
+            className="btn-accent w-full justify-center py-2.5 text-sm"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}

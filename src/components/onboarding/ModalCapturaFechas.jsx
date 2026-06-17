@@ -70,7 +70,7 @@ export default function ModalCapturaFechas({ abierto, fechaInicioActual = '', fe
 
   const inputCls = `mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600
     bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100
-    focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500
+    focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500
     disabled:opacity-50 transition-colors`
 
   return (
@@ -80,8 +80,8 @@ export default function ModalCapturaFechas({ abierto, fechaInicioActual = '', fe
         {/* Header */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center flex-shrink-0">
-              <svg className="w-5 h-5 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="w-10 h-10 rounded-xl bg-brand-100 dark:bg-brand-900/40 flex items-center justify-center flex-shrink-0">
+              <svg className="w-5 h-5 text-brand-600 dark:text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
@@ -138,18 +138,18 @@ export default function ModalCapturaFechas({ abierto, fechaInicioActual = '', fe
 
         {/* Resumen de vacaciones si hay periodos */}
         {periodos.length > 0 && (
-          <div className="px-3 py-2 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900">
-            <p className="text-xs font-semibold text-amber-800 dark:text-amber-200 mb-1">Períodos no laborables incluidos:</p>
+          <div className="px-3 py-2 rounded-lg bg-warning-50 dark:bg-warning-950/30 border border-warning-200 dark:border-warning-900">
+            <p className="text-xs font-semibold text-warning-800 dark:text-warning-200 mb-1">Períodos no laborables incluidos:</p>
             {periodos.map((p, i) => (
-              <p key={i} className="text-xs text-amber-700 dark:text-amber-300">{p.nombre}: {p.fechaInicio} → {p.fechaFin}</p>
+              <p key={i} className="text-xs text-warning-700 dark:text-warning-300">{p.nombre}: {p.fechaInicio} → {p.fechaFin}</p>
             ))}
           </div>
         )}
 
         {/* Error inline */}
         {error && (
-          <div className="px-3 py-2 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 animate-slide-down">
-            <p className="text-xs text-rose-700 dark:text-rose-300">{error}</p>
+          <div className="px-3 py-2 rounded-lg bg-danger-50 dark:bg-danger-950/40 border border-danger-200 dark:border-danger-900 animate-slide-down">
+            <p className="text-xs text-danger-700 dark:text-danger-300">{error}</p>
           </div>
         )}
 
@@ -161,7 +161,7 @@ export default function ModalCapturaFechas({ abierto, fechaInicioActual = '', fe
             Cancelar
           </button>
           <button onClick={handleGuardar} disabled={guardando}
-            className="btn-primary text-sm py-2 disabled:opacity-50 gap-2">
+            className="btn-accent text-sm py-2 disabled:opacity-50 gap-2">
             {guardando ? (
               <>
                 <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">

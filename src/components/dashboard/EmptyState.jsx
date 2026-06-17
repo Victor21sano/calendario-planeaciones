@@ -3,7 +3,7 @@ import BrandMark from '../brand/BrandMark'
 export default function EmptyState({ onCrear, sinCreditosDisponibles }) {
   const steps = [
     { n: '1', label: 'Completa tu perfil', desc: 'Datos oficiales del docente' },
-    { n: '2', label: 'Sube PE y GPE', desc: 'Documentos del mismo modulo' },
+    { n: '2', label: 'Sube PE y GPE', desc: 'Documentos del mismo módulo' },
     { n: '3', label: 'Revisa lo detectado', desc: 'Unidades, RAs y horas' },
     { n: '4', label: 'Exporta a Word', desc: 'Listo para ajustar y entregar' },
   ]
@@ -17,11 +17,11 @@ export default function EmptyState({ onCrear, sinCreditosDisponibles }) {
         <p className="mb-2 text-sm font-bold uppercase tracking-[0.18em] text-brand-700 dark:text-brand-300">
           Bienvenido a Planea-Pro
         </p>
-        <h2 className="text-3xl font-black tracking-tight text-slate-950 dark:text-white">
-          Empieza tu primera planeacion con una ruta clara.
+        <h2 className="font-display text-[2.1rem] font-semibold leading-[1.1] tracking-tight text-slate-950 dark:text-white">
+          Empieza tu primera planeación con una ruta clara.
         </h2>
         <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-slate-500 dark:text-slate-400">
-          Puedes generar una planeacion completa con IA o extraer solo el planificador de horarios sin gastar creditos.
+          Puedes generar una planeación completa con IA o extraer solo el horario automático del módulo.
         </p>
       </div>
 
@@ -37,16 +37,16 @@ export default function EmptyState({ onCrear, sinCreditosDisponibles }) {
               <path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" />
             </svg>
           </div>
-          <h3 className="mb-1 text-base font-extrabold text-slate-900 dark:text-white">Planeacion completa</h3>
+          <h3 className="mb-1 text-base font-extrabold text-slate-900 dark:text-white">Planeación completa</h3>
           <p className="mb-4 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-            Sube PE y GPE. Planea-Pro propone estructura, sesiones y tablas didacticas para revisar.
+            Sube PE y GPE. Planea-Pro propone estructura, sesiones y tablas didácticas para revisar.
           </p>
           <span className="inline-flex items-center rounded-full bg-brand-50 px-2.5 py-1 text-[10px] font-bold text-brand-700 dark:bg-brand-900/30 dark:text-brand-200">
-            1 credito por modulo
+            100 créditos
           </span>
           {sinCreditosDisponibles && (
-            <p className="mt-2 text-[11px] font-medium text-document-700 dark:text-document-300">
-              Necesitas credito para la generacion completa.
+            <p className="mt-2 text-[11px] font-medium text-warning-700 dark:text-warning-300">
+              Necesitas crédito para la generación completa.
             </p>
           )}
         </button>
@@ -61,12 +61,12 @@ export default function EmptyState({ onCrear, sinCreditosDisponibles }) {
                 d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
-          <h3 className="mb-1 text-base font-extrabold text-slate-900 dark:text-white">Horario automatico</h3>
+          <h3 className="mb-1 text-base font-extrabold text-slate-900 dark:text-white">Horario automático</h3>
           <p className="mb-4 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-            Extrae unidades y horas para construir tu planificador. Ideal para iniciar sin creditos.
+            Extrae unidades y horas para construir tu planificador de horarios.
           </p>
-          <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-500 dark:bg-slate-700/60 dark:text-slate-300">
-            Gratis
+          <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-600 dark:bg-slate-700/60 dark:text-slate-300">
+            25 créditos
           </span>
         </button>
       </div>
@@ -82,7 +82,7 @@ export default function EmptyState({ onCrear, sinCreditosDisponibles }) {
                 {step.n}
               </div>
               <p className="text-xs font-bold text-slate-800 dark:text-slate-100">{step.label}</p>
-              <p className="mt-1 text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">{step.desc}</p>
+              <p className="mt-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">{step.desc}</p>
             </div>
           ))}
         </div>

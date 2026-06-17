@@ -24,7 +24,7 @@ export default function LoginPage() {
       navigate(from, { replace: true })
     } catch (err) {
       console.error(err)
-      setError('No pudimos iniciar sesion. Revisa tu correo y contrasena.')
+      setError('No pudimos iniciar sesión. Revisa tu correo y contraseña.')
     } finally {
       setLoading(false)
     }
@@ -38,26 +38,39 @@ export default function LoginPage() {
       navigate(from, { replace: true })
     } catch (err) {
       console.error(err)
-      setError('No pudimos iniciar sesion con Google. Intentalo nuevamente.')
+      setError('No pudimos iniciar sesión con Google. Inténtalo nuevamente.')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[radial-gradient(circle_at_top_left,#dff8f4,transparent_34%),linear-gradient(135deg,#f8fbfa_0%,#eef7f5_48%,#fff8eb_100%)] p-4 dark:bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.13),transparent_32%),linear-gradient(135deg,#07151a_0%,#0f172a_52%,#18221f_100%)]">
+    <div className="min-h-screen overflow-x-hidden bg-[radial-gradient(circle_at_top_left,#d6efe9,transparent_38%),radial-gradient(circle_at_bottom_right,#fde3db,transparent_42%),linear-gradient(135deg,#fffdf8_0%,#f7f3ea_50%,#fdf0e9_100%)] p-4 dark:bg-[radial-gradient(circle_at_top_left,rgba(94,234,212,0.10),transparent_36%),radial-gradient(circle_at_bottom_right,rgba(232,93,63,0.08),transparent_42%),linear-gradient(135deg,#0d1614_0%,#111a18_55%,#1a1512_100%)]">
       <main className="mx-auto grid min-h-screen w-full max-w-6xl items-center gap-10 py-8 lg:grid-cols-[1.05fr_0.95fr]">
+        {/* Hero compacto — solo móvil (en lg+ aparece el panel lateral completo) */}
+        <section className="text-center lg:hidden animate-slide-up">
+          <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-white/70 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-brand-700 shadow-sm backdrop-blur dark:border-brand-800/60 dark:bg-slate-900/50 dark:text-brand-300">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent-500" />
+            Para docentes CONALEP
+          </p>
+          <h2 className="font-display text-[1.6rem] font-semibold leading-tight tracking-tight text-slate-950 dark:text-white">
+            Convierte PE y GPE en <span className="italic text-accent-600 dark:text-accent-400">planeaciones listas</span> para revisar y exportar.
+          </h2>
+        </section>
+
         <section className="hidden animate-slide-up lg:block">
           <BrandLogo markClassName="w-12 h-12" showTagline />
           <div className="mt-10 max-w-xl">
-            <p className="mb-4 inline-flex rounded-full border border-brand-200 bg-white/70 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-brand-700 shadow-sm dark:border-brand-800 dark:bg-slate-900/60 dark:text-brand-300">
+            <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-white/70 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-brand-700 shadow-sm backdrop-blur dark:border-brand-800/60 dark:bg-slate-900/50 dark:text-brand-300">
+              <span className="h-1.5 w-1.5 rounded-full bg-accent-500" />
               Para docentes CONALEP
             </p>
-            <h1 className="text-4xl font-black tracking-tight text-slate-950 dark:text-white">
-              Convierte PE y GPE en planeaciones listas para revisar y exportar.
+            <h1 className="font-display text-[2.75rem] font-semibold leading-[1.08] tracking-tight text-slate-950 dark:text-white">
+              <span className="block text-[1.35rem] font-bold text-brand-700 dark:text-brand-300 mb-1">Planea Pro</span>
+              Convierte PE y GPE en <span className="italic text-accent-600 dark:text-accent-400">planeaciones listas</span> para revisar y exportar.
             </h1>
-            <p className="mt-5 text-base leading-8 text-slate-600 dark:text-slate-300">
-              Planea-Pro te ayuda a ordenar documentos oficiales, calcular horarios y preparar planeaciones didacticas con una experiencia pensada para el trabajo docente.
+            <p className="mt-6 max-w-lg text-[15px] leading-8 text-slate-600 dark:text-slate-300">
+              Planea Pro te ayuda a ordenar documentos oficiales, calcular horarios y preparar planeaciones didácticas con una experiencia pensada para el trabajo docente.
             </p>
           </div>
           <div className="mt-8 grid max-w-xl grid-cols-3 gap-3">
@@ -66,27 +79,27 @@ export default function LoginPage() {
               ['Modelo 2023', 'Estructura y sesiones'],
               ['Word', 'Entrega lista para ajustar'],
             ].map(([title, desc]) => (
-              <div key={title} className="rounded-2xl border border-white/70 bg-white/70 p-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-slate-900/55">
-                <p className="text-sm font-extrabold text-brand-800 dark:text-brand-200">{title}</p>
+              <div key={title} className="rounded-2xl border border-brand-100/80 bg-white/70 p-4 shadow-sm backdrop-blur transition-transform duration-300 ease-out-strong hover:-translate-y-0.5 dark:border-white/10 dark:bg-slate-900/55">
+                <p className="font-display text-base font-semibold text-brand-800 dark:text-brand-200">{title}</p>
                 <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{desc}</p>
               </div>
             ))}
           </div>
         </section>
 
-        <div className="card relative z-10 w-full max-w-md justify-self-center p-8 animate-slide-up">
+        <div className="card relative z-10 w-full max-w-md justify-self-center p-8 animate-slide-up" style={{ animationDelay: '120ms' }}>
           <div className="mb-8 text-center">
             <BrandLogo className="justify-center" markClassName="w-14 h-14" showTagline />
-            <h2 className="mt-7 text-2xl font-extrabold text-slate-900 dark:text-white">
-              Accede a tu centro de planeacion
+            <h2 className="mt-7 font-display text-[1.7rem] font-semibold tracking-tight text-slate-900 dark:text-white">
+              Accede a tu centro de planeación
             </h2>
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-              Continua tus materias, documentos y exportaciones.
+              Continúa tus materias, documentos y exportaciones.
             </p>
           </div>
 
           {error && (
-            <div className="mb-6 rounded-xl border border-rose-200 bg-rose-50 p-3 text-center text-sm font-medium text-rose-600 dark:border-rose-800/40 dark:bg-rose-900/20 dark:text-rose-400" aria-live="polite">
+            <div className="mb-6 rounded-xl border border-danger-200 bg-danger-50 p-3 text-center text-sm font-medium text-danger-600 dark:border-danger-800/40 dark:bg-danger-900/20 dark:text-danger-400" aria-live="polite">
               {error}
             </div>
           )}
@@ -94,7 +107,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <label className="block">
               <span className="mb-1.5 ml-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">
-                Correo electronico
+                Correo electrónico
               </span>
               <span className="relative block">
                 <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -118,7 +131,7 @@ export default function LoginPage() {
 
             <label className="block">
               <span className="mb-1.5 ml-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">
-                Contrasena
+                Contraseña
               </span>
               <span className="relative block">
                 <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -139,27 +152,23 @@ export default function LoginPage() {
               </span>
             </label>
 
-            <div className="flex items-center justify-between pt-1">
-              <label className="flex cursor-pointer items-center gap-2">
-                <input type="checkbox" className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500" />
-                <span className="text-xs text-slate-600 dark:text-slate-400">Mantener sesion</span>
-              </label>
+            <div className="flex items-center justify-end pt-1">
               <Link to="/reset-password" className="text-xs font-semibold text-brand-700 hover:text-brand-800 dark:text-brand-300">
-                Olvide mi contrasena
+                Olvidé mi contraseña
               </Link>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary mt-2 w-full justify-center py-2.5 text-base"
+              className="btn-accent mt-2 w-full justify-center py-2.5 text-base"
             >
-              {loading ? 'Preparando tu espacio...' : 'Entrar a Planea-Pro'}
+              {loading ? 'Preparando tu espacio...' : 'Entrar a Planea Pro'}
             </button>
           </form>
 
-          <div className="mt-6 flex items-center text-sm text-slate-400 before:mr-4 before:flex-1 before:border-t before:border-slate-200 after:ml-4 after:flex-1 after:border-t after:border-slate-200 dark:before:border-slate-700 dark:after:border-slate-700">
-            o continua con
+          <div className="mt-6 flex items-center text-sm text-slate-500 dark:text-slate-400 before:mr-4 before:flex-1 before:border-t before:border-slate-200 after:ml-4 after:flex-1 after:border-t after:border-slate-200 dark:before:border-slate-700 dark:after:border-slate-700">
+            o continúa con
           </div>
 
           <button
@@ -179,7 +188,7 @@ export default function LoginPage() {
           <p className="mt-8 text-center text-xs text-slate-500 dark:text-slate-400">
             No tienes una cuenta?{' '}
             <Link to="/register" className="font-semibold text-brand-700 hover:underline dark:text-brand-300">
-              Registrate
+              Regístrate
             </Link>
           </p>
         </div>

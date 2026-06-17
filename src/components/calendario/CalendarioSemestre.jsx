@@ -61,8 +61,8 @@ function CeldaDia({ celda }) {
   if (celda.vacio) return <div className={base} />
 
   let cls = base + ' '
-  if (celda.esVacacion)  cls += 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300'
-  else if (celda.esFinSemana) cls += 'bg-slate-100 dark:bg-slate-800/60 text-slate-400'
+  if (celda.esVacacion)  cls += 'bg-warning-100 dark:bg-warning-900/40 text-warning-700 dark:text-warning-300'
+  else if (celda.esFinSemana) cls += 'bg-slate-100 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400'
   else if (celda.actividad)   cls += 'text-white'
   else                         cls += 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'
 
@@ -89,7 +89,7 @@ export default function CalendarioSemestre({ planeacion, compacto = false }) {
           <span className="text-slate-500">{pct}% del calendario</span>
         </div>
         <div className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-violet-500 to-primary-600 rounded-full" style={{ width: `${pct}%` }} />
+          <div className="h-full bg-gradient-to-r from-info-500 to-primary-600 rounded-full" style={{ width: `${pct}%` }} />
         </div>
       </div>
     )
@@ -107,16 +107,16 @@ export default function CalendarioSemestre({ planeacion, compacto = false }) {
         </div>
         {/* Leyenda */}
         <div className="flex items-center gap-3 text-xs text-slate-500">
-          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-amber-200 dark:bg-amber-700" />Vacaciones</span>
+          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-warning-200 dark:bg-warning-700" />Vacaciones</span>
           <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-slate-200 dark:bg-slate-700" />Fin de semana</span>
-          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-violet-500" />Actividades RA</span>
+          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-info-500" />Actividades RA</span>
         </div>
       </div>
 
       {/* Grid de días */}
       <div className="grid grid-cols-7 gap-0.5 text-xs">
         {['L','M','M','J','V','S','D'].map((d, i) => (
-          <div key={i} className="text-center text-slate-400 dark:text-slate-500 font-semibold pb-1">{d}</div>
+          <div key={i} className="text-center text-slate-500 dark:text-slate-400 font-semibold pb-1">{d}</div>
         ))}
         {datos.celdas.map((celda, i) => <CeldaDia key={i} celda={celda} />)}
       </div>

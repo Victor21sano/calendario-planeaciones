@@ -97,7 +97,7 @@ export default function PerfilPage() {
         <div className="card p-8">
 
           <div className="mb-8">
-            <h2 className="text-xl font-extrabold text-slate-900 dark:text-white mb-1">Datos del docente</h2>
+            <h2 className="font-display text-xl font-semibold text-slate-900 dark:text-white mb-1">Datos del docente</h2>
             <p className="text-sm text-slate-500 dark:text-slate-400">
               Estos datos aparecen en tus planeaciones del <strong>Modelo 2023</strong>.
               Mantenlos actualizados para que tus planeaciones sean correctas.
@@ -116,7 +116,7 @@ export default function PerfilPage() {
                 readOnly
                 className="input-base opacity-60 cursor-not-allowed"
               />
-              <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1 ml-1">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 ml-1">
                 Asociado a tu cuenta. No se puede cambiar desde aquí.
               </p>
             </div>
@@ -151,7 +151,7 @@ export default function PerfilPage() {
                 maxLength={15}
                 className="input-base font-mono tracking-wider"
               />
-              <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1 ml-1">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 ml-1">
                 Aparece en las planeaciones oficiales del CONALEP.
               </p>
             </div>
@@ -174,14 +174,14 @@ export default function PerfilPage() {
 
             {/* Error */}
             {error && (
-              <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800/40 text-xs font-medium text-rose-700 dark:text-rose-300 animate-slide-down">
+              <div className="p-3 rounded-xl bg-danger-50 dark:bg-danger-900/20 border border-danger-200 dark:border-danger-800/40 text-xs font-medium text-danger-700 dark:text-danger-300 animate-slide-down">
                 {error}
               </div>
             )}
 
             {/* Éxito */}
             {exito && (
-              <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/40 text-xs font-medium text-emerald-700 dark:text-emerald-300 flex items-center gap-2 animate-slide-down">
+              <div className="p-3 rounded-xl bg-success-50 dark:bg-success-900/20 border border-success-200 dark:border-success-800/40 text-xs font-medium text-success-700 dark:text-success-300 flex items-center gap-2 animate-slide-down">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>

@@ -11,7 +11,11 @@ import MateriaTypeBadge   from '../components/badges/MateriaTypeBadge'
 import EmptyState          from '../components/dashboard/EmptyState'
 import ModeloMateriaModal  from '../components/dashboard/ModeloMateriaModal'
 import PerfilIncompletoModal from '../components/dashboard/PerfilIncompletoModal'
+import MenuUsuario from '../components/dashboard/MenuUsuario'
 import BrandLogo           from '../components/brand/BrandLogo'
+import AnimatedNumber      from '../components/ui/AnimatedNumber'
+import { useSpotlight }    from '../hooks/useSpotlight'
+import { useMagnetic }     from '../hooks/useMagnetic'
 
 // ─── Progreso del semestre ────────────────────────────────────
 function calcProgreso(fechaInicio, fechaFin) {
@@ -46,9 +50,13 @@ function MateriaCard({ materia, idx, onNavigate, onDuplicate, onDelete }) {
       : `${format(inicio, 'MMM yyyy', { locale: es })} – ${format(fin, 'MMM yyyy', { locale: es })}`
   }
 
+  const { ref: spotRef, onMouseMove: onSpotMove } = useSpotlight()
+
   return (
     <div
-      className="card group relative cursor-pointer animate-scale-in"
+      ref={spotRef}
+      onMouseMove={onSpotMove}
+      className="card card-spotlight group relative cursor-pointer animate-scale-in"
       style={{ animationDelay: `${Math.min(idx * 50, 250)}ms` }}
       onClick={() => onNavigate(materia.id)}
     >
@@ -63,7 +71,7 @@ function MateriaCard({ materia, idx, onNavigate, onDuplicate, onDelete }) {
             </svg>
           </button>
           <button onClick={() => onDelete(materia.id)} title="Eliminar" aria-label={`Eliminar ${materia.nombre}`}
-            className="icon-button w-7 h-7 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20">
+            className="icon-button w-7 h-7 text-slate-400 hover:text-danger-600 dark:hover:text-danger-400 hover:bg-danger-50 dark:hover:bg-danger-900/20">
             <svg aria-hidden="true" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
@@ -71,7 +79,7 @@ function MateriaCard({ materia, idx, onNavigate, onDuplicate, onDelete }) {
         </div>
       </div>
 
-      <div className="p-5 flex flex-col h-full">
+      <div className="relative z-[1] p-5 flex flex-col h-full">
         {/* Nombre */}
         <h3 className="text-base font-bold text-slate-900 dark:text-slate-50 leading-snug pr-20 mb-3 line-clamp-2">
           {materia.nombre}
@@ -79,7 +87,7 @@ function MateriaCard({ materia, idx, onNavigate, onDuplicate, onDelete }) {
 
         {/* Modelo badge */}
         {materia.modelo && materia.modelo !== MODELO_2018 && (
-          <span className="inline-block mb-2 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
+          <span className="inline-block mb-2 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300">
             Modelo {materia.modelo}
           </span>
         )}
@@ -100,8 +108,8 @@ function MateriaCard({ materia, idx, onNavigate, onDuplicate, onDelete }) {
           <div className="mt-auto space-y-1.5">
             <div className="flex items-center justify-between">
               {progreso.estado === 'activo' && (
-                <span className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="flex items-center gap-1.5 text-[11px] font-medium text-success-600 dark:text-success-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse" />
                   Activo
                 </span>
               )}
@@ -109,7 +117,7 @@ function MateriaCard({ materia, idx, onNavigate, onDuplicate, onDelete }) {
                 <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500">Finalizado</span>
               )}
               {progreso.estado === 'pendiente' && (
-                <span className="text-[11px] font-medium text-amber-500 dark:text-amber-400">{progreso.label}</span>
+                <span className="text-[11px] font-medium text-warning-600 dark:text-warning-400">{progreso.label}</span>
               )}
               <span className="text-[11px] text-slate-400 dark:text-slate-500 ml-auto">
                 {progreso.estado !== 'pendiente' && progreso.label}
@@ -117,7 +125,7 @@ function MateriaCard({ materia, idx, onNavigate, onDuplicate, onDelete }) {
             </div>
             <div className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-slate-700/60 overflow-hidden">
               <div className={`h-full rounded-full transition-[width,background-color] duration-700 ease-out-strong
-                  ${progreso.estado === 'finalizado' ? 'bg-emerald-400' : 'bg-violet-500 dark:bg-violet-400'}`}
+                  ${progreso.estado === 'finalizado' ? 'bg-success-400' : 'bg-accent-500 dark:bg-accent-400'}`}
                 style={{ width: `${progreso.pct}%` }} />
             </div>
           </div>
@@ -128,6 +136,69 @@ function MateriaCard({ materia, idx, onNavigate, onDuplicate, onDelete }) {
         )}
       </div>
     </div>
+  )
+}
+
+// ─── Tarjeta Asistente Estímulo ──────────────────────────────
+function EstimuloCard() {
+  const stored = (() => {
+    try { return JSON.parse(localStorage.getItem('asistente-estimulo-docente-v1') || '{}') } catch { return {} }
+  })()
+  const checks = stored.checks || {}
+  const done = Object.values(checks).filter(Boolean).length
+  const TOTAL = 31
+  const pct = TOTAL ? Math.round((done / TOTAL) * 100) : 0
+  const hasProgress = done > 0
+
+  return (
+    <section className="mt-10" aria-labelledby="herramientas-title">
+      <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-brand-700 dark:text-brand-300" id="herramientas-title">
+        Herramientas gratuitas
+      </p>
+      <div className="card card-spotlight border-t-2 border-brand-400 dark:border-brand-500 p-5 max-w-sm">
+        {/* Chip */}
+        <span className="inline-flex items-center mb-3 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-brand-50 text-brand-700 border border-brand-200 dark:bg-brand-900/20 dark:text-brand-300 dark:border-brand-800">
+          Herramienta gratuita
+        </span>
+
+        <div className="flex items-start gap-3 mb-3">
+          <div className="shrink-0 w-9 h-9 rounded-xl bg-brand-50 dark:bg-brand-900/30 flex items-center justify-center">
+            <svg aria-hidden="true" className="w-5 h-5 text-brand-600 dark:text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+            </svg>
+          </div>
+          <div className="min-w-0">
+            <h3 className="font-display text-sm font-bold text-slate-900 dark:text-slate-50 leading-snug">
+              Asistente Estímulo Docente 2-2526
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Checklist + estimador de puntaje para el trámite semestral CONALEP.
+            </p>
+          </div>
+        </div>
+
+        {hasProgress ? (
+          <div className="mb-3 space-y-1">
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-semibold text-brand-700 dark:text-brand-300">{done} de {TOTAL} completados</span>
+              <span className="text-xs text-slate-400">{pct}%</span>
+            </div>
+            <div className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
+              <div
+                className="h-full rounded-full bg-brand-500 dark:bg-brand-400 transition-[width] duration-300"
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+          </div>
+        ) : (
+          <p className="text-xs text-slate-400 dark:text-slate-500 mb-3 italic">Sin iniciar</p>
+        )}
+
+        <Link to="/asistente-estimulo" className="btn-primary w-full text-center">
+          Abrir herramienta
+        </Link>
+      </div>
+    </section>
   )
 }
 
@@ -152,6 +223,8 @@ function SkeletonGrid() {
 // ─── Página principal ─────────────────────────────────────────
 export default function DashboardPage() {
   const { user, logout, esAdmin, creditos, sinCreditosDisponibles, perfilDocente } = useAuth()
+  const inicialAvatar = (perfilDocente?.nombre || user?.displayName || user?.email || '?')
+    .trim().charAt(0).toUpperCase() || '?'
   const [materias,                  setMaterias]                  = useState([])
   const [loading,                   setLoading]                   = useState(true)
   const [searchTerm,                setSearchTerm]                = useState('')
@@ -159,13 +232,39 @@ export default function DashboardPage() {
   const [mostrarModalSinCreditos,   setMostrarModalSinCreditos]   = useState(false)
   const [mostrarPerfilIncompleto,   setMostrarPerfilIncompleto]   = useState(false)
   const navigate = useNavigate()
+  const crearMag = useMagnetic()
 
   useEffect(() => { loadMaterias() }, [user])
+
+  // Una materia recién creada que el usuario abandonó sin generar ni capturar
+  // nada (regresó desde la pantalla de subida) se considera un borrador vacío.
+  function esBorradorVacio(m) {
+    const sinUnidades = !m.unidades || m.unidades.length === 0
+    const sinFechas   = !m.semestre?.fechaInicio && !m.semestre?.fechaFin
+    const sinPlan     = !m.planeacion2023 && !m.estructuraIA
+    const nombre      = String(m.nombre || '').trim().toLowerCase()
+    const nombreDefault = nombre === '' || nombre === 'nueva materia'
+    return sinUnidades && sinFechas && sinPlan && nombreDefault
+  }
 
   async function loadMaterias() {
     try {
       setLoading(true)
-      const data = await fetchMaterias(user.uid)
+      let data = await fetchMaterias(user.uid)
+
+      // Limpieza de borrador abandonado: si se creó una materia nueva y el usuario
+      // volvió al panel sin generar ni capturar nada, se elimina para no dejar
+      // materias vacías. Solo afecta al borrador recién creado (no a las demás).
+      const borradorId = sessionStorage.getItem('planea_borrador_id')
+      if (borradorId) {
+        const borrador = data.find(m => m.id === borradorId)
+        if (borrador && esBorradorVacio(borrador)) {
+          try { await deleteMateria(user.uid, borradorId) } catch {}
+          data = data.filter(m => m.id !== borradorId)
+        }
+        sessionStorage.removeItem('planea_borrador_id')
+      }
+
       setMaterias(data)
     } catch (err) { console.error('Error loading materias:', err) }
     finally { setLoading(false) }
@@ -202,6 +301,12 @@ export default function DashboardPage() {
       return
     }
 
+    // El horario automático cuesta 25 créditos: sin saldo suficiente, mostrar compra
+    if (!conIA && !esAdmin && creditos !== null && creditos < 25) {
+      setMostrarModalSinCreditos(true)
+      return
+    }
+
     // Crear la materia
     try {
       const defaultMateria = {
@@ -214,6 +319,9 @@ export default function DashboardPage() {
         pagada: conIA,
       }
       const newId = await addMateria(user.uid, defaultMateria)
+      // Marcar como borrador: si el usuario regresa sin usarla, se limpia al
+      // volver al panel (ver loadMaterias / esBorradorVacio).
+      sessionStorage.setItem('planea_borrador_id', newId)
       navigate(`/materia/${newId}`, !conIA ? { state: { modoManual: true } } : undefined)
     } catch (err) { console.error('Error creating materia', err) }
   }
@@ -248,42 +356,16 @@ export default function DashboardPage() {
   }, [materias, searchTerm])
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
+    <div className="min-h-screen surface-atmosphere flex flex-col">
 
       {/* ── Header ── */}
-      <header className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-white/5">
+      <header className="sticky top-0 z-40 bg-[#fffdf8]/80 dark:bg-[#182420]/80 backdrop-blur-xl border-b border-brand-100/60 dark:border-white/5">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-4">
           <BrandLogo className="flex-shrink-0" markClassName="w-8 h-8" />
 
           <div className="flex items-center gap-2">
             <SaldoCreditos />
-            {esAdmin && (
-              <Link to="/admin"
-                className="pressable hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-brand-700 dark:text-brand-300 bg-brand-50 dark:bg-brand-900/20 hover:bg-brand-100 dark:hover:bg-brand-900/30">
-                <svg aria-hidden="true" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                </svg>
-                Admin
-              </Link>
-            )}
-            {/* Link perfil */}
-            <Link
-              to="/perfil"
-              className="hidden sm:inline-flex items-center gap-1 text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              title="Mi perfil"
-            >
-              <svg aria-hidden="true" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-              Perfil
-            </Link>
-            <button
-              onClick={handleLogout}
-              className="text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 px-2.5 py-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
-            >
-              Salir
-            </button>
+            <MenuUsuario inicial={inicialAvatar} esAdmin={esAdmin} onLogout={handleLogout} />
           </div>
         </div>
       </header>
@@ -298,10 +380,10 @@ export default function DashboardPage() {
               <p className="mb-1 text-xs font-bold uppercase tracking-[0.18em] text-brand-700 dark:text-brand-300">
                 Centro de trabajo docente
               </p>
-              <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">Tus planeaciones recientes</h2>
+              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">Tus planeaciones recientes</h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                {materias.length} {materias.length === 1 ? 'planeación' : 'planeaciones'}
-                {' · '}{totalConIA} con IA, {totalManuales} manuales
+                <AnimatedNumber value={materias.length} /> {materias.length === 1 ? 'planeación' : 'planeaciones'}
+                {' · '}<AnimatedNumber value={totalConIA} /> con IA, <AnimatedNumber value={totalManuales} /> manuales
               </p>
             </div>
             <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -319,12 +401,19 @@ export default function DashboardPage() {
                   onChange={e => setSearchTerm(e.target.value)}
                 />
               </div>
-              <button onClick={abrirModalCrear} className="btn-primary text-xs h-9 gap-1.5 flex-shrink-0">
-                <svg aria-hidden="true" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                Crear planeacion
-              </button>
+              <span
+                ref={crearMag.ref}
+                onMouseMove={crearMag.onMouseMove}
+                onMouseLeave={crearMag.onMouseLeave}
+                className="inline-block flex-shrink-0 transition-transform duration-300 ease-out-strong will-change-transform"
+              >
+                <button onClick={abrirModalCrear} className="btn-accent text-xs h-9 gap-1.5">
+                  <svg aria-hidden="true" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Crear planeación
+                </button>
+              </span>
             </div>
           </div>
         )}
@@ -357,8 +446,24 @@ export default function DashboardPage() {
                 onDelete={handleDelete}
               />
             ))}
+            {!searchTerm && (
+              <button
+                onClick={abrirModalCrear}
+                className="selectable-card flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-slate-300 p-8 text-slate-400 hover:border-brand-400 hover:bg-white/60 hover:text-brand-600 dark:border-slate-600 dark:text-slate-500 dark:hover:border-brand-500 dark:hover:bg-slate-800/40 dark:hover:text-brand-300"
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                </span>
+                <span className="text-sm font-semibold">Nueva planeación</span>
+              </button>
+            )}
           </div>
         )}
+
+        {/* ── Herramientas ── */}
+        <EstimuloCard />
       </main>
 
       {/* ── Modales ── */}
@@ -373,10 +478,6 @@ export default function DashboardPage() {
       {mostrarModalSinCreditos && (
         <ModalSinCreditos
           onComprar={() => navigate('/comprar-creditos')}
-          onModoGratuito={() => {
-            setMostrarModalSinCreditos(false)
-            handleConfirmarCreacion({ modelo: MODELO_2018, conIA: false })
-          }}
           onCerrar={() => setMostrarModalSinCreditos(false)}
         />
       )}

@@ -1,6 +1,6 @@
 import BrandMark from './brand/BrandMark'
 
-export default function ModalSinCreditos({ onComprar, onModoGratuito, onCerrar }) {
+export default function ModalSinCreditos({ onComprar, onCerrar }) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center overscroll-contain bg-black/50 p-4 backdrop-blur-sm animate-fade-in"
@@ -26,38 +26,27 @@ export default function ModalSinCreditos({ onComprar, onModoGratuito, onCerrar }
 
         <div className="space-y-2 text-center">
           <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">
-            Tus creditos no son suficientes
+            Tus créditos no son suficientes
           </h2>
           <p className="text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-            La planeacion completa con IA requiere 1 credito por modulo. Tambien puedes usar el horario automatico gratis para extraer unidades y horas.
+            La planeación completa cuesta 100 créditos y el horario automático 25. Adquiere créditos para continuar.
           </p>
         </div>
 
         <div className="space-y-3">
           <button
             onClick={onComprar}
-            className="btn-primary w-full justify-center gap-2 py-3 text-sm"
+            className="btn-accent w-full justify-center gap-2 py-3 text-sm"
           >
             <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                 d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
-            Adquirir creditos
+            Adquirir créditos
           </button>
 
-          <button
-            onClick={onModoGratuito}
-            className="btn-secondary w-full justify-center gap-2 py-3 text-sm"
-          >
-            <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            Usar horario automatico gratis
-          </button>
-
-          <p className="px-2 text-center text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">
-            Puedes generar la planeacion didactica completa cuando tengas creditos disponibles.
+          <p className="px-2 text-center text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+            Si ya pagaste el horario (25), la planeación completa son solo 75 créditos más.
           </p>
         </div>
       </div>
