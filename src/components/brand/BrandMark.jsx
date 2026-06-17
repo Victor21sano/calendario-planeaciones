@@ -1,7 +1,7 @@
 export default function BrandMark({ className = 'w-10 h-10', compact = false }) {
   return (
     <div
-      className={`${className} relative inline-flex items-center justify-center rounded-2xl bg-gradient-to-br from-academic-500 to-brand-700 text-white shadow-lg shadow-brand-700/30`}
+      className={`${className} relative inline-flex items-center justify-center rounded-[26%] bg-gradient-to-br from-academic-500 to-brand-700 text-white shadow-lg shadow-brand-700/30`}
       aria-hidden="true"
     >
       <svg viewBox="0 0 120 120" className="h-[78%] w-[78%]" fill="none">
