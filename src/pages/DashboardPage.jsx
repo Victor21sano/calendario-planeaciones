@@ -337,22 +337,10 @@ export default function DashboardPage() {
     catch (err) { console.error(err) }
   }
 
-  const { filteredMaterias, totalConIA, totalManuales } = useMemo(() => {
+  const filteredMaterias = useMemo(() => {
     const query = searchTerm.trim().toLowerCase()
-    let conIA = 0
-    let manuales = 0
-    const filtradas = []
-
-    for (const materia of materias) {
-      if (materia.pagada === false) manuales += 1
-      else conIA += 1
-
-      if (!query || materia.nombre.toLowerCase().includes(query)) {
-        filtradas.push(materia)
-      }
-    }
-
-    return { filteredMaterias: filtradas, totalConIA: conIA, totalManuales: manuales }
+    if (!query) return materias
+    return materias.filter(m => m.nombre.toLowerCase().includes(query))
   }, [materias, searchTerm])
 
   return (
@@ -382,8 +370,7 @@ export default function DashboardPage() {
               </p>
               <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">Tus planeaciones recientes</h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                <AnimatedNumber value={materias.length} /> {materias.length === 1 ? 'planeación' : 'planeaciones'}
-                {' · '}<AnimatedNumber value={totalConIA} /> con IA, <AnimatedNumber value={totalManuales} /> manuales
+                <AnimatedNumber value={materias.length} /> {materias.length === 1 ? 'planeación' : 'planeaciones'} con IA
               </p>
             </div>
             <div className="flex items-center gap-2 w-full sm:w-auto">
