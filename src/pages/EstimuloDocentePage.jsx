@@ -60,7 +60,7 @@ export default function EstimuloDocentePage() {
     <div className="estimulo-page min-h-screen surface-atmosphere flex flex-col">
 
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-[#fffdf8]/80 dark:bg-[#182420]/80 backdrop-blur-xl border-b border-brand-100/60 dark:border-white/5">
+      <header className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-brand-100/60 dark:border-white/5">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-4">
           <BrandLogo className="flex-shrink-0" markClassName="w-8 h-8" />
           <MenuUsuario inicial={inicialAvatar} esAdmin={esAdmin} onLogout={logout} />
@@ -209,11 +209,12 @@ export default function EstimuloDocentePage() {
 
             {/* Notas personales */}
             <div className="card p-5 space-y-2">
-              <h2 className="font-display text-base font-semibold text-slate-900 dark:text-white">Notas personales</h2>
+              <label htmlFor="estimulo-notes" className="font-display text-base font-semibold text-slate-900 dark:text-white block">Notas personales</label>
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 Este espacio también se guarda automáticamente en este navegador.
               </p>
               <textarea
+                id="estimulo-notes"
                 value={notes}
                 onChange={e => setNotes(e.target.value)}
                 placeholder="Ejemplo: pedir constancia de curso, escanear Anexo II, revisar RFC vigente..."
