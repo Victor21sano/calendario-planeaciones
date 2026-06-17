@@ -370,7 +370,7 @@ export default function DashboardPage() {
               </p>
               <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">Tus planeaciones recientes</h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                <AnimatedNumber value={materias.length} /> {materias.length === 1 ? 'planeación' : 'planeaciones'} con IA
+                <AnimatedNumber value={materias.length} /> {materias.length === 1 ? 'planeación potenciada con IA' : 'planeaciones potenciadas con IA'}
               </p>
             </div>
             <div className="flex items-center gap-2 w-full sm:w-auto">
