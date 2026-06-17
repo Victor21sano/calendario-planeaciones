@@ -139,6 +139,69 @@ function MateriaCard({ materia, idx, onNavigate, onDuplicate, onDelete }) {
   )
 }
 
+// ─── Tarjeta Asistente Estímulo ──────────────────────────────
+function EstimuloCard() {
+  const stored = (() => {
+    try { return JSON.parse(localStorage.getItem('asistente-estimulo-docente-v1') || '{}') } catch { return {} }
+  })()
+  const checks = stored.checks || {}
+  const done = Object.values(checks).filter(Boolean).length
+  const TOTAL = 34
+  const pct = TOTAL ? Math.round((done / TOTAL) * 100) : 0
+  const hasProgress = done > 0
+
+  return (
+    <section className="mt-10" aria-labelledby="herramientas-title">
+      <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-brand-700 dark:text-brand-300" id="herramientas-title">
+        Herramientas gratuitas
+      </p>
+      <div className="card card-spotlight border-t-2 border-brand-400 dark:border-brand-500 p-5 max-w-sm">
+        {/* Chip */}
+        <span className="inline-flex items-center mb-3 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-brand-50 text-brand-700 border border-brand-200 dark:bg-brand-900/20 dark:text-brand-300 dark:border-brand-800">
+          Herramienta gratuita
+        </span>
+
+        <div className="flex items-start gap-3 mb-3">
+          <div className="shrink-0 w-9 h-9 rounded-xl bg-brand-50 dark:bg-brand-900/30 flex items-center justify-center">
+            <svg aria-hidden="true" className="w-5 h-5 text-brand-600 dark:text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+            </svg>
+          </div>
+          <div className="min-w-0">
+            <h3 className="font-display text-sm font-bold text-slate-900 dark:text-slate-50 leading-snug">
+              Asistente Estímulo Docente 2-2526
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Checklist + estimador de puntaje para el trámite semestral CONALEP.
+            </p>
+          </div>
+        </div>
+
+        {hasProgress ? (
+          <div className="mb-3 space-y-1">
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-semibold text-brand-700 dark:text-brand-300">{done} de {TOTAL} completados</span>
+              <span className="text-xs text-slate-400">{pct}%</span>
+            </div>
+            <div className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
+              <div
+                className="h-full rounded-full bg-brand-500 dark:bg-brand-400 transition-[width] duration-300"
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+          </div>
+        ) : (
+          <p className="text-xs text-slate-400 dark:text-slate-500 mb-3 italic">Sin iniciar</p>
+        )}
+
+        <Link to="/asistente-estimulo" className="btn-primary w-full text-center">
+          Abrir herramienta
+        </Link>
+      </div>
+    </section>
+  )
+}
+
 // ─── Skeleton ─────────────────────────────────────────────────
 function SkeletonGrid() {
   return (
@@ -398,6 +461,9 @@ export default function DashboardPage() {
             )}
           </div>
         )}
+
+        {/* ── Herramientas ── */}
+        <EstimuloCard />
       </main>
 
       {/* ── Modales ── */}
