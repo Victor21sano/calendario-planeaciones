@@ -351,7 +351,7 @@ export default function DashboardPage() {
     <div className="min-h-screen surface-atmosphere flex flex-col">
 
       {/* ── Header ── */}
-      <header className="sticky top-0 z-40 bg-[#fffdf8]/80 dark:bg-[#182420]/80 backdrop-blur-xl border-b border-brand-100/60 dark:border-white/5">
+      <header className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-brand-100/60 dark:border-slate-800/60">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-4">
           <BrandLogo className="flex-shrink-0" markClassName="w-8 h-8" />
 
