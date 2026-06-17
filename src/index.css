@@ -604,3 +604,28 @@
 .dark .preview-2023-pagina table td[aria-hidden="true"] {
   border-color: #334155 !important;
 }
+
+/* ─── Estimulo Docente: print ─────────────────────────────── */
+@media print {
+  .estimulo-page [data-no-print],
+  .estimulo-page header,
+  .estimulo-page aside,
+  .estimulo-page [role="toolbar"],
+  .estimulo-page button,
+  .estimulo-page details,
+  .estimulo-page a[href="/"] {
+    display: none !important;
+  }
+
+  .estimulo-page { background: white !important; }
+
+  .estimulo-page .md\:grid-cols-\[280px_1fr\] {
+    grid-template-columns: 1fr !important;
+  }
+
+  .estimulo-page .card {
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+    break-inside: avoid;
+  }
+}
