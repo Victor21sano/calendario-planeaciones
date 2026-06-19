@@ -46,7 +46,7 @@ export default function PlanificadorPage() {
     horasTotalesPrograma: 0,
     periodosVacacionales: [],
     unidades: [],
-    modelo:       '2018',
+    modelo:       '2023',
     pagada:       true,
     planeacion2023: null,
     planGeneradaGratis: false,
@@ -113,7 +113,7 @@ export default function PlanificadorPage() {
           navigate('/')
           return
         }
-        const modelo         = data.modelo || '2018'
+        const modelo         = data.modelo || '2023'
         const planeacion2023 = data.planeacion2023 || null
         const semestre       = data.semestre || { fechaInicio: '', fechaFin: '' }
         const periodosVac    = data.periodosVacacionales || []
@@ -539,7 +539,7 @@ export default function PlanificadorPage() {
         {mainTab === 'planeacion' && (
           estado.planGeneradaGratis
             ? (
-              /* ── Generador bloqueado: contenido borroso + paywall (2018 o 2023) ── */
+              /* ── Generador bloqueado: contenido borroso + paywall ── */
               <div className="relative min-h-[600px]">
                 <div className="blur-[6px] pointer-events-none select-none opacity-80 max-h-[640px] overflow-hidden" aria-hidden="true" inert="">
                   {estado.modelo === MODELO_2023 && estado.planeacion2023
@@ -556,7 +556,7 @@ export default function PlanificadorPage() {
                         onPendingResultApplied={() => {}}
                         onGeneratedComplete={() => {}}
                         pagada={false}
-                        modelo={estado.modelo || '2018'}
+                        modelo={estado.modelo || '2023'}
                       />
                     )
                   }
@@ -676,7 +676,7 @@ export default function PlanificadorPage() {
               </div>
             )
             : (
-              /* Generador Modelo 2018 (o 2023 sin planeación todavía) */
+              /* Fallback: materia sin planeacion2023 generada aún */
               <PlaneacionGeneradorSection
                 materiaId={materiaId}
                 unidades={unidades}
@@ -699,7 +699,7 @@ export default function PlanificadorPage() {
                 onPendingResultApplied={() => setPendingResult(null)}
                 onGeneratedComplete={marcarMateriaComoIA}
                 pagada={estado.pagada !== false}
-                modelo={estado.modelo || '2018'}
+                modelo={estado.modelo || '2023'}
               />
             )
         )}

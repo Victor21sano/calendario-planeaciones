@@ -15,10 +15,11 @@ import {
 // ─── Constantes de modelo ─────────────────────────────────────
 export const MODELO_2018 = '2018'
 export const MODELO_2023 = '2023'
+export const MODELO_2025 = '2025'
 
-/** Devuelve el modelo de la materia; retrocompatible: ausencia de campo → 2018. */
+/** Devuelve el modelo de la materia; retrocompatible: ausencia de campo → 2023. */
 export function getModeloMateria(materia) {
-  return materia?.modelo || MODELO_2018
+  return materia?.modelo || MODELO_2023
 }
 
 export function esModelo2023(materia) {
@@ -47,7 +48,7 @@ export const addMateria = async (uid, materiaData) => {
   const colRef = getMateriasRef(uid)
   const docRef = await addDoc(colRef, {
     ...materiaData,
-    modelo: materiaData.modelo || MODELO_2018,  // garantizar campo siempre
+    modelo: materiaData.modelo || MODELO_2023,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   })

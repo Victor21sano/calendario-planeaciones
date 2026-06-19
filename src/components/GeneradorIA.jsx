@@ -210,7 +210,7 @@ function EstructuraPreview({ estructura, hasExisting, onConfirm, onCancel }) {
 }
 
 // ─── Main Component ───────────────────────────────────────────
-export default function GeneradorIA({ onGenerated, onUpdateUnidades, raList, onSinCreditos = () => {}, modelo = '2018', materiaId = null }) {
+export default function GeneradorIA({ onGenerated, onUpdateUnidades, raList, onSinCreditos = () => {}, modelo = '2023', materiaId = null }) {
   const { creditos, esAdmin, sinCreditosDisponibles: modoGratis } = useAuth()
   const [pdfPE,  setPdfPE]  = useState(null)
   const [pdfGPE, setPdfGPE] = useState(null)

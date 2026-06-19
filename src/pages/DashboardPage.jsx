@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { fetchMaterias, deleteMateria, duplicarMateria, addMateria, MODELO_2018 } from '../services/materias'
+import { fetchMaterias, deleteMateria, duplicarMateria, addMateria } from '../services/materias'
 import { tieneDatosCompletos2023 } from '../services/userService'
 import { format, differenceInCalendarWeeks } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -84,13 +84,6 @@ function MateriaCard({ materia, idx, onNavigate, onDuplicate, onDelete }) {
         <h3 className="text-base font-bold text-slate-900 dark:text-slate-50 leading-snug pr-20 mb-3 line-clamp-2">
           {materia.nombre}
         </h3>
-
-        {/* Modelo badge */}
-        {materia.modelo && materia.modelo !== MODELO_2018 && (
-          <span className="inline-block mb-2 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300">
-            Modelo {materia.modelo}
-          </span>
-        )}
 
         {/* Metadata */}
         <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">

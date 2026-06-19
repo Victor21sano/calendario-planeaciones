@@ -2,12 +2,7 @@ import { useState, useEffect, useRef } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { updateMateria, actualizarMateriaConPlaneacion2023, MODELO_2023 } from "../../services/materias"
 import { calcularSemanasHabiles, calcularHorasSemanaAuto } from "../../utils/calculos"
-import {
-  extraerEstructuraDesdeArchivos,
-  generarRAsDesdeEstructura,
-  buildUnidadesFromAI,
-  fileToBase64,
-} from "../../services/iaPlaneacion"
+import { fileToBase64 } from "../../services/iaPlaneacion"
 import { extraerEstructura2023 } from "../../services/ia/gemini2023"
 import { iniciarSesionGeneracion, finalizarSesionGeneracion } from "../../services/creditosService"
 import { generarPlaneacion2023Completa, validarRequisitos2023 } from "../../services/ia/orquestador2023"
@@ -21,7 +16,7 @@ import {
   PDFS_KEY,
 } from "./utils"
 
-// Motor de generacion del PlanificadorPage (modelos 2018 y 2023). Extraido de
+// Motor de generacion del PlanificadorPage (Modelo 2023). Extraido de
 // PlanificadorPage.jsx SIN cambios de comportamiento: posee el estado de flujo
 // (onboarding/generacion/modales) y los handlers que orquestan extraccion de
 // estructura, generacion de planeacion y el cobro via sesiones de credito.
@@ -134,11 +129,9 @@ export default function useFlujoGeneracion({
   // ── Generación desde la pantalla de onboarding ───────────────
   // semestreOverride: usado cuando se guardan fechas desde el modal (evita state stale)
   async function handleOnboardingGenerate(pdfPE, pdfGPE, semestreOverride = null) {
-    const modelo   = estado.modelo || '2018'
     const semestre = semestreOverride || estado.semestre
 
     console.log('🔵 [Generar] Click recibido', {
-      modelo,
       semestre,
       semestreOverride,
       pdfs: { pe: pdfPE?.name, gpe: pdfGPE?.name },
@@ -150,7 +143,7 @@ export default function useFlujoGeneracion({
     })
 
     // Detección temprana de fechas faltantes: abre modal en lugar de mostrar error
-    if (modelo === MODELO_2023 && !semestreOverride) {
+    if (!semestreOverride) {
       const faltanFechas = !semestre?.fechaInicio || !semestre?.fechaFin
       if (faltanFechas) {
         console.log('🟡 [Generar] Faltan fechas → abriendo modal de captura')
@@ -160,30 +153,20 @@ export default function useFlujoGeneracion({
       }
     }
 
-    console.log('🟢 [Generar] Validaciones OK, iniciando flujo de generación (modelo:', modelo, ')')
+    console.log('🟢 [Generar] Validaciones OK, iniciando flujo de generación')
 
-    // Validación previa sin descontar crédito (solo Modelo 2023)
-    // horasSemana ya NO se valida aquí — se calcula automáticamente en el orquestador
-    if (modelo === MODELO_2023) {
-      if (!tieneDatosCompletos2023(perfilDocente)) {
-        await continuarTrasCompletarPerfil('completa', pdfPE, pdfGPE, semestre)
-        return
-      }
-      const problemaRequisitos = validarRequisitos2023({
-        perfilDocente,
-        semestre,
-        pdfPE,
-        pdfGPE,
-      })
-      if (problemaRequisitos) {
-        setGenError(problemaRequisitos)
-        return
-      }
+    // Validación previa sin descontar crédito
+    if (!tieneDatosCompletos2023(perfilDocente)) {
+      await continuarTrasCompletarPerfil('completa', pdfPE, pdfGPE, semestre)
+      return
+    }
+    const problemaRequisitos = validarRequisitos2023({ perfilDocente, semestre, pdfPE, pdfGPE })
+    if (problemaRequisitos) {
+      setGenError(problemaRequisitos)
+      return
     }
 
     // Gate de UX: si no hay saldo, abrir modal antes de procesar los PDFs.
-    // El descuento real lo hace el servidor al abrir la sesión de generación
-    // (iniciarSesionGeneracion), de forma atómica y como única fuente de verdad.
     if (!esAdmin && creditos <= 0) {
       setMostrarModalSinCreditos(true)
       return
@@ -193,117 +176,62 @@ export default function useFlujoGeneracion({
     setGenError('')
     setGenProgress({ phase: 'converting', message: 'Preparando PDFs…', current: 0, total: 0 })
 
-    // ── Rama Modelo 2023 ──────────────────────────────────────────
-    if (modelo === MODELO_2023) {
-      try {
-        const datosDocente = {
-          nombre:      perfilDocente?.nombre      || '',
-          numEmpleado: perfilDocente?.numEmpleado || '',
-          plantel:     perfilDocente?.plantel     || '',
-        }
-        const calendario = {
-          fechaInicioSemestre: semestre?.fechaInicio || '',
-          fechaFinSemestre:    semestre?.fechaFin    || '',
-          diasNoLaborables:    expandirPeriodosVacacionales(estado.periodosVacacionales),
-        }
-
-        const resultado = await generarPlaneacion2023Completa({
-          pdfPE,
-          pdfGPE,
-          datosDocente,
-          calendario,
-          materiaId,
-          onProgreso: p => setGenProgress(p),
-        })
-
-        const nombreCorto = nombreMateriaDesdeSiglema(resultado.planeacion)
-        if (nombreCorto && debeAutonombrarMateria(estado.nombre)) {
-          await updateMateria(user.uid, materiaId, { nombre: nombreCorto })
-        }
-
-        // Guardar en Firestore. El crédito ya fue descontado por la sesión de
-        // generación que abre el orquestador 2023 (y reembolsado si hubiera fallado).
-        await actualizarMateriaConPlaneacion2023(user.uid, materiaId, resultado.planeacion, { pagada: true })
-
-        // Poblar Estructura y horasSemana para la Planeación Calculada.
-        // horasSemana se calcula con la regla de 3 del Planificador (totalHoras ÷ semanas hábiles)
-        // para que la capacidad cuadre al 100 % — no se usa el valor del orquestador 2023.
-        const unidades2023 = extraerUnidadesDesde2023(resultado.planeacion)
-        setEstado(prev => {
-          const next = {
-            ...prev,
-            ...(nombreCorto && debeAutonombrarMateria(prev.nombre) ? { nombre: nombreCorto } : {}),
-            planeacion2023: resultado.planeacion,
-            unidades: unidades2023,
-            pagada: true,
-            planGeneradaGratis: false,
-          }
-          const hTotales = unidades2023.flatMap(u => u.subunidades || []).reduce((s, su) => s + (Number(su.horas) || 0), 0)
-          const sem = semestre
-          if (hTotales > 0 && sem?.fechaInicio && sem?.fechaFin) {
-            const semanas = calcularSemanasHabiles(sem, estado.periodosVacacionales || [])
-            const auto = calcularHorasSemanaAuto(hTotales, semanas.length)
-            if (auto) next.horasSemana = auto.requiereManual ? '' : String(auto.rounded)
-          }
-          return next
-        })
-
-        if (resultado.rasConError.length > 0) {
-          console.warn('[2023] RAs con error:', resultado.rasConError)
-        }
-
-        sessionStorage.setItem('planea_pro_splash', '1')
-        setOnboardingFase('success')
-      } catch (err) {
-        console.error('🔴 [Generar 2023] Error en generación:', err)
-        setGenError(err.message || 'Error generando la planeación 2023.')
-        setOnboardingFase('upload')
+    try {
+      const datosDocente = {
+        nombre:      perfilDocente?.nombre      || '',
+        numEmpleado: perfilDocente?.numEmpleado || '',
+        plantel:     perfilDocente?.plantel     || '',
       }
-      return
-    }
+      const calendario = {
+        fechaInicioSemestre: semestre?.fechaInicio || '',
+        fechaFinSemestre:    semestre?.fechaFin    || '',
+        diasNoLaborables:    expandirPeriodosVacacionales(estado.periodosVacacionales),
+      }
 
-    // ── Rama Modelo 2018 ──────────────────────────────────────────
-    // Abrir una sola sesión de generación (1 crédito) que cubre extracción + RAs.
-    let sessionId
-    try {
-      sessionId = await iniciarSesionGeneracion('completa', materiaId)
-    } catch (err) {
-      if (err.code === 'functions/failed-precondition') setMostrarModalSinCreditos(true)
-      else setGenError(err.message || 'Error al iniciar la generación.')
-      setOnboardingFase('upload')
-      return
-    }
-    try {
-      // Paso 1: extraer estructura del PE
-      const estructura = await extraerEstructuraDesdeArchivos(pdfPE, pdfGPE, p => setGenProgress(p), sessionId)
+      const resultado = await generarPlaneacion2023Completa({
+        pdfPE,
+        pdfGPE,
+        datosDocente,
+        calendario,
+        materiaId,
+        onProgreso: p => setGenProgress(p),
+      })
 
-      // Actualizar unidades, horas totales y calcular horasSemana con regla de 3
-      const newUnidades   = buildUnidadesFromAI(estructura.unidades)
-      const horasTotales2018 = estructura.modulo?.horasTotales || 0
+      const nombreCorto = nombreMateriaDesdeSiglema(resultado.planeacion)
+      if (nombreCorto && debeAutonombrarMateria(estado.nombre)) {
+        await updateMateria(user.uid, materiaId, { nombre: nombreCorto })
+      }
+
+      await actualizarMateriaConPlaneacion2023(user.uid, materiaId, resultado.planeacion, { pagada: true })
+
+      const unidades2023 = extraerUnidadesDesde2023(resultado.planeacion)
       setEstado(prev => {
-        const next = { ...prev, unidades: newUnidades, horasTotalesPrograma: horasTotales2018 }
-        if (horasTotales2018 > 0 && prev.semestre?.fechaInicio && prev.semestre?.fechaFin) {
-          const semanas = calcularSemanasHabiles(prev.semestre, prev.periodosVacacionales || [])
-          const auto = calcularHorasSemanaAuto(horasTotales2018, semanas.length)
+        const next = {
+          ...prev,
+          ...(nombreCorto && debeAutonombrarMateria(prev.nombre) ? { nombre: nombreCorto } : {}),
+          planeacion2023: resultado.planeacion,
+          unidades: unidades2023,
+          pagada: true,
+          planGeneradaGratis: false,
+        }
+        const hTotales = unidades2023.flatMap(u => u.subunidades || []).reduce((s, su) => s + (Number(su.horas) || 0), 0)
+        if (hTotales > 0 && semestre?.fechaInicio && semestre?.fechaFin) {
+          const semanas = calcularSemanasHabiles(semestre, estado.periodosVacacionales || [])
+          const auto = calcularHorasSemanaAuto(hTotales, semanas.length)
           if (auto) next.horasSemana = auto.requiereManual ? '' : String(auto.rounded)
         }
         return next
       })
 
-      // Paso 2: generar todas las planeaciones
-      const { rasData, errors } = await generarRAsDesdeEstructura(estructura, p => setGenProgress(p), sessionId)
-      const result = { estructura, rasData, errors }
+      if (resultado.rasConError.length > 0) {
+        console.warn('[2023] RAs con error:', resultado.rasConError)
+      }
 
-      // Confirmar la sesión: el crédito se consume definitivamente.
-      await finalizarSesionGeneracion(sessionId, true)
-
-      setGenResult(result)
       sessionStorage.setItem('planea_pro_splash', '1')
       setOnboardingFase('success')
     } catch (err) {
-      // Cerrar la sesión con fallo → el servidor reembolsa el crédito.
-      await finalizarSesionGeneracion(sessionId, false)
-      setGenError(err.message)
+      console.error('🔴 [Generar 2023] Error en generación:', err)
+      setGenError(err.message || 'Error generando la planeación 2023.')
       setOnboardingFase('upload')
     }
   }
@@ -320,9 +248,8 @@ export default function useFlujoGeneracion({
   // semestreOverride: cuando se guardan fechas desde el modal (evita state stale)
   async function handleFreeExtract(pdfPE, pdfGPE, semestreOverride = null) {
     const semestreActual = semestreOverride || estado.semestre
-    const modelo = estado.modelo || '2018'
 
-    // Pedir fechas del semestre si faltan (igual que el flujo de pago)
+    // Pedir fechas del semestre si faltan
     if (!semestreOverride && (!semestreActual?.fechaInicio || !semestreActual?.fechaFin)) {
       setPdfsPendientes({ pdfPE, pdfGPE })
       setPendienteEsGratis(true)
@@ -335,12 +262,12 @@ export default function useFlujoGeneracion({
     setMostrarModalSinCreditos(false)
     setGenProgress({ phase: 'converting', message: 'Extrayendo estructura del PE…', current: 0, total: 0 })
 
-    if (modelo === MODELO_2023 && !tieneDatosCompletos2023(perfilDocente)) {
+    if (!tieneDatosCompletos2023(perfilDocente)) {
       await continuarTrasCompletarPerfil('gratis', pdfPE, pdfGPE, semestreActual)
       return
     }
-    const sem    = semestreOverride || estado.semestre
-    const vac    = estado.periodosVacacionales || []
+    const sem = semestreOverride || estado.semestre
+    const vac = estado.periodosVacacionales || []
 
     // Abrir sesión de horario (descuenta 25 créditos en el servidor).
     let sessionId
@@ -358,105 +285,55 @@ export default function useFlujoGeneracion({
       const [b64PE, b64GPE] = await Promise.all([fileToBase64(pdfPE), fileToBase64(pdfGPE)])
       try { sessionStorage.setItem(PDFS_KEY(materiaId), JSON.stringify({ pe: b64PE, gpe: b64GPE })) } catch {}
 
-      // ── Rama Modelo 2023: extraer estructura 2023 (sin actividades, sin cobro) ──
-      if (modelo === MODELO_2023) {
-        setGenProgress({ phase: 'structure', message: 'Extrayendo estructura del módulo…', current: 0, total: 0 })
-        const datosDocente = {
-          nombre:      perfilDocente?.nombre      || '',
-          numEmpleado: perfilDocente?.numEmpleado || '',
-          plantel:     perfilDocente?.plantel     || '',
-        }
-        const calendario = {
-          fechaInicioSemestre: sem?.fechaInicio || '',
-          fechaFinSemestre:    sem?.fechaFin    || '',
-          diasNoLaborables:    expandirPeriodosVacacionales(vac),
-        }
-        // Extrae la estructura 2023 cobrando la sesión de horario (25 créditos).
-        const estructura2023 = await extraerEstructura2023(
-          pdfPE, pdfGPE, datosDocente, calendario, sessionId,
-        )
-        if (estructura2023?.cabecera) estructura2023.cabecera.calendario = calendario
-
-        const unidades2023 = extraerUnidadesDesde2023(estructura2023)
-        const hTotales = unidades2023.flatMap(u => u.subunidades || []).reduce((s, su) => s + (Number(su.horas) || 0), 0)
-        const nombreCorto = nombreMateriaDesdeSiglema(estructura2023)
-
-        // Persistir la estructura como planeacion2023 (RAs sin actividades aún)
-        await actualizarMateriaConPlaneacion2023(user.uid, materiaId, estructura2023, { pagada: false })
-        if (nombreCorto && debeAutonombrarMateria(estado.nombre)) {
-          await updateMateria(user.uid, materiaId, { nombre: nombreCorto })
-        }
-
-        setEstado(prev => {
-          const next = {
-            ...prev,
-            ...(nombreCorto && debeAutonombrarMateria(prev.nombre) ? { nombre: nombreCorto } : {}),
-            planeacion2023: estructura2023,
-            unidades: unidades2023,
-            horasTotalesPrograma: hTotales,
-            pagada: false,
-            planGeneradaGratis: true,
-          }
-          if (hTotales > 0 && sem?.fechaInicio && sem?.fechaFin) {
-            const semanas = calcularSemanasHabiles(sem, vac)
-            const auto = calcularHorasSemanaAuto(hTotales, semanas.length)
-            if (auto) next.horasSemana = auto.requiereManual ? '' : String(auto.rounded)
-          }
-          return next
-        })
-
-        // Confirmar la sesión de horario (consume los 25 créditos definitivamente).
-        await finalizarSesionGeneracion(sessionId, true)
-
-        sessionStorage.setItem('planea_pro_splash', '1')
-        setOnboardingFase('app')
-        setMainTab('planificador')
-        return
+      setGenProgress({ phase: 'structure', message: 'Extrayendo estructura del módulo…', current: 0, total: 0 })
+      const datosDocente = {
+        nombre:      perfilDocente?.nombre      || '',
+        numEmpleado: perfilDocente?.numEmpleado || '',
+        plantel:     perfilDocente?.plantel     || '',
       }
+      const calendario = {
+        fechaInicioSemestre: sem?.fechaInicio || '',
+        fechaFinSemestre:    sem?.fechaFin    || '',
+        diasNoLaborables:    expandirPeriodosVacacionales(vac),
+      }
+      const estructura2023 = await extraerEstructura2023(
+        pdfPE, pdfGPE, datosDocente, calendario, sessionId,
+      )
+      if (estructura2023?.cabecera) estructura2023.cabecera.calendario = calendario
 
-      // ── Rama Modelo 2018 ──
-      const estructura = await extraerEstructuraDesdeArchivos(pdfPE, pdfGPE, p => setGenProgress(p), sessionId)
-      const newUnidades   = buildUnidadesFromAI(estructura.unidades)
-      const horasDesdeRAs = newUnidades.flatMap(u => u.subunidades || []).reduce((s, su) => s + (Number(su.horas) || 0), 0)
-      const horasTotales  = horasDesdeRAs || estructura.modulo?.horasTotales || 0
+      const unidades2023 = extraerUnidadesDesde2023(estructura2023)
+      const hTotales = unidades2023.flatMap(u => u.subunidades || []).reduce((s, su) => s + (Number(su.horas) || 0), 0)
+      const nombreCorto = nombreMateriaDesdeSiglema(estructura2023)
+
+      await actualizarMateriaConPlaneacion2023(user.uid, materiaId, estructura2023, { pagada: false })
+      if (nombreCorto && debeAutonombrarMateria(estado.nombre)) {
+        await updateMateria(user.uid, materiaId, { nombre: nombreCorto })
+      }
 
       setEstado(prev => {
         const next = {
           ...prev,
-          unidades: newUnidades,
-          horasTotalesPrograma: horasTotales,
+          ...(nombreCorto && debeAutonombrarMateria(prev.nombre) ? { nombre: nombreCorto } : {}),
+          planeacion2023: estructura2023,
+          unidades: unidades2023,
+          horasTotalesPrograma: hTotales,
           pagada: false,
           planGeneradaGratis: true,
-          estructuraIA: estructura,   // guardada para generar al pagar (sin re-subir PDFs)
         }
-        if (horasTotales > 0 && sem?.fechaInicio && sem?.fechaFin) {
-          const hPE = estructura.modulo?.horasSemana
-          if (hPE > 0) {
-            next.horasSemana = String(hPE)
-          } else {
-            const semanas = calcularSemanasHabiles(sem, vac)
-            const auto = calcularHorasSemanaAuto(horasTotales, semanas.length)
-            if (auto) next.horasSemana = auto.requiereManual ? '' : String(auto.rounded)
-          }
+        if (hTotales > 0 && sem?.fechaInicio && sem?.fechaFin) {
+          const semanas = calcularSemanasHabiles(sem, vac)
+          const auto = calcularHorasSemanaAuto(hTotales, semanas.length)
+          if (auto) next.horasSemana = auto.requiereManual ? '' : String(auto.rounded)
         }
         return next
       })
-      await updateMateria(user.uid, materiaId, {
-        unidades: newUnidades,
-        horasTotalesPrograma: horasTotales,
-        pagada: false,
-        planGeneradaGratis: true,
-        estructuraIA: estructura,
-      })
 
-      // Confirmar la sesión de horario (consume los 25 créditos definitivamente).
       await finalizarSesionGeneracion(sessionId, true)
 
       sessionStorage.setItem('planea_pro_splash', '1')
       setOnboardingFase('app')
-      setMainTab('planificador')   // mostrar el Planificador ya lleno
+      setMainTab('planificador')
     } catch (err) {
-      // Cerrar la sesión con fallo → el servidor reembolsa los 25 créditos.
       await finalizarSesionGeneracion(sessionId, false)
       setGenError(err.message)
       setOnboardingFase('upload')
@@ -465,63 +342,24 @@ export default function useFlujoGeneracion({
 
   // ── Generación on-pay: desbloquea la planeación completa ──
   async function handleGenerarDesdeEstructura() {
-    // Sin créditos → mandar a comprar
     if (!esAdmin && creditos <= 0) {
       navigate('/comprar-creditos')
       return
     }
 
-    // ── Modelo 2023: regenerar con los PDFs guardados (re-usa el flujo de pago) ──
-    if (estado.modelo === MODELO_2023) {
-      const stored = sessionStorage.getItem(PDFS_KEY(materiaId))
-      if (!stored) {
-        // PDFs no disponibles (otra sesión/dispositivo) → re-subir
-        setOnboardingFase('upload')
-        return
-      }
-      try {
-        const { pe, gpe } = JSON.parse(stored)
-        const pdfPE  = base64ToFile(pe,  'PE.pdf')
-        const pdfGPE = base64ToFile(gpe, 'GPE.pdf')
-        // handleOnboardingGenerate hace: validar, descontar crédito, generar y guardar
-        await handleOnboardingGenerate(pdfPE, pdfGPE, estado.semestre)
-      } catch (err) {
-        setGenError(err.message || 'Error al generar la planeación.')
-        setOnboardingFase('upload')
-      }
+    const stored = sessionStorage.getItem(PDFS_KEY(materiaId))
+    if (!stored) {
+      setOnboardingFase('upload')
       return
     }
-
-    // ── Modelo 2018: generar desde la estructura ya extraída ──
-    if (!estado.estructuraIA) return
-
-    // Abrir sesión (descuenta 1 crédito en el servidor, atómico).
-    let sessionId
     try {
-      sessionId = await iniciarSesionGeneracion('completa', materiaId)
+      const { pe, gpe } = JSON.parse(stored)
+      const pdfPE  = base64ToFile(pe,  'PE.pdf')
+      const pdfGPE = base64ToFile(gpe, 'GPE.pdf')
+      await handleOnboardingGenerate(pdfPE, pdfGPE, estado.semestre)
     } catch (err) {
-      if (err.code === 'functions/failed-precondition') { navigate('/comprar-creditos'); return }
-      setGenError(err.message || 'Error al iniciar la generación.')
-      return
-    }
-
-    setGenerandoPagada(true)
-    setOnboardingFase('loading')
-    setGenProgress({ phase: 'structure', message: 'Generando tu planeación didáctica…', current: 0, total: 0 })
-    try {
-      const { rasData, errors } = await generarRAsDesdeEstructura(estado.estructuraIA, p => setGenProgress(p), sessionId)
-      await finalizarSesionGeneracion(sessionId, true)
-      await updateMateria(user.uid, materiaId, { pagada: true, planGeneradaGratis: false })
-      setGenResult({ estructura: estado.estructuraIA, rasData, errors })
-      setEstado(prev => ({ ...prev, pagada: true, planGeneradaGratis: false }))
-      setOnboardingFase('success')
-    } catch (err) {
-      await finalizarSesionGeneracion(sessionId, false)
       setGenError(err.message || 'Error al generar la planeación.')
-      setOnboardingFase('app')
-      setMainTab('planeacion')
-    } finally {
-      setGenerandoPagada(false)
+      setOnboardingFase('upload')
     }
   }
   useEffect(() => {

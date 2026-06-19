@@ -82,7 +82,7 @@ export default function PlaneacionGeneradorSection({
   pendingGenerationResult, onPendingResultApplied,
   onGeneratedComplete,
   pagada = true,
-  modelo = '2018',
+  modelo = '2023',
 }) {
   const navigate = useNavigate()
   const raList = buildRAList(unidades || [])
