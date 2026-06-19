@@ -10,10 +10,11 @@ function scoreValueFor(itemId, scores) {
   return opt ? Number(opt[2]) : 0
 }
 
-function calculateScore(scores) {
+function calculateScore(scores, checks) {
   const factors = Object.fromEntries(Object.keys(factorMeta).map(k => [k, 0]))
   let total = 0
   Object.keys(scoreRubric).forEach(itemId => {
+    if (!checks[itemId]) return
     const pts = scoreValueFor(itemId, scores)
     factors[scoreRubric[itemId].factor] += pts
     total += pts
@@ -30,12 +31,6 @@ function resolveLevel(points) {
   return { label: 'Sin nivel estimado', umas: 0 }
 }
 
-function persist(checks, scores, notes) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({
-    checks, scores, notes, updatedAt: new Date().toISOString()
-  }))
-}
-
 export function useEstimuloState() {
   const [checks, setChecks] = useState({})
   const [scores, setScores] = useState({})
@@ -43,6 +38,7 @@ export function useEstimuloState() {
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
   const [showConfirmReset, setShowConfirmReset] = useState(false)
+  const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
     try {
@@ -53,27 +49,24 @@ export function useEstimuloState() {
     } catch {
       localStorage.removeItem(STORAGE_KEY)
     }
+    setIsLoaded(true)
   }, [])
 
+  // Persist con valores siempre frescos — sin closures estancados.
+  // isLoaded evita sobreescribir con el estado vacío inicial antes de cargar.
+  useEffect(() => {
+    if (!isLoaded) return
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      checks, scores, notes, updatedAt: new Date().toISOString()
+    }))
+  }, [isLoaded, checks, scores, notes])
+
   function toggleCheck(itemId) {
-    setChecks(prev => {
-      const next = { ...prev, [itemId]: !prev[itemId] }
-      persist(next, scores, notes)
-      return next
-    })
+    setChecks(prev => ({ ...prev, [itemId]: !prev[itemId] }))
   }
 
   function setScore(itemId, value) {
-    setScores(prev => {
-      const next = { ...prev, [itemId]: value }
-      persist(checks, next, notes)
-      return next
-    })
-  }
-
-  function handleSetNotes(value) {
-    setNotes(value)
-    persist(checks, scores, value)
+    setScores(prev => ({ ...prev, [itemId]: value }))
   }
 
   function markSection(sectionId, value) {
@@ -82,7 +75,6 @@ export function useEstimuloState() {
     setChecks(prev => {
       const next = { ...prev }
       section.items.forEach(item => { next[item.id] = value })
-      persist(next, scores, notes)
       return next
     })
   }
@@ -91,7 +83,6 @@ export function useEstimuloState() {
     setChecks({})
     setScores({})
     setNotes('')
-    persist({}, {}, '')
     setShowConfirmReset(false)
   }
 
@@ -100,7 +91,7 @@ export function useEstimuloState() {
   const total = allItems.length
   const totalProgress = { done, total, pct: total ? Math.round((done / total) * 100) : 0 }
 
-  const { total: scoreTotal, factors } = calculateScore(scores)
+  const { total: scoreTotal, factors } = calculateScore(scores, checks)
   const { label: level, umas } = resolveLevel(scoreTotal)
   const scoreResult = { total: scoreTotal, factors, level, umas }
 
@@ -114,7 +105,7 @@ export function useEstimuloState() {
         checks[item.id] ? 'Completo' : 'Pendiente',
         (item.tags || []).join(' / '),
         scoreRubric[item.id]?.subfactor || '',
-        scoreValueFor(item.id, scores)
+        checks[item.id] ? scoreValueFor(item.id, scores) : 0
       ]
     })
     const lines = [
@@ -139,7 +130,7 @@ export function useEstimuloState() {
     filter, setFilter,
     search, setSearch,
     toggleCheck, setScore,
-    setNotes: handleSetNotes,
+    setNotes,
     markSection,
     resetAll: () => setShowConfirmReset(true),
     showConfirmReset, confirmReset,

@@ -116,6 +116,7 @@ export const scoreRubric = {
   'ev-certificados-habilidades': {
     factor: '1', subfactor: '1.5', max: 20,
     options: [
+      ['', 'Seleccionar certificados en habilidades', 0],
       ['0', 'Sin certificados', 0],
       ['10', '1 certificado', 10],
       ['20', '2 o más certificados', 20],
