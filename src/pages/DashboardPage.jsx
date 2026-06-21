@@ -281,8 +281,8 @@ export default function DashboardPage() {
   async function handleConfirmarCreacion({ modelo, conIA }) {
     setMostrarModalCrear(false)
 
-    // Si eligió Modelo 2023, verificar perfil completo
-    if (modelo === '2023' && !tieneDatosCompletos2023(perfilDocente)) {
+    // Ambos modelos (2023 y 2025) requieren perfil docente completo
+    if (!tieneDatosCompletos2023(perfilDocente)) {
       sessionStorage.setItem('planea_perfil_continuar', JSON.stringify({
         source: 'dashboard-create',
         modelo,

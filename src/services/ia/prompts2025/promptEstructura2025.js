@@ -55,6 +55,10 @@ META EDUCATIVA
 
 DOCENTE Y CALENDARIO: usar literalmente los valores del JSON adjunto al final.
 
+GRUPO: NO se extrae del PE ni se inventa. El número de grupo y el turno los
+captura el docente después. Devuelve SIEMPRE grupo con cadenas vacías:
+"grupo": { "numero": "", "turno": "" }. Nunca copies valores de ejemplo.
+
 ═══════════════════════════════════════════════════════════════════
 REGLAS DE EXTRACCIÓN — PROPÓSITOS FORMATIVOS
 ═══════════════════════════════════════════════════════════════════
@@ -142,8 +146,8 @@ Responde SOLO con el objeto JSON. Sin texto antes ni después. Sin bloques markd
       "diasNoLaborables": []
     },
     "grupo": {
-      "numero": "60606",
-      "turno": "Matutino"
+      "numero": "",
+      "turno": ""
     }
   },
   "metaEducativa": {

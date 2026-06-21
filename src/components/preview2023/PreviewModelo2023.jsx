@@ -18,7 +18,10 @@ const PALETA_RA = [
  *   Tabs de RA (1.1, 1.2, 2.1…) → sub-tabs de propósito (P1, P2…)
  *   → contenido de la actividad (tablas estilo 2018)
  */
-export default function PreviewModelo2023({ planeacion, pagada = true, esAdmin = false }) {
+const TERMINOLOGIA_DEFAULT = { raCorto: 'RA', ra: 'Resultado de Aprendizaje', actividad: 'Propósito' }
+
+export default function PreviewModelo2023({ planeacion, pagada = true, esAdmin = false, terminologia = TERMINOLOGIA_DEFAULT }) {
+  const t = { ...TERMINOLOGIA_DEFAULT, ...terminologia }
 
   if (!planeacion?.cabecera || !planeacion?.unidades) {
     return (
@@ -40,7 +43,7 @@ export default function PreviewModelo2023({ planeacion, pagada = true, esAdmin =
   if (rasConUnidad.length === 0) {
     return (
       <div className="text-center py-16 text-slate-500 dark:text-slate-400">
-        <p className="text-sm font-medium">La planeación no tiene Resultados de Aprendizaje.</p>
+        <p className="text-sm font-medium">La planeación no tiene {t.ra}s.</p>
       </div>
     )
   }
@@ -80,7 +83,7 @@ export default function PreviewModelo2023({ planeacion, pagada = true, esAdmin =
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-white/60 dark:hover:bg-slate-800/60'
                 }`}
             >
-              RA {ra.codigo}
+              {t.raCorto} {ra.codigo}
               {tieneActiv && (
                 <span className={`w-1.5 h-1.5 rounded-full ${activo ? color : 'bg-slate-300 dark:bg-slate-600'}`} />
               )}
@@ -109,7 +112,7 @@ export default function PreviewModelo2023({ planeacion, pagada = true, esAdmin =
               </p>
             </div>
             <div className="text-xs text-slate-500 dark:text-slate-400 text-right flex-shrink-0">
-              <p>{props.length} propósito{props.length !== 1 ? 's' : ''}</p>
+              <p>{props.length} {t.actividad.toLowerCase()}{props.length !== 1 ? 's' : ''}</p>
             </div>
           </div>
 
@@ -120,7 +123,7 @@ export default function PreviewModelo2023({ planeacion, pagada = true, esAdmin =
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                   d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
               </svg>
-              <p className="text-sm font-medium">Este RA no tiene propósitos generados.</p>
+              <p className="text-sm font-medium">Este {t.raCorto} no tiene {t.actividad.toLowerCase()}s generados.</p>
               <p className="text-xs mt-1">Genera la planeación completa o edita manualmente.</p>
             </div>
           )}
@@ -141,7 +144,7 @@ export default function PreviewModelo2023({ planeacion, pagada = true, esAdmin =
                           : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                         }`}
                     >
-                      Propósito {prop.numero || i + 1}
+                      {t.actividad} {prop.numero || i + 1}
                       {prop.noSesion ? ` · Sesión ${prop.noSesion}` : ''}
                     </button>
                   ))}
@@ -159,6 +162,7 @@ export default function PreviewModelo2023({ planeacion, pagada = true, esAdmin =
                   totalPaginas={totalPaginas}
                   esPrimeraActividadDelRA={propActivo === 0}
                   bloqueada={!desbloqueado && (paginaInicial + propActivo) > 0}
+                  terminologia={t}
                 />
 
                 {/* Navegación entre propósitos */}
@@ -172,7 +176,7 @@ export default function PreviewModelo2023({ planeacion, pagada = true, esAdmin =
                       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                       </svg>
-                      Propósito anterior
+                      {t.actividad} anterior
                     </button>
                     <span className="text-xs text-slate-500 dark:text-slate-400">
                       {propActivo + 1} / {props.length}
@@ -182,7 +186,7 @@ export default function PreviewModelo2023({ planeacion, pagada = true, esAdmin =
                       disabled={propActivo === props.length - 1}
                       className="btn-secondary text-xs py-1.5 gap-1.5 disabled:opacity-40"
                     >
-                      Propósito siguiente
+                      {t.actividad} siguiente
                       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>

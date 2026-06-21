@@ -8,7 +8,10 @@ import { MODALIDADES } from '../../modelos/2023/constantes.js'
 
 const opcionesModalidad = MODALIDADES.map(m => ({ valor: m, etiqueta: m }))
 
-export default function EditorActividad({ actividad, indice, total, onCambio, onEliminar, onDuplicar }) {
+const TERMINOLOGIA_DEFAULT = { actividad: 'Propósito' }
+
+export default function EditorActividad({ actividad, indice, total, onCambio, onEliminar, onDuplicar, terminologia = TERMINOLOGIA_DEFAULT }) {
+  const t = { ...TERMINOLOGIA_DEFAULT, ...terminologia }
   const [expandida, setExpandida] = useState(indice === 0)
 
   const set = (campo, valor) => onCambio({ ...actividad, [campo]: valor })
@@ -30,7 +33,7 @@ export default function EditorActividad({ actividad, indice, total, onCambio, on
       >
         <div className="flex items-center gap-3 min-w-0">
           <span className="text-sm font-semibold text-slate-800 dark:text-slate-100 flex-shrink-0">
-            Actividad {actividad.numero} / {total}
+            {t.actividad} {actividad.numero} / {total}
           </span>
           <span className="text-xs text-slate-500 dark:text-slate-400 truncate">
             {actividad.duracionHoras}h · {actividad.modalidad}
@@ -46,7 +49,7 @@ export default function EditorActividad({ actividad, indice, total, onCambio, on
           {onDuplicar && (
             <button
               onClick={e => { e.stopPropagation(); onDuplicar(indice) }}
-              title="Duplicar actividad"
+              title={`Duplicar ${t.actividad.toLowerCase()}`}
               className="p-1.5 rounded hover:bg-white dark:hover:bg-slate-700 transition"
             >
               <svg className="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -58,9 +61,9 @@ export default function EditorActividad({ actividad, indice, total, onCambio, on
             <button
               onClick={e => {
                 e.stopPropagation()
-                if (window.confirm('¿Eliminar esta actividad?')) onEliminar(indice)
+                if (window.confirm(`¿Eliminar esta ${t.actividad.toLowerCase()}?`)) onEliminar(indice)
               }}
-              title="Eliminar actividad"
+              title={`Eliminar ${t.actividad.toLowerCase()}`}
               className="p-1.5 rounded hover:bg-danger-100 dark:hover:bg-danger-900/30 transition"
             >
               <svg className="w-4 h-4 text-danger-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -428,6 +428,13 @@ Si existe actividadEvaluacion en el contexto, desde el Inicio puede mencionarse 
 
 No conviertas todos los inicios en evaluación sumativa. La evaluación del Inicio siempre es diagnóstica.
 
+EQUILIBRIO DE EXTENSIÓN (importante): el Inicio debe ser conciso. Tanto en
+estrategiaEnsenanzaDocente como en estrategiaAprendizajeAlumno del Inicio,
+mantente entre 60 y 110 palabras, INCLUSO en la primera actividad del RA. Al
+presentar la Actividad de Evaluación, hazlo en UNA sola frase breve; no expandas
+el encuadre ni repitas información. El Inicio de la primera actividad NO debe ser
+desproporcionadamente más largo que el de las demás.
+
 La estrategiaAprendizajeAlumno del Inicio debe incluir:
 
 - Responder al pase de lista.

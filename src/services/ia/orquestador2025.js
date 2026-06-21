@@ -75,9 +75,8 @@ export function validarRequisitos2025({ perfilDocente, semestre, pdfPE }) {
  * Equivale a calcularFechas() del 2023 pero opera sobre propositosFormativos[].sesiones[].
  */
 function calcularFechas2025(planeacion) {
-  const { parseISO, addDays, isWeekend, isEqual, isAfter, format } = require ? {} : {}
-
-  // Importación dinámica no disponible en ESM — usamos implementación propia
+  // Implementación propia de aritmética de fechas (sin date-fns ni import dinámico,
+  // no disponibles aquí en ESM/browser).
   const horasSemana    = planeacion.cabecera?.asignatura?.horasSemana || 2
   const inicioISO      = planeacion.cabecera?.calendario?.fechaInicioSemestre
   const finISO         = planeacion.cabecera?.calendario?.fechaFinSemestre

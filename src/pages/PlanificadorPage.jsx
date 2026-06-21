@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { fetchMateria, updateMateria, MODELO_2023 } from '../services/materias'
+import { fetchMateria, updateMateria, actualizarMateriaConPlaneacion2025, MODELO_2023, MODELO_2025 } from '../services/materias'
 import CalendarioForm from '../components/CalendarioForm'
 import EstructuraForm from '../components/EstructuraForm'
 import ResultadoTabla from '../components/ResultadoTabla'
@@ -13,6 +13,7 @@ import { validarEntrada } from '../utils/validaciones'
 import { PreviewModelo2023 }                        from '../components/preview2023'
 import { EditorModelo2023, ToggleVistaEdicion }    from '../components/editor2023'
 import BotonDescargarWord2023                      from '../components/exportacion/BotonDescargarWord2023'
+import BotonDescargarWord2025                      from '../components/exportacion/BotonDescargarWord2025'
 import SplashScreen      from '../components/onboarding/SplashScreen'
 import UploadScreen      from '../components/onboarding/UploadScreen'
 import LoadingTips       from '../components/onboarding/LoadingTips'
@@ -20,9 +21,11 @@ import SuccessTransition from '../components/onboarding/SuccessTransition'
 import SaldoCreditos     from '../components/SaldoCreditos'
 import {
   extraerUnidadesDesde2023,
+  extraerUnidadesDesde2025,
   sumarHorasUnidades,
   DARK_KEY,
 } from './planificador/utils'
+import { adaptar2025aVista, vista2023a2025 } from './planificador/adaptador2025'
 import Stepper     from './planificador/components/Stepper'
 import Toast       from './planificador/components/Toast'
 import AlertBanner from './planificador/components/AlertBanner'
@@ -49,6 +52,7 @@ export default function PlanificadorPage() {
     modelo:       '2023',
     pagada:       true,
     planeacion2023: null,
+    planeacion2025: null,
     planGeneradaGratis: false,
     estructuraIA: null,
   })
@@ -115,11 +119,12 @@ export default function PlanificadorPage() {
         }
         const modelo         = data.modelo || '2023'
         const planeacion2023 = data.planeacion2023 || null
+        const planeacion2025 = data.planeacion2025 || null
         const semestre       = data.semestre || { fechaInicio: '', fechaFin: '' }
         const periodosVac    = data.periodosVacacionales || []
         const horasTotales   = data.horasTotalesPrograma || 0
 
-        // Si modelo 2023 ya tiene planeación pero no tiene unidades guardadas (o quedaron
+        // Si la planeación ya existe pero no tiene unidades guardadas (o quedaron
         // con solo el código "1.1" por el bug anterior), re-derivarlas con los títulos.
         let unidades = data.unidades || []
         if (modelo === MODELO_2023 && planeacion2023) {
@@ -127,6 +132,12 @@ export default function PlanificadorPage() {
             (u.subunidades || []).every(s => /^\d+\.\d+$/.test(String(s.nombre || '').trim()))
           )
           if (soloCodigos) unidades = extraerUnidadesDesde2023(planeacion2023)
+        }
+        if (modelo === MODELO_2025 && planeacion2025) {
+          const soloCodigos = unidades.length === 0 || unidades.every(u =>
+            (u.subunidades || []).every(s => /^\d+\.\d+$/.test(String(s.nombre || '').trim()))
+          )
+          if (soloCodigos) unidades = extraerUnidadesDesde2025(planeacion2025)
         }
         // Si no tiene horasSemana guardada, calcularla con la regla de 3 del Planificador
         // (totalHoras ÷ semanas hábiles) para que la capacidad cuadre al 100 %.
@@ -137,12 +148,13 @@ export default function PlanificadorPage() {
         const hTotales = hUnidades
           || horasTotales
           || (modelo === MODELO_2023 ? (planeacion2023?.cabecera?.modulo?.horasTotales || 0) : 0)
+          || (modelo === MODELO_2025 ? (planeacion2025?.cabecera?.asignatura?.horasTotales || 0) : 0)
 
         if (hTotales > 0 && semestre.fechaInicio && semestre.fechaFin) {
           const semanas = calcularSemanasHabiles(semestre, periodosVac)
           const auto = calcularHorasSemanaAuto(hTotales, semanas.length)
           const capacidadGuardada = Number(horasSemana || 0) * semanas.length
-          const debeRecalcular = !horasSemana || (modelo === MODELO_2023 && capacidadGuardada < hTotales)
+          const debeRecalcular = !horasSemana || ((modelo === MODELO_2023 || modelo === MODELO_2025) && capacidadGuardada < hTotales)
           if (auto && debeRecalcular) horasSemana = auto.requiereManual ? '' : String(auto.rounded)
         }
 
@@ -156,6 +168,7 @@ export default function PlanificadorPage() {
           modelo,
           pagada: data.pagada !== false,
           planeacion2023,
+          planeacion2025,
           planGeneradaGratis: data.planGeneradaGratis || false,
           estructuraIA: data.estructuraIA || null,
         })
@@ -171,13 +184,19 @@ export default function PlanificadorPage() {
 
   const { nombre, semestre, horasSemana, horasTotalesPrograma, periodosVacacionales, unidades } = estado
 
+  // Vista adaptada del Modelo 2025 a la forma que consumen los componentes 2023.
+  const vista2025 = useMemo(
+    () => (estado.modelo === MODELO_2025 && estado.planeacion2025 ? adaptar2025aVista(estado.planeacion2025) : null),
+    [estado.modelo, estado.planeacion2025]
+  )
+
   // Semanas hábiles disponibles (para cálculo automático de horas/semana)
   const semanasHabilesCount = (semestre.fechaInicio && semestre.fechaFin)
     ? calcularSemanasHabiles(semestre, periodosVacacionales).length
     : 0
 
   useEffect(() => {
-    if (loading || estado.modelo !== MODELO_2023) return
+    if (loading || (estado.modelo !== MODELO_2023 && estado.modelo !== MODELO_2025)) return
     if (!semestre.fechaInicio || !semestre.fechaFin || semanasHabilesCount <= 0) return
 
     const hTotales = sumarHorasUnidades(unidades) || Number(horasTotalesPrograma) || 0
@@ -318,6 +337,7 @@ export default function PlanificadorPage() {
           error={genError}
           bloqueado={sinCreditos}
           modoSoloPlanificador={modoManualInicial}
+          modelo={estado.modelo}
         />
         {mostrarModalSinCreditos && (
           <ModalSinCreditos
@@ -544,6 +564,8 @@ export default function PlanificadorPage() {
                 <div className="blur-[6px] pointer-events-none select-none opacity-80 max-h-[640px] overflow-hidden" aria-hidden="true" inert="">
                   {estado.modelo === MODELO_2023 && estado.planeacion2023
                     ? <PreviewModelo2023 planeacion={estado.planeacion2023} pagada={false} esAdmin={false} />
+                    : estado.modelo === MODELO_2025 && vista2025
+                    ? <PreviewModelo2023 planeacion={vista2025} terminologia={vista2025.terminologia} pagada={false} esAdmin={false} />
                     : (
                       <PlaneacionGeneradorSection
                         materiaId={materiaId}
@@ -670,6 +692,67 @@ export default function PlanificadorPage() {
                       onCambioPlaneacion={nueva =>
                         setEstado(prev => ({ ...prev, planeacion2023: nueva }))
                       }
+                    />
+                  )
+                }
+              </div>
+            )
+            : estado.modelo === MODELO_2025 && vista2025
+            ? (
+              /* Vista previa / Editor Modelo 2025 */
+              <div>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4 no-print">
+                  <div>
+                    <h2 className="section-title">Planeación — Modelo 2025</h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                      {(estado.planeacion2025.propositosFormativos || []).flatMap(pf => pf.sesiones || []).length} sesiones
+                      {estado.planeacion2025.cabecera?.asignatura?.horasSemana > 0 && (
+                        <span className="ml-2">
+                          · 📊 {estado.planeacion2025.cabecera.asignatura.horasSemana} hrs/semana
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {estado.pagada !== false && (
+                      <BotonDescargarWord2025
+                        planeacion={estado.planeacion2025}
+                        className="text-xs py-1.5 px-3 no-print"
+                      />
+                    )}
+                    {modoVista2023 === 'preview' && (
+                      <button onClick={() => window.print()} className="btn-secondary text-xs gap-1.5 no-print">
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                        </svg>
+                        Imprimir / PDF
+                      </button>
+                    )}
+                    <ToggleVistaEdicion modo={modoVista2023} onCambio={setModoVista2023} />
+                  </div>
+                </div>
+
+                {modoVista2023 === 'preview'
+                  ? (
+                    <PreviewModelo2023
+                      planeacion={vista2025}
+                      terminologia={vista2025.terminologia}
+                      pagada={estado.pagada !== false}
+                      esAdmin={esAdmin}
+                    />
+                  )
+                  : (
+                    <EditorModelo2023
+                      planeacion={vista2025}
+                      terminologia={vista2025.terminologia}
+                      materiaId={materiaId}
+                      pdfPE={null}
+                      pdfGPE={null}
+                      onGuardar={async v => {
+                        const p = vista2023a2025(v, estado.planeacion2025)
+                        await actualizarMateriaConPlaneacion2025(user.uid, materiaId, p)
+                        setEstado(prev => ({ ...prev, planeacion2025: p }))
+                      }}
                     />
                   )
                 }
