@@ -7,28 +7,50 @@
 
 import { calcularPlaneacion, formatDate } from './calculos'
 
-// Reparte las semanas del rango de un PF/RA entre sus sesiones, proporcional a
-// las horas de cada sesión (fracción acumulada). Devuelve [{fechaInicio, fechaFin}].
-function repartirSemanas(weeks, sesiones, getHoras) {
-  const W = weeks.length
+// Días hábiles (Lun-Vie) dentro de las semanas del rango de un PF/RA.
+function diasHabilesDeWeeks(weeks) {
+  const dias = []
+  for (const w of weeks) {
+    const ini = new Date(w.lunesEfectivo)
+    const fin = new Date(w.viernesEfectivo)
+    for (let d = new Date(ini); d <= fin; d.setDate(d.getDate() + 1)) {
+      const dow = d.getDay()
+      if (dow >= 1 && dow <= 5) dias.push(new Date(d))
+    }
+  }
+  return dias
+}
+
+// Reparte las sesiones de un PF/RA en bloques de días hábiles SECUENCIALES y
+// SIN TRASLAPE, proporcional a las horas de cada sesión. Devuelve
+// [{fechaInicio, fechaFin}] en el mismo orden que `sesiones`.
+function repartirEnDias(weeks, sesiones, getHoras) {
+  const dias = diasHabilesDeWeeks(weeks)
+  const D = dias.length
+  const N = sesiones.length
+  if (D === 0 || N === 0) return sesiones.map(() => ({ fechaInicio: '', fechaFin: '' }))
+
   const total = sesiones.reduce((s, x) => s + (Number(getHoras(x)) || 0), 0)
-  const totalEfectivo = total > 0 ? total : sesiones.length
 
-  let acum = 0
-  return sesiones.map(s => {
-    const h = total > 0 ? (Number(getHoras(s)) || 0) : 1
-    const cs = acum / totalEfectivo
-    acum += h
-    const ce = acum / totalEfectivo
-
-    let startIdx = Math.floor(cs * W)
-    let endIdx   = Math.ceil(ce * W) - 1
-    startIdx = Math.min(Math.max(startIdx, 0), W - 1)
-    endIdx   = Math.min(Math.max(endIdx, startIdx), W - 1)
-
+  let cursor = 0
+  return sesiones.map((s, k) => {
+    const restantes = N - k - 1
+    let count
+    if (k === N - 1) {
+      count = Math.max(1, D - cursor)                       // la última absorbe el resto
+    } else {
+      const h = total > 0 ? (Number(getHoras(s)) || 0) : 1
+      count = total > 0 ? Math.round((h / total) * D) : Math.round(D / N)
+      if (count < 1) count = 1
+      const maxCount = D - cursor - restantes               // dejar ≥1 día a cada sesión restante
+      if (count > maxCount) count = Math.max(1, maxCount)
+    }
+    const iniIdx = Math.min(cursor, D - 1)
+    const finIdx = Math.min(cursor + count - 1, D - 1)
+    cursor = Math.min(cursor + count, D)
     return {
-      fechaInicio: formatDate(weeks[startIdx].lunesEfectivo),
-      fechaFin:    formatDate(weeks[endIdx].viernesEfectivo),
+      fechaInicio: formatDate(dias[iniIdx]),
+      fechaFin:    formatDate(dias[finIdx]),
     }
   })
 }
@@ -72,7 +94,7 @@ export function aplicarFechasDesdeHorario({ semestre, horasSemana, periodosVacac
     const weeks = semanas.filter(w => w.numero >= sub.semanaInicio && w.numero <= sub.semanaFin)
     if (weeks.length === 0) return
 
-    const rangos = repartirSemanas(weeks, sesiones, s => (s.duracionHoras ?? s.horas))
+    const rangos = repartirEnDias(weeks, sesiones, s => (s.duracionHoras ?? s.horas))
     sesiones.forEach((s, k) => {
       s.fechaInicio = rangos[k].fechaInicio
       s.fechaFin    = rangos[k].fechaFin

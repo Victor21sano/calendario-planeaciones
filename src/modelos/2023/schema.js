@@ -81,9 +81,9 @@ export const schemaModelo2023 = {
 
         grupo: {
           type: 'object',
-          required: ['numero'],
+          // numero/turno los captura el docente; pueden estar vacíos al generar.
           properties: {
-            numero: { type: 'string', minLength: 1 },
+            numero: { type: 'string' },
             turno:  { type: 'string' },
           },
         },

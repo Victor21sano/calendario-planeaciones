@@ -43,11 +43,16 @@ export default function EditorModelo2023({ planeacion: planeacionInicial, materi
   const { errores } = useMemo(() => {
     const res = validarPlaneacionCompleta2023(planeacion)
     if (t.modelo !== '2025') return res
+    // El formato oficial 2025 no exige el código de la actividad de evaluación
+    // en el texto del Cierre (eso es del 2023). Se omite esa advertencia.
+    const filtrados = (res.errores || []).filter(
+      m => !/código de la actividad de evaluación/i.test(m)
+    )
     const localizar = msg => String(msg)
       .replace(/\bRA\b/g, t.raCorto || 'PF')
       .replace(/\bactividad\b/g, 'sesión')
       .replace(/\bUnidad\b/g, t.unidad || 'Ámbito')
-    return { ...res, errores: (res.errores || []).map(localizar) }
+    return { ...res, errores: filtrados.map(localizar) }
   }, [planeacion, t.modelo, t.raCorto, t.unidad])
 
   const actualizarCabecera = nueva =>
@@ -60,21 +65,40 @@ export default function EditorModelo2023({ planeacion: planeacionInicial, materi
       return { ...p, unidades: us }
     })
 
-  const recalcularFechas = () => {
+  // 'idle' | 'trabajando' | 'ok' | 'error'
+  const [recalcEstado, setRecalcEstado] = useState('idle')
+
+  const recalcularFechas = async () => {
+    if (recalcEstado === 'trabajando') return
+    setRecalcEstado('trabajando')
     try {
+      // Pequeña pausa para que el estado "Recalculando…" sea visible.
+      await new Promise(r => setTimeout(r, 350))
+
       const cal      = planeacion.cabecera?.calendario || {}
       const semestre = { fechaInicio: cal.fechaInicioSemestre, fechaFin: cal.fechaFinSemestre }
       const horasSemana = planeacion.cabecera?.modulo?.horasSemana
       const periodos = (cal.diasNoLaborables || []).map(d => ({ fechaInicio: d, fechaFin: d }))
       const unidadesPlan = extraerUnidadesDesde2023(planeacion)
+
+      if (!semestre.fechaInicio || !semestre.fechaFin || !horasSemana) {
+        setRecalcEstado('error')
+        setTimeout(() => setRecalcEstado('idle'), 3500)
+        return
+      }
+
       const clone = JSON.parse(JSON.stringify(planeacion))
       aplicarFechasDesdeHorario({
         semestre, horasSemana, periodosVacacionales: periodos,
         unidades: unidadesPlan, planeacion: clone, modelo: '2023',
       })
       setPlaneacion(clone)
+      setRecalcEstado('ok')
+      setTimeout(() => setRecalcEstado('idle'), 2500)
     } catch (err) {
       console.error('[EditorModelo2023] Error al recalcular fechas:', err)
+      setRecalcEstado('error')
+      setTimeout(() => setRecalcEstado('idle'), 3500)
     }
   }
 
@@ -102,10 +126,20 @@ export default function EditorModelo2023({ planeacion: planeacionInicial, materi
         <div className="flex items-center gap-3">
           <button
             onClick={recalcularFechas}
-            className="text-xs px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600
-                       hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+            disabled={recalcEstado === 'trabajando'}
+            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-colors disabled:opacity-60
+                       border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800"
           >
-            Recalcular fechas
+            {recalcEstado === 'trabajando' && (
+              <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8z" />
+              </svg>
+            )}
+            {recalcEstado === 'trabajando' ? 'Recalculando…'
+              : recalcEstado === 'ok'    ? '✓ Fechas recalculadas'
+              : recalcEstado === 'error' ? 'Faltan fechas/horas'
+              : 'Recalcular fechas'}
           </button>
           <button
             onClick={forzarGuardado}
