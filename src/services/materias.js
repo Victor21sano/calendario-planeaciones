@@ -70,6 +70,27 @@ export const deleteMateria = async (uid, materiaId) => {
   await deleteDoc(docRef)
 }
 
+/** Guarda la planeación 2025 completa dentro del documento de la materia. */
+export const actualizarMateriaConPlaneacion2025 = async (uid, materiaId, planeacion, opciones = {}) => {
+  if (!uid) throw new Error('Usuario no autenticado')
+
+  const tamanoBytes = JSON.stringify(planeacion).length
+  if (tamanoBytes > 900_000) {
+    console.warn(
+      `[actualizarMateriaConPlaneacion2025] Planeación muy grande: ${tamanoBytes} bytes.`
+    )
+  }
+
+  const docRef = doc(db, `users/${uid}/materias/${materiaId}`)
+  const data = {
+    modelo:         MODELO_2025,
+    planeacion2025: planeacion,
+    updatedAt:      serverTimestamp(),
+  }
+  if (typeof opciones.pagada === 'boolean') data.pagada = opciones.pagada
+  await updateDoc(docRef, data)
+}
+
 /** Guarda la planeación 2023 completa dentro del documento de la materia. */
 export const actualizarMateriaConPlaneacion2023 = async (uid, materiaId, planeacion, opciones = {}) => {
   if (!uid) throw new Error('Usuario no autenticado')

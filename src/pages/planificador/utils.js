@@ -1,6 +1,27 @@
 // Helpers puros y constantes del PlanificadorPage.
 // Extraídos de PlanificadorPage.jsx sin cambios de comportamiento.
 
+// Convierte planeacion2025.propositosFormativos → formato del Planificador { id, nombre, subunidades }
+export function extraerUnidadesDesde2025(planeacion2025) {
+  if (!planeacion2025?.propositosFormativos) return []
+  const ambito = planeacion2025.metaEducativa?.ambito || planeacion2025.cabecera?.asignatura?.ambito || 'Ámbito'
+  return [{
+    id: 'u2025_1',
+    nombre: ambito,
+    subunidades: planeacion2025.propositosFormativos.map((pf, i) => ({
+      id: `u2025_1_s_${i + 1}`,
+      nombre: pf.codigo ? `${pf.codigo} ${pf.texto || ''}`.substring(0, 80).trim() : (pf.texto || `PF ${i + 1}`),
+      horas: pf.horas || 0,
+    })),
+  }]
+}
+
+export function nombreMateriaDesdeSiglema2025(planeacion2025) {
+  const siglema = planeacion2025?.cabecera?.asignatura?.siglema || ''
+  const match = String(siglema).match(/([A-Z0-9]{3,})-\d{2}\b/i)
+  return match ? match[1].toUpperCase() : ''
+}
+
 // Convierte planeacion2023.unidades → formato del Planificador { id, nombre, subunidades }
 export function extraerUnidadesDesde2023(planeacion2023) {
   if (!planeacion2023?.unidades) return []

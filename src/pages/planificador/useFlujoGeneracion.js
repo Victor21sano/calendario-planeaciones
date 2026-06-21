@@ -1,15 +1,19 @@
 import { useState, useEffect, useRef } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
-import { updateMateria, actualizarMateriaConPlaneacion2023, MODELO_2023 } from "../../services/materias"
+import { updateMateria, actualizarMateriaConPlaneacion2023, actualizarMateriaConPlaneacion2025, MODELO_2023, MODELO_2025 } from "../../services/materias"
 import { calcularSemanasHabiles, calcularHorasSemanaAuto } from "../../utils/calculos"
 import { fileToBase64 } from "../../services/iaPlaneacion"
 import { extraerEstructura2023 } from "../../services/ia/gemini2023"
 import { iniciarSesionGeneracion, finalizarSesionGeneracion } from "../../services/creditosService"
 import { generarPlaneacion2023Completa, validarRequisitos2023 } from "../../services/ia/orquestador2023"
+import { generarPlaneacion2025Completa, validarRequisitos2025 } from "../../services/ia/orquestador2025"
+import { extraerEstructura2025 } from "../../services/ia/gemini2025"
 import { tieneDatosCompletos2023 } from "../../services/userService"
 import {
   extraerUnidadesDesde2023,
+  extraerUnidadesDesde2025,
   nombreMateriaDesdeSiglema,
+  nombreMateriaDesdeSiglema2025,
   debeAutonombrarMateria,
   base64ToFile,
   expandirPeriodosVacacionales,
@@ -155,12 +159,16 @@ export default function useFlujoGeneracion({
 
     console.log('🟢 [Generar] Validaciones OK, iniciando flujo de generación')
 
+    const es2025 = estado.modelo === MODELO_2025
+
     // Validación previa sin descontar crédito
     if (!tieneDatosCompletos2023(perfilDocente)) {
       await continuarTrasCompletarPerfil('completa', pdfPE, pdfGPE, semestre)
       return
     }
-    const problemaRequisitos = validarRequisitos2023({ perfilDocente, semestre, pdfPE, pdfGPE })
+    const problemaRequisitos = es2025
+      ? validarRequisitos2025({ perfilDocente, semestre, pdfPE })
+      : validarRequisitos2023({ perfilDocente, semestre, pdfPE, pdfGPE })
     if (problemaRequisitos) {
       setGenError(problemaRequisitos)
       return
@@ -174,7 +182,7 @@ export default function useFlujoGeneracion({
 
     setOnboardingFase('loading')
     setGenError('')
-    setGenProgress({ phase: 'converting', message: 'Preparando PDFs…', current: 0, total: 0 })
+    setGenProgress({ phase: 'converting', message: 'Preparando PDF…', current: 0, total: 0 })
 
     try {
       const datosDocente = {
@@ -188,50 +196,83 @@ export default function useFlujoGeneracion({
         diasNoLaborables:    expandirPeriodosVacacionales(estado.periodosVacacionales),
       }
 
-      const resultado = await generarPlaneacion2023Completa({
-        pdfPE,
-        pdfGPE,
-        datosDocente,
-        calendario,
-        materiaId,
-        onProgreso: p => setGenProgress(p),
-      })
+      if (es2025) {
+        // ── Modelo 2025: un solo PDF ───────────────────────────
+        const resultado = await generarPlaneacion2025Completa({
+          pdfPE,
+          datosDocente,
+          calendario,
+          materiaId,
+          onProgreso: p => setGenProgress(p),
+        })
 
-      const nombreCorto = nombreMateriaDesdeSiglema(resultado.planeacion)
-      if (nombreCorto && debeAutonombrarMateria(estado.nombre)) {
-        await updateMateria(user.uid, materiaId, { nombre: nombreCorto })
-      }
+        const nombreCorto = nombreMateriaDesdeSiglema2025(resultado.planeacion)
+        if (nombreCorto && debeAutonombrarMateria(estado.nombre)) {
+          await updateMateria(user.uid, materiaId, { nombre: nombreCorto })
+        }
 
-      await actualizarMateriaConPlaneacion2023(user.uid, materiaId, resultado.planeacion, { pagada: true })
+        await actualizarMateriaConPlaneacion2025(user.uid, materiaId, resultado.planeacion, { pagada: true })
 
-      const unidades2023 = extraerUnidadesDesde2023(resultado.planeacion)
-      setEstado(prev => {
-        const next = {
+        const unidades2025 = extraerUnidadesDesde2025(resultado.planeacion)
+        setEstado(prev => ({
           ...prev,
           ...(nombreCorto && debeAutonombrarMateria(prev.nombre) ? { nombre: nombreCorto } : {}),
-          planeacion2023: resultado.planeacion,
-          unidades: unidades2023,
+          planeacion2025: resultado.planeacion,
+          unidades: unidades2025,
           pagada: true,
           planGeneradaGratis: false,
-        }
-        const hTotales = unidades2023.flatMap(u => u.subunidades || []).reduce((s, su) => s + (Number(su.horas) || 0), 0)
-        if (hTotales > 0 && semestre?.fechaInicio && semestre?.fechaFin) {
-          const semanas = calcularSemanasHabiles(semestre, estado.periodosVacacionales || [])
-          const auto = calcularHorasSemanaAuto(hTotales, semanas.length)
-          if (auto) next.horasSemana = auto.requiereManual ? '' : String(auto.rounded)
-        }
-        return next
-      })
+        }))
 
-      if (resultado.rasConError.length > 0) {
-        console.warn('[2023] RAs con error:', resultado.rasConError)
+        if (resultado.pfsConError?.length > 0) {
+          console.warn('[2025] PFs con error:', resultado.pfsConError)
+        }
+      } else {
+        // ── Modelo 2023: PE + GPE ──────────────────────────────
+        const resultado = await generarPlaneacion2023Completa({
+          pdfPE,
+          pdfGPE,
+          datosDocente,
+          calendario,
+          materiaId,
+          onProgreso: p => setGenProgress(p),
+        })
+
+        const nombreCorto = nombreMateriaDesdeSiglema(resultado.planeacion)
+        if (nombreCorto && debeAutonombrarMateria(estado.nombre)) {
+          await updateMateria(user.uid, materiaId, { nombre: nombreCorto })
+        }
+
+        await actualizarMateriaConPlaneacion2023(user.uid, materiaId, resultado.planeacion, { pagada: true })
+
+        const unidades2023 = extraerUnidadesDesde2023(resultado.planeacion)
+        setEstado(prev => {
+          const next = {
+            ...prev,
+            ...(nombreCorto && debeAutonombrarMateria(prev.nombre) ? { nombre: nombreCorto } : {}),
+            planeacion2023: resultado.planeacion,
+            unidades: unidades2023,
+            pagada: true,
+            planGeneradaGratis: false,
+          }
+          const hTotales = unidades2023.flatMap(u => u.subunidades || []).reduce((s, su) => s + (Number(su.horas) || 0), 0)
+          if (hTotales > 0 && semestre?.fechaInicio && semestre?.fechaFin) {
+            const semanas = calcularSemanasHabiles(semestre, estado.periodosVacacionales || [])
+            const auto = calcularHorasSemanaAuto(hTotales, semanas.length)
+            if (auto) next.horasSemana = auto.requiereManual ? '' : String(auto.rounded)
+          }
+          return next
+        })
+
+        if (resultado.rasConError.length > 0) {
+          console.warn('[2023] RAs con error:', resultado.rasConError)
+        }
       }
 
       sessionStorage.setItem('planea_pro_splash', '1')
       setOnboardingFase('success')
     } catch (err) {
-      console.error('🔴 [Generar 2023] Error en generación:', err)
-      setGenError(err.message || 'Error generando la planeación 2023.')
+      console.error(`🔴 [Generar ${es2025 ? '2025' : '2023'}] Error en generación:`, err)
+      setGenError(err.message || `Error generando la planeación ${es2025 ? '2025' : '2023'}.`)
       setOnboardingFase('upload')
     }
   }
@@ -280,12 +321,9 @@ export default function useFlujoGeneracion({
       return
     }
 
-    try {
-      // Guardar los PDFs en sessionStorage para poder generar al pagar sin re-subir
-      const [b64PE, b64GPE] = await Promise.all([fileToBase64(pdfPE), fileToBase64(pdfGPE)])
-      try { sessionStorage.setItem(PDFS_KEY(materiaId), JSON.stringify({ pe: b64PE, gpe: b64GPE })) } catch {}
+    const es2025 = estado.modelo === MODELO_2025
 
-      setGenProgress({ phase: 'structure', message: 'Extrayendo estructura del módulo…', current: 0, total: 0 })
+    try {
       const datosDocente = {
         nombre:      perfilDocente?.nombre      || '',
         numEmpleado: perfilDocente?.numEmpleado || '',
@@ -296,37 +334,70 @@ export default function useFlujoGeneracion({
         fechaFinSemestre:    sem?.fechaFin    || '',
         diasNoLaborables:    expandirPeriodosVacacionales(vac),
       }
-      const estructura2023 = await extraerEstructura2023(
-        pdfPE, pdfGPE, datosDocente, calendario, sessionId,
-      )
-      if (estructura2023?.cabecera) estructura2023.cabecera.calendario = calendario
 
-      const unidades2023 = extraerUnidadesDesde2023(estructura2023)
-      const hTotales = unidades2023.flatMap(u => u.subunidades || []).reduce((s, su) => s + (Number(su.horas) || 0), 0)
-      const nombreCorto = nombreMateriaDesdeSiglema(estructura2023)
+      if (es2025) {
+        // ── Modelo 2025: un solo PDF, extrae solo propósitos formativos ──
+        const b64PE = await fileToBase64(pdfPE)
+        try { sessionStorage.setItem(PDFS_KEY(materiaId), JSON.stringify({ pe: b64PE })) } catch {}
 
-      await actualizarMateriaConPlaneacion2023(user.uid, materiaId, estructura2023, { pagada: false })
-      if (nombreCorto && debeAutonombrarMateria(estado.nombre)) {
-        await updateMateria(user.uid, materiaId, { nombre: nombreCorto })
-      }
+        setGenProgress({ phase: 'structure', message: 'Extrayendo Propósitos Formativos del PE…', current: 0, total: 0 })
+        const estructura2025 = await extraerEstructura2025(pdfPE, datosDocente, calendario, sessionId)
+        if (estructura2025?.cabecera) estructura2025.cabecera.calendario = calendario
 
-      setEstado(prev => {
-        const next = {
+        const unidades2025 = extraerUnidadesDesde2025(estructura2025)
+        const hTotales = unidades2025.flatMap(u => u.subunidades || []).reduce((s, su) => s + (Number(su.horas) || 0), 0)
+        const nombreCorto = nombreMateriaDesdeSiglema2025(estructura2025)
+
+        await actualizarMateriaConPlaneacion2025(user.uid, materiaId, estructura2025, { pagada: false })
+        if (nombreCorto && debeAutonombrarMateria(estado.nombre)) {
+          await updateMateria(user.uid, materiaId, { nombre: nombreCorto })
+        }
+
+        setEstado(prev => ({
           ...prev,
           ...(nombreCorto && debeAutonombrarMateria(prev.nombre) ? { nombre: nombreCorto } : {}),
-          planeacion2023: estructura2023,
-          unidades: unidades2023,
+          planeacion2025: estructura2025,
+          unidades: unidades2025,
           horasTotalesPrograma: hTotales,
           pagada: false,
           planGeneradaGratis: true,
+        }))
+      } else {
+        // ── Modelo 2023: PE + GPE ──────────────────────────────
+        const [b64PE, b64GPE] = await Promise.all([fileToBase64(pdfPE), fileToBase64(pdfGPE)])
+        try { sessionStorage.setItem(PDFS_KEY(materiaId), JSON.stringify({ pe: b64PE, gpe: b64GPE })) } catch {}
+
+        setGenProgress({ phase: 'structure', message: 'Extrayendo estructura del módulo…', current: 0, total: 0 })
+        const estructura2023 = await extraerEstructura2023(pdfPE, pdfGPE, datosDocente, calendario, sessionId)
+        if (estructura2023?.cabecera) estructura2023.cabecera.calendario = calendario
+
+        const unidades2023 = extraerUnidadesDesde2023(estructura2023)
+        const hTotales = unidades2023.flatMap(u => u.subunidades || []).reduce((s, su) => s + (Number(su.horas) || 0), 0)
+        const nombreCorto = nombreMateriaDesdeSiglema(estructura2023)
+
+        await actualizarMateriaConPlaneacion2023(user.uid, materiaId, estructura2023, { pagada: false })
+        if (nombreCorto && debeAutonombrarMateria(estado.nombre)) {
+          await updateMateria(user.uid, materiaId, { nombre: nombreCorto })
         }
-        if (hTotales > 0 && sem?.fechaInicio && sem?.fechaFin) {
-          const semanas = calcularSemanasHabiles(sem, vac)
-          const auto = calcularHorasSemanaAuto(hTotales, semanas.length)
-          if (auto) next.horasSemana = auto.requiereManual ? '' : String(auto.rounded)
-        }
-        return next
-      })
+
+        setEstado(prev => {
+          const next = {
+            ...prev,
+            ...(nombreCorto && debeAutonombrarMateria(prev.nombre) ? { nombre: nombreCorto } : {}),
+            planeacion2023: estructura2023,
+            unidades: unidades2023,
+            horasTotalesPrograma: hTotales,
+            pagada: false,
+            planGeneradaGratis: true,
+          }
+          if (hTotales > 0 && sem?.fechaInicio && sem?.fechaFin) {
+            const semanas = calcularSemanasHabiles(sem, vac)
+            const auto = calcularHorasSemanaAuto(hTotales, semanas.length)
+            if (auto) next.horasSemana = auto.requiereManual ? '' : String(auto.rounded)
+          }
+          return next
+        })
+      }
 
       await finalizarSesionGeneracion(sessionId, true)
 
@@ -353,9 +424,10 @@ export default function useFlujoGeneracion({
       return
     }
     try {
-      const { pe, gpe } = JSON.parse(stored)
-      const pdfPE  = base64ToFile(pe,  'PE.pdf')
-      const pdfGPE = base64ToFile(gpe, 'GPE.pdf')
+      const parsed = JSON.parse(stored)
+      const pdfPE  = base64ToFile(parsed.pe, 'PE.pdf')
+      // Modelo 2025 no tiene GPE — parsed.gpe puede ser undefined
+      const pdfGPE = parsed.gpe ? base64ToFile(parsed.gpe, 'GPE.pdf') : null
       await handleOnboardingGenerate(pdfPE, pdfGPE, estado.semestre)
     } catch (err) {
       setGenError(err.message || 'Error al generar la planeación.')
