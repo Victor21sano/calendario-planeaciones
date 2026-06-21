@@ -46,7 +46,7 @@ export const HORAS_INICIO_CIERRE_GRANDE  = 2   // cuando duracion > UMBRAL
 
 /**
  * Número sugerido de actividades específicas por RA según sus horas.
- * Regla de negocio: al menos 1 por cada ~10 horas, máximo 4.
+ * Regla CONALEP: máx. 7h por actividad → nº actividades = ⌈horasRA / 7⌉ (sin tope fijo).
  */
 // REGLA CONALEP: cada actividad específica (propósito) NO puede exceder 7 horas.
 export const HORAS_MAX_POR_ACTIVIDAD = 7

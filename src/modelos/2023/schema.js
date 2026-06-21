@@ -140,7 +140,9 @@ export const schemaModelo2023 = {
         actividadesEspecificas: {
           type:     'array',
           minItems: 0,
-          maxItems: 4,
+          // Sin tope fijo de cantidad: el nº de actividades = ⌈horasRA / 7⌉
+          // (regla CONALEP de máx. 7h por actividad). 16 da holgura para RAs largos.
+          maxItems: 16,
           items:    { $ref: '#/$defs/actividadEspecifica' },
         },
       },
