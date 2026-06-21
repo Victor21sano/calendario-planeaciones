@@ -8,6 +8,7 @@ import { es } from 'date-fns/locale'
 import SaldoCreditos       from '../components/SaldoCreditos'
 import ModalSinCreditos    from '../components/ModalSinCreditos'
 import MateriaTypeBadge   from '../components/badges/MateriaTypeBadge'
+import ModeloBadge        from '../components/badges/ModeloBadge'
 import EmptyState          from '../components/dashboard/EmptyState'
 import ModeloMateriaModal  from '../components/dashboard/ModeloMateriaModal'
 import PerfilIncompletoModal from '../components/dashboard/PerfilIncompletoModal'
@@ -62,6 +63,7 @@ function MateriaCard({ materia, idx, onNavigate, onDuplicate, onDelete }) {
     >
       {/* Badge + acciones */}
       <div className="absolute top-4 right-4 flex items-center gap-1.5 z-10">
+        <ModeloBadge modelo={materia.modelo} />
         <MateriaTypeBadge pagada={materia.pagada} />
         <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
           <button onClick={() => onDuplicate(materia.id)} title="Duplicar" aria-label={`Duplicar ${materia.nombre}`}
@@ -81,7 +83,7 @@ function MateriaCard({ materia, idx, onNavigate, onDuplicate, onDelete }) {
 
       <div className="relative z-[1] p-5 flex flex-col h-full">
         {/* Nombre */}
-        <h3 className="text-base font-bold text-slate-900 dark:text-slate-50 leading-snug pr-20 mb-3 line-clamp-2">
+        <h3 className="text-base font-bold text-slate-900 dark:text-slate-50 leading-snug pr-28 mb-3 line-clamp-2">
           {materia.nombre}
         </h3>
 
@@ -433,7 +435,7 @@ export default function DashboardPage() {
             {!searchTerm && (
               <button
                 onClick={abrirModalCrear}
-                className="selectable-card flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-slate-300 p-8 text-slate-400 hover:border-brand-400 hover:bg-white/60 hover:text-brand-600 dark:border-slate-600 dark:text-slate-500 dark:hover:border-brand-500 dark:hover:bg-slate-800/40 dark:hover:text-brand-300"
+                className="selectable-card flex h-full min-h-[150px] flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-slate-300 p-8 text-slate-400 hover:border-brand-400 hover:bg-white/60 hover:text-brand-600 dark:border-slate-600 dark:text-slate-500 dark:hover:border-brand-500 dark:hover:bg-slate-800/40 dark:hover:text-brand-300"
               >
                 <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800">
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

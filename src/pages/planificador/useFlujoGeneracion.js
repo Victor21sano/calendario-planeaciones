@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { updateMateria, actualizarMateriaConPlaneacion2023, actualizarMateriaConPlaneacion2025, MODELO_2023, MODELO_2025 } from "../../services/materias"
 import { calcularSemanasHabiles, calcularHorasSemanaAuto } from "../../utils/calculos"
+import { aplicarFechasDesdeHorario } from "../../utils/fechasPlaneacion"
 import { fileToBase64 } from "../../services/iaPlaneacion"
 import { extraerEstructura2023 } from "../../services/ia/gemini2023"
 import { iniciarSesionGeneracion, finalizarSesionGeneracion } from "../../services/creditosService"
@@ -17,6 +18,7 @@ import {
   debeAutonombrarMateria,
   base64ToFile,
   expandirPeriodosVacacionales,
+  sumarHorasUnidades,
   PDFS_KEY,
 } from "./utils"
 
@@ -41,7 +43,7 @@ export default function useFlujoGeneracion({
   const location = useLocation()
 
   const [mostrarModalSinCreditos, setMostrarModalSinCreditos] = useState(false)
-  // ── Onboarding flow: 'init'|'splash'|'upload'|'loading'|'success'|'app'
+  // ── Onboarding flow: 'init'|'upload'|'loading'|'success'|'app'
   const [onboardingFase, setOnboardingFase] = useState('init')
   const [genProgress,    setGenProgress]    = useState({ phase: 'idle', message: '', current: 0, total: 0 })
   const [genError,       setGenError]       = useState('')
@@ -198,6 +200,12 @@ export default function useFlujoGeneracion({
 
       if (es2025) {
         // ── Modelo 2025: un solo PDF ───────────────────────────
+        // Guardar el PE en sessionStorage para poder regenerar PFs que fallen.
+        try {
+          const b64PE = await fileToBase64(pdfPE)
+          sessionStorage.setItem(PDFS_KEY(materiaId), JSON.stringify({ pe: b64PE }))
+        } catch {}
+
         const resultado = await generarPlaneacion2025Completa({
           pdfPE,
           datosDocente,
@@ -211,14 +219,33 @@ export default function useFlujoGeneracion({
           await updateMateria(user.uid, materiaId, { nombre: nombreCorto })
         }
 
+        // Fechas desde el Planificador de Horarios (fuente única de verdad).
+        const unidades2025 = extraerUnidadesDesde2025(resultado.planeacion)
+        const vac2025      = estado.periodosVacacionales || []
+        let   horasSemana2025 = Number(estado.horasSemana) || 0
+        if (!horasSemana2025 && semestre?.fechaInicio && semestre?.fechaFin) {
+          const semanas = calcularSemanasHabiles(semestre, vac2025)
+          const auto    = calcularHorasSemanaAuto(sumarHorasUnidades(unidades2025), semanas.length)
+          if (auto) horasSemana2025 = auto.rounded
+        }
+        if (horasSemana2025 > 0) {
+          if (resultado.planeacion?.cabecera?.asignatura) {
+            resultado.planeacion.cabecera.asignatura.horasSemana = horasSemana2025
+          }
+          aplicarFechasDesdeHorario({
+            semestre, horasSemana: horasSemana2025, periodosVacacionales: vac2025,
+            unidades: unidades2025, planeacion: resultado.planeacion, modelo: MODELO_2025,
+          })
+        }
+
         await actualizarMateriaConPlaneacion2025(user.uid, materiaId, resultado.planeacion, { pagada: true })
 
-        const unidades2025 = extraerUnidadesDesde2025(resultado.planeacion)
         setEstado(prev => ({
           ...prev,
           ...(nombreCorto && debeAutonombrarMateria(prev.nombre) ? { nombre: nombreCorto } : {}),
           planeacion2025: resultado.planeacion,
           unidades: unidades2025,
+          ...(horasSemana2025 > 0 ? { horasSemana: String(horasSemana2025) } : {}),
           pagada: true,
           planGeneradaGratis: false,
         }))
@@ -242,9 +269,28 @@ export default function useFlujoGeneracion({
           await updateMateria(user.uid, materiaId, { nombre: nombreCorto })
         }
 
+        // Fechas desde el Planificador de Horarios (fuente única de verdad).
+        const unidades2023 = extraerUnidadesDesde2023(resultado.planeacion)
+        const vac2023      = estado.periodosVacacionales || []
+        const hTotales2023 = sumarHorasUnidades(unidades2023)
+        let   horasSemana2023 = Number(estado.horasSemana) || 0
+        if (!horasSemana2023 && hTotales2023 > 0 && semestre?.fechaInicio && semestre?.fechaFin) {
+          const semanas = calcularSemanasHabiles(semestre, vac2023)
+          const auto    = calcularHorasSemanaAuto(hTotales2023, semanas.length)
+          if (auto) horasSemana2023 = auto.rounded
+        }
+        if (horasSemana2023 > 0) {
+          if (resultado.planeacion?.cabecera?.modulo) {
+            resultado.planeacion.cabecera.modulo.horasSemana = horasSemana2023
+          }
+          aplicarFechasDesdeHorario({
+            semestre, horasSemana: horasSemana2023, periodosVacacionales: vac2023,
+            unidades: unidades2023, planeacion: resultado.planeacion, modelo: MODELO_2023,
+          })
+        }
+
         await actualizarMateriaConPlaneacion2023(user.uid, materiaId, resultado.planeacion, { pagada: true })
 
-        const unidades2023 = extraerUnidadesDesde2023(resultado.planeacion)
         setEstado(prev => {
           const next = {
             ...prev,
@@ -254,10 +300,9 @@ export default function useFlujoGeneracion({
             pagada: true,
             planGeneradaGratis: false,
           }
-          const hTotales = unidades2023.flatMap(u => u.subunidades || []).reduce((s, su) => s + (Number(su.horas) || 0), 0)
-          if (hTotales > 0 && semestre?.fechaInicio && semestre?.fechaFin) {
-            const semanas = calcularSemanasHabiles(semestre, estado.periodosVacacionales || [])
-            const auto = calcularHorasSemanaAuto(hTotales, semanas.length)
+          if (hTotales2023 > 0 && semestre?.fechaInicio && semestre?.fechaFin) {
+            const semanas = calcularSemanasHabiles(semestre, vac2023)
+            const auto = calcularHorasSemanaAuto(hTotales2023, semanas.length)
             if (auto) next.horasSemana = auto.requiereManual ? '' : String(auto.rounded)
           }
           return next
@@ -268,7 +313,6 @@ export default function useFlujoGeneracion({
         }
       }
 
-      sessionStorage.setItem('planea_pro_splash', '1')
       setOnboardingFase('success')
     } catch (err) {
       console.error(`🔴 [Generar ${es2025 ? '2025' : '2023'}] Error en generación:`, err)
@@ -401,7 +445,6 @@ export default function useFlujoGeneracion({
 
       await finalizarSesionGeneracion(sessionId, true)
 
-      sessionStorage.setItem('planea_pro_splash', '1')
       setOnboardingFase('app')
       setMainTab('planificador')
     } catch (err) {

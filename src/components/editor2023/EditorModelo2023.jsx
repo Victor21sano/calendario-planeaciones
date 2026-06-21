@@ -4,8 +4,10 @@ import EditorRA            from './EditorRA'
 import IndicadorGuardado   from './IndicadorGuardado'
 import BarraAdvertencias   from './BarraAdvertencias'
 import { useAutoGuardado } from './hooks/useAutoGuardado'
-import { validarPlaneacionCompleta2023, calcularFechas } from '../../modelos/2023/index.js'
+import { validarPlaneacionCompleta2023 }                 from '../../modelos/2023/index.js'
 import { actualizarMateriaConPlaneacion2023 }            from '../../services/materias'
+import { aplicarFechasDesdeHorario }                     from '../../utils/fechasPlaneacion'
+import { extraerUnidadesDesde2023 }                      from '../../pages/planificador/utils'
 import { useAuth }                                        from '../../contexts/AuthContext'
 
 /**
@@ -60,8 +62,17 @@ export default function EditorModelo2023({ planeacion: planeacionInicial, materi
 
   const recalcularFechas = () => {
     try {
-      const nueva = calcularFechas(planeacion)
-      setPlaneacion(nueva)
+      const cal      = planeacion.cabecera?.calendario || {}
+      const semestre = { fechaInicio: cal.fechaInicioSemestre, fechaFin: cal.fechaFinSemestre }
+      const horasSemana = planeacion.cabecera?.modulo?.horasSemana
+      const periodos = (cal.diasNoLaborables || []).map(d => ({ fechaInicio: d, fechaFin: d }))
+      const unidadesPlan = extraerUnidadesDesde2023(planeacion)
+      const clone = JSON.parse(JSON.stringify(planeacion))
+      aplicarFechasDesdeHorario({
+        semestre, horasSemana, periodosVacacionales: periodos,
+        unidades: unidadesPlan, planeacion: clone, modelo: '2023',
+      })
+      setPlaneacion(clone)
     } catch (err) {
       console.error('[EditorModelo2023] Error al recalcular fechas:', err)
     }
@@ -128,6 +139,8 @@ export default function EditorModelo2023({ planeacion: planeacionInicial, materi
               pdfPE={pdfPE}
               pdfGPE={pdfGPE}
               terminologia={t}
+              modelo={t.modelo}
+              materiaId={materiaId}
               onCambio={nuevo => actualizarRA(uIdx, rIdx, nuevo)}
             />
           ))}

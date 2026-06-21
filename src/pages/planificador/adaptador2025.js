@@ -48,6 +48,10 @@ export function adaptar2025aVista(planeacion2025) {
     duracionHoras:          pf.horas,
     ponderacion:            pf.ponderacion,
     actividadEvaluacion:    pf.actividadEvaluacion,
+    // Campos del PF que el regenerador 2025 necesita (ignorados por los componentes 2023)
+    contenidosFormativos:   pf.contenidosFormativos || [],
+    estrategiasAprendizaje: pf.estrategiasAprendizaje || [],
+    rubrica:                pf.rubrica,
     actividadesEspecificas: pf.sesiones || [],
   }))
 

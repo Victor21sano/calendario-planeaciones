@@ -14,7 +14,6 @@ import { PreviewModelo2023 }                        from '../components/preview2
 import { EditorModelo2023, ToggleVistaEdicion }    from '../components/editor2023'
 import BotonDescargarWord2023                      from '../components/exportacion/BotonDescargarWord2023'
 import BotonDescargarWord2025                      from '../components/exportacion/BotonDescargarWord2025'
-import SplashScreen      from '../components/onboarding/SplashScreen'
 import UploadScreen      from '../components/onboarding/UploadScreen'
 import LoadingTips       from '../components/onboarding/LoadingTips'
 import SuccessTransition from '../components/onboarding/SuccessTransition'
@@ -190,6 +189,33 @@ export default function PlanificadorPage() {
     [estado.modelo, estado.planeacion2025]
   )
 
+  // Conteo de RAs/PFs que quedaron sin sesiones (generación parcial / fallida).
+  const fallidos = useMemo(() => {
+    if (estado.modelo === MODELO_2025) {
+      return (estado.planeacion2025?.propositosFormativos || []).filter(pf => !(pf.sesiones?.length)).length
+    }
+    return (estado.planeacion2023?.unidades || [])
+      .flatMap(u => u.ras || [])
+      .filter(ra => !(ra.actividadesEspecificas?.length)).length
+  }, [estado.modelo, estado.planeacion2025, estado.planeacion2023])
+
+  const bannerFallidos = fallidos > 0 && (
+    <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-warning-200 bg-warning-50 p-3 no-print dark:border-warning-900 dark:bg-warning-950/30">
+      <p className="text-xs text-warning-800 dark:text-warning-300">
+        ⚠ {fallidos}{' '}
+        {estado.modelo === MODELO_2025
+          ? (fallidos === 1 ? 'Propósito Formativo' : 'Propósitos Formativos')
+          : (fallidos === 1 ? 'Resultado de Aprendizaje' : 'Resultados de Aprendizaje')}{' '}
+        no se {fallidos === 1 ? 'generó' : 'generaron'}. Ábrelo en el editor para regenerarlo (gratis).
+      </p>
+      {modoVista2023 !== 'editor' && (
+        <button onClick={() => setModoVista2023('editor')} className="btn-secondary whitespace-nowrap text-xs">
+          Ir al editor
+        </button>
+      )}
+    </div>
+  )
+
   // Semanas hábiles disponibles (para cálculo automático de horas/semana)
   const semanasHabilesCount = (semestre.fechaInicio && semestre.fechaFin)
     ? calcularSemanasHabiles(semestre, periodosVacacionales).length
@@ -224,8 +250,7 @@ export default function PlanificadorPage() {
     if (!loading && onboardingFase === 'init') {
       const isNew = unidades.length === 0 && !semestre.fechaInicio
       if (isNew) {
-        const splashShown = sessionStorage.getItem('planea_pro_splash')
-        setOnboardingFase(splashShown ? 'upload' : 'splash')
+        setOnboardingFase('upload')
       } else {
         setOnboardingFase('app')
         setMainTab('planificador')
@@ -318,15 +343,6 @@ export default function PlanificadorPage() {
   }
 
   // ── Onboarding screens (new materias) ───────────────────────
-  if (onboardingFase === 'splash') {
-    return (
-      <SplashScreen onComplete={() => {
-        sessionStorage.setItem('planea_pro_splash', '1')
-        setOnboardingFase('upload')
-      }} />
-    )
-  }
-
   if (onboardingFase === 'upload') {
     const sinCreditos  = !esAdmin && creditos !== null && creditos <= 0
     return (
@@ -675,6 +691,8 @@ export default function PlanificadorPage() {
                   </div>
                 </div>
 
+                {bannerFallidos}
+
                 {modoVista2023 === 'preview'
                   ? (
                     <PreviewModelo2023
@@ -731,6 +749,8 @@ export default function PlanificadorPage() {
                     <ToggleVistaEdicion modo={modoVista2023} onCambio={setModoVista2023} />
                   </div>
                 </div>
+
+                {bannerFallidos}
 
                 {modoVista2023 === 'preview'
                   ? (

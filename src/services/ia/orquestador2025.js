@@ -39,7 +39,7 @@ async function procesarEnLotes(tareas, concurrencia = 3) {
  * Distribuye las horas de un PF en sesiones de máximo 7 horas.
  * Ejemplo: 9 horas → [3, 3, 3]
  */
-function distribuirHorasEntreSesiones(horasTotales, maxPorSesion = 7) {
+export function distribuirHorasEntreSesiones(horasTotales, maxPorSesion = 7) {
   if (horasTotales <= maxPorSesion) return [horasTotales]
   const numSesiones = Math.ceil(horasTotales / maxPorSesion)
   const base    = Math.floor(horasTotales / numSesiones)
