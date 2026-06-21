@@ -172,6 +172,14 @@ Evita propósitos genéricos como:
 - "Realiza actividades del PF."
 
 ═══════════════════════════════════════════════════════════════════
+ELEMENTO TRANSVERSAL (campo "elementoTransversal", nivel sesión)
+═══════════════════════════════════════════════════════════════════
+Cadena breve con 2 elementos transversales separados por coma, elegidos de:
+"Orientación didáctica", "Estrategia de aprendizaje", "Actividad de evaluación".
+- Sesiones iniciales/intermedias del PF → "Orientación didáctica, Estrategia de aprendizaje"
+- Sesiones donde se construye o aplica la evidencia (incluida la última) → "Estrategia de aprendizaje, Actividad de evaluación"
+
+═══════════════════════════════════════════════════════════════════
 REGLAS DE LOS MOMENTOS DIDÁCTICOS
 ═══════════════════════════════════════════════════════════════════
 
@@ -182,6 +190,9 @@ Cada momento debe incluir exactamente estos campos:
 - estrategiaEnsenanzaDocente
 - estrategiaAprendizajeAlumno
 - estrategiaEvaluacion
+- tipoEvaluacion
+- instrumentoEvaluacion
+- evidenciaAprendizaje
 - recursosMaterialesDidacticos
 - estudioIndependiente
 
@@ -291,6 +302,38 @@ CIERRE:
 No inventes códigos ni evidencias. No cambies el código oficial. No cambies la evidencia oficial.
 
 ═══════════════════════════════════════════════════════════════════
+TIPO DE EVALUACIÓN (campo "tipoEvaluacion")
+═══════════════════════════════════════════════════════════════════
+Valor breve, una sola palabra, según el momento:
+- INICIO → "Diagnóstica"
+- DESARROLLO → "Formativa"
+- CIERRE de sesión NO final del PF → "Formativa"
+- CIERRE de la ÚLTIMA sesión del PF → "Sumativa"
+
+═══════════════════════════════════════════════════════════════════
+INSTRUMENTO DE EVALUACIÓN (campo "instrumentoEvaluacion")
+═══════════════════════════════════════════════════════════════════
+Nombre(s) del/los instrumento(s) de evaluación, coherentes con el momento y la
+evidencia. Texto breve; si son varios, sepáralos con salto de línea (\\n).
+Ejemplos por momento (NO copiar literal, adaptar al contenido):
+- INICIO: "Lista de cotejo", "Guía de observación", "Cuestionario\\nRegistro de observación"
+- DESARROLLO: "Rúbrica analítica", "Lista de cotejo\\nParticipación activa", "Registro de participación"
+- CIERRE (formativo): "Observación sobre la participación", "Lista de cotejo / Registro de observación"
+- CIERRE (sumativo): "Rúbrica", "Autoevaluación escrita\\nRúbrica"
+
+═══════════════════════════════════════════════════════════════════
+EVIDENCIA DE APRENDIZAJE (campo "evidenciaAprendizaje")
+═══════════════════════════════════════════════════════════════════
+Producto(s) o desempeño(s) observable(s) que deja el alumno en ese momento,
+coherente con la estrategia. Texto breve; si son varios, sepáralos con \\n.
+NO confundir con la evidencia oficial del PF (esa va en la Actividad de Evaluación).
+Ejemplos (adaptar al contenido real):
+- INICIO: "Participación oral registrada\\nMapa de ideas grupal", "Resolución del cuestionario"
+- DESARROLLO: "Cuadro comparativo\\nApuntes y reflexiones escritas", "Infografía", "Línea del tiempo"
+- CIERRE (formativo): "Conclusiones", "Apuntes en el cuaderno"
+- CIERRE (sumativo de la última sesión): debe mencionar la evidencia oficial del PF (ej. "Presentación del Lapbook\\nReflexión final")
+
+═══════════════════════════════════════════════════════════════════
 RECURSOS MATERIALES DIDÁCTICOS
 ═══════════════════════════════════════════════════════════════════
 
@@ -331,8 +374,15 @@ En todas las sesiones, la estrategiaEnsenanzaDocente del Inicio debe iniciar con
 
 "Pasar lista. El docente da la bienvenida al grupo y realiza el encuadre de la sesión. Presenta el propósito de aprendizaje: [propositoAprendizaje]. Contextualiza la importancia del contenido específico en relación con el Propósito Formativo [codigo]: [texto breve del PF]. Activa conocimientos previos y experiencias mediante preguntas detonadoras relacionadas con [contenidoEspecifico]. Registra las respuestas en el pizarrón o medio disponible, aclara dudas iniciales y orienta al grupo sobre el producto o desempeño esperado al cierre."
 
-Si es la primera sesión del PF, adicionar:
+Si es la primera sesión del PF, adicionar (en UNA sola frase breve):
 "Presenta la Actividad de Evaluación [codigo] con ponderación [ponderacion]% como referente del desempeño final del PF."
+
+EQUILIBRIO DE EXTENSIÓN (importante): el Inicio debe ser conciso. Tanto en
+estrategiaEnsenanzaDocente como en estrategiaAprendizajeAlumno del Inicio,
+mantente entre 60 y 110 palabras, INCLUSO en la primera sesión del PF. Al
+presentar la Actividad de Evaluación no expandas el encuadre ni repitas
+información. El Inicio de la primera sesión NO debe ser desproporcionadamente
+más largo que el de las demás sesiones.
 
 La evaluación del Inicio siempre es DIAGNÓSTICA.
 
@@ -412,6 +462,7 @@ La primera sesión cierra con evaluación FORMATIVA; la última con evaluación 
     "duracionHoras": 3,
     "modalidad": "Presencial",
     "contenidoEspecifico": "Autoconocimiento y cuidado de sí. El cuerpo como lugar del cuidado, del pensamiento y de la acción.",
+    "elementoTransversal": "Orientación didáctica, Estrategia de aprendizaje",
     "fechaInicio": "",
     "fechaFin": "",
     "momentos": {
@@ -421,6 +472,9 @@ La primera sesión cierra con evaluación FORMATIVA; la última con evaluación 
         "estrategiaEnsenanzaDocente": "Pasar lista. El docente da la bienvenida al grupo y realiza el encuadre de la sesión. Presenta el propósito de aprendizaje sobre autoconocimiento y autocuidado, y contextualiza su relevancia en el bienestar integral. Presenta la Actividad de Evaluación 1.1.1 con ponderación 25% como referente del desempeño final del PF. Activa saberes previos mediante preguntas detonadoras: ¿Qué hábitos cuidan mi bienestar? ¿Cuáles lo deterioran? ¿Qué significa cuidarme éticamente? Registra respuestas en el pizarrón y orienta al grupo sobre el producto esperado: el Lapbook del cuidado de sí.",
         "estrategiaAprendizajeAlumno": "El alumno responde al pase de lista y escucha el encuadre de la sesión. Anota en su cuaderno el propósito de aprendizaje, la duración y el producto a construir a lo largo del PF. Responde las preguntas detonadoras compartiendo hábitos y experiencias personales sobre su bienestar. Escucha y contrasta sus respuestas con las de sus compañeros. Formula dudas iniciales sobre el concepto de autocuidado y lo que implica como práctica ética.",
         "estrategiaEvaluacion": "Evaluación diagnóstica. Autoevaluación mediante preguntas detonadoras: el alumno identifica qué prácticas cotidianas fortalecen o deterioran su bienestar, reconociendo su punto de partida antes del desarrollo del contenido.",
+        "tipoEvaluacion": "Diagnóstica",
+        "instrumentoEvaluacion": "Guía de observación\\nLista de cotejo",
+        "evidenciaAprendizaje": "Participación oral registrada\\nRespuestas a preguntas detonadoras",
         "recursosMaterialesDidacticos": "Pizarrón, marcadores, cuaderno de apuntes, hoja de preguntas detonadoras",
         "estudioIndependiente": { "descripcion": "", "duracionHoras": 0 }
       },
@@ -430,6 +484,9 @@ La primera sesión cierra con evaluación FORMATIVA; la última con evaluación 
         "estrategiaEnsenanzaDocente": "Pasar lista. El docente facilita la actividad 'Mi cuerpo, mi casa': guía a los alumnos para que escriban una breve carta de agradecimiento a su cuerpo, reconociendo lo que les permite hacer, sentir y pensar. Organiza equipos de 4 para compartir reflexiones y construir un mapa mental colectivo con prácticas de autocuidado físico, emocional, mental y social. Supervisa el proceso, retroalimenta las contribuciones y socializa los mapas más representativos con el grupo.",
         "estrategiaAprendizajeAlumno": "El alumno escribe una carta de agradecimiento a su cuerpo, explorando qué le permite hacer, sentir y pensar. Comparte su reflexión en equipo y escucha las experiencias de sus compañeros. Contribuye al mapa mental colectivo aportando prácticas de autocuidado desde su propia experiencia. Analiza los diferentes tipos de bienestar: físico, emocional, mental, sexual, socioafectivo y del entorno.",
         "estrategiaEvaluacion": "Evaluación formativa. Heteroevaluación mediante observación directa y lista de cotejo: el docente valora la reflexión personal, la participación en equipo y la coherencia de las prácticas de autocuidado identificadas en el mapa mental.",
+        "tipoEvaluacion": "Formativa",
+        "instrumentoEvaluacion": "Lista de cotejo\\nRegistro de participación",
+        "evidenciaAprendizaje": "Carta de agradecimiento al cuerpo\\nMapa mental colectivo de autocuidado",
         "recursosMaterialesDidacticos": "Hojas blancas, plumones de colores, pizarrón, lista de cotejo formativa",
         "estudioIndependiente": { "descripcion": "Elaborar una lista personal de 5 hábitos que deseas fortalecer y 3 que deseas transformar.", "duracionHoras": 1 }
       },
@@ -439,6 +496,9 @@ La primera sesión cierra con evaluación FORMATIVA; la última con evaluación 
         "estrategiaEnsenanzaDocente": "Pasar lista. El docente propicia un cierre reflexivo mediante la pregunta: ¿Qué significa para ti cuidarte como práctica ética? Solicita a 3-4 alumnos que compartan su reflexión en voz alta. Recupera los aprendizajes clave de la sesión y los conecta con las próximas sesiones del PF donde construirán el Lapbook. Orienta sobre cómo la carta y el mapa mental serán insumos para las secciones del Lapbook.",
         "estrategiaAprendizajeAlumno": "El alumno comparte su reflexión sobre el significado del autocuidado como práctica ética. Escucha y anota las reflexiones de sus compañeros que le resultan significativas. Registra en su cuaderno los conceptos clave de la sesión. Revisa su lista de hábitos y anticipa cómo la usará en el Lapbook. Autoevalúa su participación identificando qué aportó y qué quiere profundizar.",
         "estrategiaEvaluacion": "Evaluación formativa. Autoevaluación reflexiva: el alumno valora su participación activa durante la sesión, identifica los conceptos que comprendió y reconoce aspectos que quiere profundizar en las siguientes sesiones.",
+        "tipoEvaluacion": "Formativa",
+        "instrumentoEvaluacion": "Autoevaluación reflexiva\\nRegistro de observación",
+        "evidenciaAprendizaje": "Reflexión escrita sobre el autocuidado\\nConclusiones de la sesión",
         "recursosMaterialesDidacticos": "Cuaderno, hojas de reflexión, pizarrón, marcadores",
         "estudioIndependiente": { "descripcion": "", "duracionHoras": 0 }
       }
@@ -464,6 +524,7 @@ Cada objeto del array debe conservar exactamente esta estructura:
     "duracionHoras": 0,
     "modalidad": "Presencial",
     "contenidoEspecifico": "",
+    "elementoTransversal": "",
     "fechaInicio": "",
     "fechaFin": "",
     "momentos": {
@@ -473,6 +534,9 @@ Cada objeto del array debe conservar exactamente esta estructura:
         "estrategiaEnsenanzaDocente": "",
         "estrategiaAprendizajeAlumno": "",
         "estrategiaEvaluacion": "",
+        "tipoEvaluacion": "",
+        "instrumentoEvaluacion": "",
+        "evidenciaAprendizaje": "",
         "recursosMaterialesDidacticos": "",
         "estudioIndependiente": {
           "descripcion": "",
@@ -485,6 +549,9 @@ Cada objeto del array debe conservar exactamente esta estructura:
         "estrategiaEnsenanzaDocente": "",
         "estrategiaAprendizajeAlumno": "",
         "estrategiaEvaluacion": "",
+        "tipoEvaluacion": "",
+        "instrumentoEvaluacion": "",
+        "evidenciaAprendizaje": "",
         "recursosMaterialesDidacticos": "",
         "estudioIndependiente": {
           "descripcion": "",
@@ -497,6 +564,9 @@ Cada objeto del array debe conservar exactamente esta estructura:
         "estrategiaEnsenanzaDocente": "",
         "estrategiaAprendizajeAlumno": "",
         "estrategiaEvaluacion": "",
+        "tipoEvaluacion": "",
+        "instrumentoEvaluacion": "",
+        "evidenciaAprendizaje": "",
         "recursosMaterialesDidacticos": "",
         "estudioIndependiente": {
           "descripcion": "",
@@ -531,8 +601,11 @@ VALIDACIONES OBLIGATORIAS ANTES DE RESPONDER
 16. El Desarrollo usa evaluación formativa.
 17. El Cierre de sesiones no finales usa evaluación formativa.
 18. El Cierre de la última sesión usa evaluación sumativa con código, evidencia y ponderación oficiales.
-19. No se inventan códigos, evidencias, instrumentos ni contenidos.
+19. No se inventan códigos ni la evidencia oficial del PF (sí se eligen instrumentos pedagógicos como lista de cotejo, rúbrica, guía de observación).
 20. No se usan frases como "etc.", "materiales didácticos" o "temas vistos".
+21. Cada momento incluye tipoEvaluacion: Inicio="Diagnóstica", Desarrollo="Formativa", Cierre="Formativa" (o "Sumativa" en la última sesión del PF).
+22. Cada momento incluye instrumentoEvaluacion y evidenciaAprendizaje, breves y coherentes con la estrategia del momento.
+23. Cada sesión incluye elementoTransversal con 2 elementos separados por coma.
 
 ═══════════════════════════════════════════════════════════════════
 CONTEXTO JSON

@@ -3,8 +3,13 @@ import CampoTexto    from './campos/CampoTexto'
 import CampoNumero   from './campos/CampoNumero'
 import CampoFecha    from './campos/CampoFecha'
 
-export default function EditorCabecera({ cabecera, onCambio }) {
+const TERMINOLOGIA_DEFAULT = { modelo: '2023' }
+
+export default function EditorCabecera({ cabecera, onCambio, terminologia = TERMINOLOGIA_DEFAULT }) {
   const [expandida, setExpandida] = useState(false)
+  const es2025      = terminologia?.modelo === '2025'
+  const palabraCont = es2025 ? 'Asignatura' : 'Módulo'
+  const etqCompet   = es2025 ? 'Meta educativa' : 'Competencia del módulo'
 
   const setDocente   = (campo, v) => onCambio({ ...cabecera, docente:   { ...cabecera.docente,   [campo]: v } })
   const setModulo    = (campo, v) => onCambio({ ...cabecera, modulo:    { ...cabecera.modulo,    [campo]: v } })
@@ -19,7 +24,7 @@ export default function EditorCabecera({ cabecera, onCambio }) {
         onClick={() => setExpandida(e => !e)}
       >
         <div>
-          <h3 className="font-semibold text-slate-800 dark:text-slate-100">Cabecera — Docente y Módulo</h3>
+          <h3 className="font-semibold text-slate-800 dark:text-slate-100">Cabecera — Docente y {palabraCont}</h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             {cabecera.modulo?.nombre || '—'} · {cabecera.docente?.nombre || '—'}
           </p>
@@ -40,9 +45,9 @@ export default function EditorCabecera({ cabecera, onCambio }) {
             <CampoTexto etiqueta="Plantel"            valor={cabecera.docente?.plantel}     onCambio={v => setDocente('plantel', v)} requerido />
           </fieldset>
 
-          {/* Módulo */}
+          {/* Módulo / Asignatura */}
           <fieldset className="space-y-3 border border-slate-200 dark:border-slate-700 rounded-xl p-4">
-            <legend className="px-2 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide">Módulo</legend>
+            <legend className="px-2 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide">{palabraCont}</legend>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <CampoTexto etiqueta="Siglema" valor={cabecera.modulo?.siglema} onCambio={v => setModulo('siglema', v)} />
               <CampoTexto etiqueta="Nombre" valor={cabecera.modulo?.nombre} onCambio={v => setModulo('nombre', v)} requerido />
@@ -59,12 +64,14 @@ export default function EditorCabecera({ cabecera, onCambio }) {
               readonly
               ayuda="El tipo se extrajo automáticamente del PE. Para cambiarlo, regenera la planeación."
             />
-            <CampoTexto etiqueta="Competencia del módulo" valor={cabecera.modulo?.competenciaModulo} onCambio={v => setModulo('competenciaModulo', v)} />
-            <CampoTextArea
-              etiqueta="Propósito del módulo"
-              valor={cabecera.modulo?.proposito}
-              onCambio={v => setModulo('proposito', v)}
-            />
+            <CampoTexto etiqueta={etqCompet} valor={cabecera.modulo?.competenciaModulo} onCambio={v => setModulo('competenciaModulo', v)} />
+            {!es2025 && (
+              <CampoTextArea
+                etiqueta="Propósito del módulo"
+                valor={cabecera.modulo?.proposito}
+                onCambio={v => setModulo('proposito', v)}
+              />
+            )}
           </fieldset>
 
           {/* Grupo y Calendario */}

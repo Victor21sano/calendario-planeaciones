@@ -1,5 +1,10 @@
 import { copiarTablaHTML } from '../../utils/copiarTabla'
 
+const TERMINOLOGIA_DEFAULT = {
+  modelo: '2023', unidad: 'Unidad', ra: 'Resultado de Aprendizaje', raCorto: 'RA',
+  actividad: 'Propósito', tituloFormato: 'Formato de Planeación Didáctica',
+}
+
 // ─── Estilos de tabla inline (Word-compatible, mismo patrón que Modelo 2018) ─
 const TS   = { borderCollapse: 'collapse', width: '100%', fontFamily: 'Calibri, Arial, sans-serif', fontSize: '10pt' }
 const TH   = { border: '1px solid #CBD5E1', padding: '5px 8px', backgroundColor: '#F1F5F9', color: '#0F172A', fontWeight: 'bold', textAlign: 'left', verticalAlign: 'top' }
@@ -63,39 +68,43 @@ function TablaDocente({ docente = {}, bloqueado }) {
   )
 }
 
-// ─── Tabla cabecera módulo ────────────────────────────────────────────────────
-function TablaModulo({ modulo = {}, grupo = {}, bloqueado }) {
-  const mgm = `2023 - ${grupo?.numero || '—'} - ${modulo?.siglema || '—'}`
+// ─── Tabla cabecera módulo / asignatura ───────────────────────────────────────
+function TablaModulo({ modulo = {}, grupo = {}, bloqueado, t = TERMINOLOGIA_DEFAULT }) {
+  const es2025   = t.modelo === '2025'
+  const palabra  = es2025 ? 'Asignatura' : 'Módulo'
+  const mgm      = `${t.modelo} - ${grupo?.numero || '—'} - ${modulo?.siglema || '—'}`
+  const colProp  = es2025 ? 'Meta educativa' : 'Competencia del Módulo'
   return (
-    <Tabla titulo="Módulo" getHTML={() => `<table style="border-collapse:collapse;width:100%"><tr><td>Datos módulo</td></tr></table>`} bloqueado={bloqueado}>
+    <Tabla titulo={palabra} getHTML={() => `<table style="border-collapse:collapse;width:100%"><tr><td>Datos ${palabra.toLowerCase()}</td></tr></table>`} bloqueado={bloqueado}>
       <table style={TS}><tbody>
-        <tr><th style={THC}>Modelo - Grupo - Módulo</th><th style={TH}>Competencia del Módulo</th><th style={THC}>Semestre</th></tr>
-        <tr><td style={TDC}>{mgm}</td><td style={TD}>{modulo?.competenciaModulo||'—'}</td><td style={TDC}>{modulo?.semestre||'—'}</td></tr>
+        <tr><th style={THC}>Modelo - Grupo - {palabra}</th><th style={TH}>{colProp}</th><th style={THC}>Semestre</th></tr>
+        <tr><td style={TDC}>{mgm}</td><td style={{...TD,whiteSpace:'pre-wrap'}}>{modulo?.competenciaModulo||'—'}</td><td style={TDC}>{modulo?.semestre||'—'}</td></tr>
       </tbody></table>
     </Tabla>
   )
 }
 
-// ─── Tabla unidad ─────────────────────────────────────────────────────────────
-function TablaUnidad({ unidad = {}, bloqueado }) {
+// ─── Tabla unidad / ámbito ────────────────────────────────────────────────────
+function TablaUnidad({ unidad = {}, bloqueado, t = TERMINOLOGIA_DEFAULT }) {
   return (
-    <Tabla titulo="Unidad" getHTML={() => ''} bloqueado={bloqueado}>
+    <Tabla titulo={t.unidad} getHTML={() => ''} bloqueado={bloqueado}>
       <table style={TS}><tbody>
-        <tr><th style={TH}>No. y Nombre de Unidad</th><th style={TH}>Propósito de la Unidad</th></tr>
+        <tr><th style={TH}>No. y Nombre de {t.unidad}</th><th style={TH}>Propósito del {t.unidad}</th></tr>
         <tr><td style={TD}>{unidad.nombre||'—'}</td><td style={{...TD,whiteSpace:'pre-wrap'}}>{unidad.proposito||'—'}</td></tr>
       </tbody></table>
     </Tabla>
   )
 }
 
-// ─── Tabla RA ─────────────────────────────────────────────────────────────────
-function TablaRA({ ra = {}, mostrarEvidencia = true, bloqueado }) {
+// ─── Tabla RA / Propósito Formativo ───────────────────────────────────────────
+function TablaRA({ ra = {}, mostrarEvidencia = true, bloqueado, t = TERMINOLOGIA_DEFAULT }) {
   const ev = ra.actividadEvaluacion || {}
+  const tituloTabla = `${t.ra} y Actividad de Evaluación`
   return (
-    <Tabla titulo="Resultado y Actividad de Aprendizaje" getHTML={() => ''} bloqueado={bloqueado}>
-      <table style={TS}><caption className="sr-only">Resultado y Actividad de Aprendizaje</caption><tbody>
-        <tr><td colSpan={4} style={TITLE} aria-hidden="true">RESULTADO Y ACTIVIDAD DE APRENDIZAJE</td></tr>
-        <tr><th scope="col" style={TH}>Resultado de Aprendizaje</th><th scope="col" style={THC}>Duración (hrs)</th><th scope="col" style={TH}>Actividad de Evaluación</th>{mostrarEvidencia && <th scope="col" style={TH}>Evidencia</th>}</tr>
+    <Tabla titulo={tituloTabla} getHTML={() => ''} bloqueado={bloqueado}>
+      <table style={TS}><caption className="sr-only">{tituloTabla}</caption><tbody>
+        <tr><td colSpan={4} style={TITLE} aria-hidden="true">{tituloTabla.toUpperCase()}</td></tr>
+        <tr><th scope="col" style={TH}>{t.ra}</th><th scope="col" style={THC}>Duración (hrs)</th><th scope="col" style={TH}>Actividad de Evaluación</th>{mostrarEvidencia && <th scope="col" style={TH}>Evidencia</th>}</tr>
         <tr>
           <td style={{...TD,whiteSpace:'pre-wrap'}}>{ra.titulo||'—'}</td>
           <td style={TDC}>{ra.duracionHoras||'—'}</td>
@@ -171,8 +180,9 @@ function TablaMomento({ tipo, momento = {}, bloqueado }) {
  * Una "página" de planeación Modelo 2023 en formato tabular estilo 2018.
  * Si `bloqueada === true`, muestra PaywallOverlay encima.
  */
-export default function PaginaActividad({ cabecera, unidad, ra, actividad, numeroPagina, totalPaginas, esPrimeraActividadDelRA = true, bloqueada = false }) {
+export default function PaginaActividad({ cabecera, unidad, ra, actividad, numeroPagina, totalPaginas, esPrimeraActividadDelRA = true, bloqueada = false, terminologia = TERMINOLOGIA_DEFAULT }) {
   const bloq = bloqueada
+  const t = { ...TERMINOLOGIA_DEFAULT, ...terminologia }
 
   const htmlPaginaCompleta = () => {
     const el = document.getElementById(`pag-2023-${numeroPagina}`)
@@ -190,7 +200,7 @@ export default function PaginaActividad({ cabecera, unidad, ra, actividad, numer
         {/* Barra superior */}
         <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 no-print">
           <span>
-            Página {numeroPagina} / {totalPaginas} · RA {ra?.codigo} · Propósito {actividad?.numero}
+            Página {numeroPagina} / {totalPaginas} · {t.raCorto} {ra?.codigo} · {t.actividad} {actividad?.numero}
             {actividad?.noSesion ? ` · Sesión ${actividad.noSesion}` : ''}
           </span>
           <BtnCopiar getHTML={htmlPaginaCompleta} label="Copiar página completa" bloqueado={bloq} />
@@ -199,14 +209,14 @@ export default function PaginaActividad({ cabecera, unidad, ra, actividad, numer
         {/* Título oficial */}
         <div className="border-b-2 border-success-600 pb-2">
           <p className="text-lg font-light text-slate-800 dark:text-slate-100">
-            Formato de Planeación Didáctica
+            {t.tituloFormato}
           </p>
         </div>
 
         <TablaDocente docente={cabecera?.docente} bloqueado={bloq} />
-        <TablaModulo  modulo={cabecera?.modulo} grupo={cabecera?.grupo} bloqueado={bloq} />
-        <TablaUnidad  unidad={unidad} bloqueado={bloq} />
-        <TablaRA      ra={ra} mostrarEvidencia={esPrimeraActividadDelRA} bloqueado={bloq} />
+        <TablaModulo  modulo={cabecera?.modulo} grupo={cabecera?.grupo} bloqueado={bloq} t={t} />
+        <TablaUnidad  unidad={unidad} bloqueado={bloq} t={t} />
+        <TablaRA      ra={ra} mostrarEvidencia={esPrimeraActividadDelRA} bloqueado={bloq} t={t} />
         <TablaDatosEspecifico actividad={actividad} bloqueado={bloq} />
         <TablaMomento tipo="inicio"     momento={actividad?.momentos?.inicio}     bloqueado={bloq} />
         <TablaMomento tipo="desarrollo" momento={actividad?.momentos?.desarrollo} bloqueado={bloq} />

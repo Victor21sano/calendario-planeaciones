@@ -122,11 +122,16 @@ function DropZone({ label, sublabel, icon, file, onFile, disabled, name }) {
   )
 }
 
-export default function UploadScreen({ onGenerate, onFreeGenerate, error, bloqueado = false, modoSoloPlanificador = false }) {
+export default function UploadScreen({ onGenerate, onFreeGenerate, error, bloqueado = false, modoSoloPlanificador = false, modelo = '2023' }) {
   const [pdfPE, setPdfPE] = useState(null)
   const [pdfGPE, setPdfGPE] = useState(null)
-  const canGenerate = pdfPE && pdfGPE && !bloqueado && !modoSoloPlanificador
-  const canFreeGenerate = !!(pdfPE && pdfGPE)
+  // Modelo 2025: un solo PDF (PE integrado, sin GPE).
+  const es2025 = modelo === '2025'
+  const documentosListos = es2025 ? !!pdfPE : !!(pdfPE && pdfGPE)
+  const canGenerate = documentosListos && !bloqueado && !modoSoloPlanificador
+  const canFreeGenerate = documentosListos
+  // En 2025 nunca se pasa GPE
+  const gpeArg = es2025 ? null : pdfGPE
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 p-6 animate-fade-in dark:bg-slate-950">
@@ -138,18 +143,20 @@ export default function UploadScreen({ onGenerate, onFreeGenerate, error, bloque
             <BrandMark className="w-14 h-14" />
           </div>
           <h2 className="mb-2 font-display text-2xl font-semibold text-slate-900 dark:text-white">
-            Sube PE y GPE del mismo módulo
+            {es2025 ? 'Sube el PE integrado del Modelo 2025' : 'Sube PE y GPE del mismo módulo'}
           </h2>
           <p className="mx-auto max-w-md text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-            Planea-Pro usará estos documentos oficiales para detectar unidades, RAs, horas y la estructura de tu planeación.
+            {es2025
+              ? 'Planea-Pro usará el Programa de Estudios integrado para detectar el ámbito, los Propósitos Formativos, horas y la estructura de tu planeación.'
+              : 'Planea-Pro usará estos documentos oficiales para detectar unidades, RAs, horas y la estructura de tu planeación.'}
           </p>
         </div>
 
-        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className={`mb-6 grid grid-cols-1 gap-4 ${es2025 ? 'max-w-md mx-auto' : 'sm:grid-cols-2'}`}>
           <DropZone
             label="Programa de Estudios (PE)"
             name="programa-estudios"
-            sublabel="Unidades, RAs, horas y contenidos oficiales"
+            sublabel={es2025 ? 'Ámbito, Propósitos Formativos, horas y contenidos' : 'Unidades, RAs, horas y contenidos oficiales'}
             icon={
               <svg aria-hidden="true" className="h-7 w-7 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -159,19 +166,21 @@ export default function UploadScreen({ onGenerate, onFreeGenerate, error, bloque
             onFile={setPdfPE}
             disabled={false}
           />
-          <DropZone
-            label="Guía Pedagógica (GPE)"
-            name="guia-pedagogica"
-            sublabel="Competencias, atributos y evaluaciones"
-            icon={
-              <svg aria-hidden="true" className="h-7 w-7 text-academic-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-              </svg>
-            }
-            file={pdfGPE}
-            onFile={setPdfGPE}
-            disabled={false}
-          />
+          {!es2025 && (
+            <DropZone
+              label="Guía Pedagógica (GPE)"
+              name="guia-pedagogica"
+              sublabel="Competencias, atributos y evaluaciones"
+              icon={
+                <svg aria-hidden="true" className="h-7 w-7 text-academic-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              }
+              file={pdfGPE}
+              onFile={setPdfGPE}
+              disabled={false}
+            />
+          )}
         </div>
 
         {error && (
@@ -183,7 +192,7 @@ export default function UploadScreen({ onGenerate, onFreeGenerate, error, bloque
 
         {!modoSoloPlanificador && (
           <button
-            onClick={() => onGenerate(pdfPE, pdfGPE)}
+            onClick={() => onGenerate(pdfPE, gpeArg)}
             disabled={!canGenerate}
             className={`btn-accent mb-4 w-full justify-center gap-2 py-3.5 text-base disabled:cursor-not-allowed disabled:opacity-40
               ${bloqueado ? 'pointer-events-none opacity-40' : ''}`}
@@ -216,14 +225,14 @@ export default function UploadScreen({ onGenerate, onFreeGenerate, error, bloque
             </div>
           </div>
           <button
-            onClick={() => onFreeGenerate?.(pdfPE, pdfGPE)}
+            onClick={() => onFreeGenerate?.(pdfPE, gpeArg)}
             disabled={!canFreeGenerate}
             className="pressable flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700/50"
           >
             <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-            {canFreeGenerate ? 'Generar horario automático (25 créditos)' : 'Sube PE y GPE para continuar'}
+            {canFreeGenerate ? 'Generar horario automático (25 créditos)' : (es2025 ? 'Sube el PE para continuar' : 'Sube PE y GPE para continuar')}
           </button>
         </div>
       </div>

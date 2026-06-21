@@ -3,8 +3,12 @@ import EditorActividad  from './EditorActividad'
 import BotonRegenerarRA from './BotonRegenerarRA'
 import { actividadEspecificaVacia } from '../../modelos/2023/constantes.js'
 
-export default function EditorRA({ ra, onCambio, cabecera, pdfPE, pdfGPE }) {
+const TERMINOLOGIA_DEFAULT = { raCorto: 'RA', actividad: 'Propósito' }
+
+export default function EditorRA({ ra, onCambio, cabecera, pdfPE, pdfGPE, terminologia = TERMINOLOGIA_DEFAULT }) {
+  const t = { ...TERMINOLOGIA_DEFAULT, ...terminologia }
   const [expandido, setExpandido] = useState(true)
+  const actividadLabel = t.actividad.toLowerCase()
 
   const setActividad = (i, nueva) => {
     const arr = [...(ra.actividadesEspecificas || [])]
@@ -48,10 +52,10 @@ export default function EditorRA({ ra, onCambio, cabecera, pdfPE, pdfGPE }) {
       >
         <div>
           <h3 className="font-semibold text-slate-800 dark:text-slate-100">
-            RA {ra.codigo} · {ra.titulo}
+            {t.raCorto} {ra.codigo} · {ra.titulo}
           </h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            {ra.duracionHoras}h · {ra.actividadesEspecificas?.length ?? 0} actividades
+            {ra.duracionHoras}h · {ra.actividadesEspecificas?.length ?? 0} {actividadLabel}s
             {!cuadran && (
               <span className="ml-2 text-danger-600 dark:text-danger-400 font-medium">
                 · ⚠ {ra.duracionHoras - sumaHoras}h sin distribuir
@@ -85,6 +89,7 @@ export default function EditorRA({ ra, onCambio, cabecera, pdfPE, pdfGPE }) {
               actividad={act}
               indice={i}
               total={ra.actividadesEspecificas.length}
+              terminologia={t}
               onCambio={nueva => setActividad(i, nueva)}
               onEliminar={eliminarActividad}
               onDuplicar={duplicarActividad}
@@ -101,7 +106,7 @@ export default function EditorRA({ ra, onCambio, cabecera, pdfPE, pdfGPE }) {
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            Agregar actividad
+            Agregar {actividadLabel}
           </button>
         </div>
       )}

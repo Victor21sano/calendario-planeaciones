@@ -13,9 +13,9 @@ const MODELOS = [
   {
     id: MODELO_2025,
     nombre: 'Modelo 2025',
-    desc: 'Nuevo formato en desarrollo. Estará disponible próximamente.',
-    badge: 'Próximamente',
-    disponible: false,
+    desc: 'Nuevo formato MCCEMS. Sube solo el PE integrado (sin GPE).',
+    badge: 'Nuevo',
+    disponible: true,
     path: 'M12 6v6m0 0v6m0-6h6m-6 0H6',
   },
 ]
@@ -24,7 +24,7 @@ const METODOS = [
   {
     id: 'ia',
     nombre: 'Planeación completa',
-    desc: 'Sube PE y GPE, Planea-Pro genera todo - 100 créditos',
+    desc: 'Sube el PE, Planea-Pro genera todo — 100 créditos',
     icon: 'M13 10V3L4 14h7v7l9-11h-7z',
   },
   {
@@ -38,6 +38,7 @@ const METODOS = [
 export default function ModeloMateriaModal({ onConfirmar, onCerrar, sinCreditosDisponibles }) {
   const [modelo, setModelo] = useState(MODELO_2023)
   const [metodo, setMetodo] = useState(null)
+  const modeloSeleccionado = MODELOS.find(m => m.id === modelo)
   const puedeContinuar = modelo !== null && metodo !== null
 
   function handleConfirmar() {
@@ -119,8 +120,8 @@ export default function ModeloMateriaModal({ onConfirmar, onCerrar, sinCreditosD
           </div>
         </div>
 
-        {/* Selector de método — solo cuando el modelo seleccionado está disponible */}
-        {modelo === MODELO_2023 && (
+        {/* Selector de método — cuando el modelo seleccionado está disponible */}
+        {modeloSeleccionado?.disponible && (
           <div className="space-y-3">
             <p className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
               2 — Cómo crearla

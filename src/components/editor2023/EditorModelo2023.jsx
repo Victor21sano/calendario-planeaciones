@@ -16,20 +16,37 @@ import { useAuth }                                        from '../../contexts/A
  *   pdfPE / pdfGPE     — archivos File en memoria (pueden ser null si no están disponibles)
  *   onCambioPlaneacion  — callback para sincronizar con el estado del padre
  */
-export default function EditorModelo2023({ planeacion: planeacionInicial, materiaId, pdfPE = null, pdfGPE = null, onCambioPlaneacion }) {
+const TERMINOLOGIA_DEFAULT = { modelo: '2023', unidad: 'Unidad', ra: 'Resultado de Aprendizaje', raCorto: 'RA' }
+
+export default function EditorModelo2023({ planeacion: planeacionInicial, materiaId, pdfPE = null, pdfGPE = null, onCambioPlaneacion, onGuardar = null, terminologia = TERMINOLOGIA_DEFAULT }) {
   const { user } = useAuth()
+  const t = { ...TERMINOLOGIA_DEFAULT, ...terminologia }
   const [planeacion, setPlaneacion] = useState(planeacionInicial)
 
-  // Auto-guardado debounced
+  // Auto-guardado debounced. Si se pasa onGuardar (p.ej. Modelo 2025), se delega
+  // la persistencia al padre; de lo contrario, se guarda como planeación 2023.
   const guardar = useCallback(async datos => {
-    await actualizarMateriaConPlaneacion2023(user.uid, materiaId, datos)
-    onCambioPlaneacion?.(datos)
-  }, [user.uid, materiaId, onCambioPlaneacion])
+    if (onGuardar) {
+      await onGuardar(datos)
+    } else {
+      await actualizarMateriaConPlaneacion2023(user.uid, materiaId, datos)
+      onCambioPlaneacion?.(datos)
+    }
+  }, [user.uid, materiaId, onCambioPlaneacion, onGuardar])
 
   const { estado, ultimoGuardado, forzarGuardado } = useAutoGuardado(planeacion, guardar, 1500)
 
-  // Validación reactiva (muestra advertencias pero no bloquea edición)
-  const { errores } = useMemo(() => validarPlaneacionCompleta2023(planeacion), [planeacion])
+  // Validación reactiva (muestra advertencias pero no bloquea edición).
+  // En Modelo 2025 se localizan los mensajes del validador 2023 (RA→PF, actividad→sesión, Unidad→Ámbito).
+  const { errores } = useMemo(() => {
+    const res = validarPlaneacionCompleta2023(planeacion)
+    if (t.modelo !== '2025') return res
+    const localizar = msg => String(msg)
+      .replace(/\bRA\b/g, t.raCorto || 'PF')
+      .replace(/\bactividad\b/g, 'sesión')
+      .replace(/\bUnidad\b/g, t.unidad || 'Ámbito')
+    return { ...res, errores: (res.errores || []).map(localizar) }
+  }, [planeacion, t.modelo, t.raCorto, t.unidad])
 
   const actualizarCabecera = nueva =>
     setPlaneacion(p => ({ ...p, cabecera: nueva }))
@@ -68,7 +85,7 @@ export default function EditorModelo2023({ planeacion: planeacionInicial, materi
         <div>
           <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">Editor de planeación</h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Modelo 2023 · Los cambios se guardan automáticamente
+            Modelo {t.modelo} · Los cambios se guardan automáticamente
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -94,13 +111,14 @@ export default function EditorModelo2023({ planeacion: planeacionInicial, materi
       <EditorCabecera
         cabecera={planeacion.cabecera}
         onCambio={actualizarCabecera}
+        terminologia={t}
       />
 
       {/* Unidades → RAs */}
       {(planeacion.unidades || []).map((unidad, uIdx) => (
         <section key={uIdx} className="space-y-3">
           <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 px-1">
-            Unidad {unidad.numero} · {unidad.nombre}
+            {t.unidad} {unidad.numero} · {unidad.nombre}
           </h2>
           {(unidad.ras || []).map((ra, rIdx) => (
             <EditorRA
@@ -109,6 +127,7 @@ export default function EditorModelo2023({ planeacion: planeacionInicial, materi
               cabecera={planeacion.cabecera}
               pdfPE={pdfPE}
               pdfGPE={pdfGPE}
+              terminologia={t}
               onCambio={nuevo => actualizarRA(uIdx, rIdx, nuevo)}
             />
           ))}
