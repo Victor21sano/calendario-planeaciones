@@ -237,7 +237,7 @@ function EstimuloCard() {
           <ToolCard
             to="/convertir-swre" idx={0} badge={BadgeNuevo}
             titulo="Convertir a formato SWRE"
-            desc="Toma los promedios de tu Registro de calificaciones y genera las letras (N/P · I · S · B · E) listas para pegar en la sábana de SWRE."
+            desc="Requiere calificaciones capturadas en tu Registro. Toma esos promedios y genera las letras (N/P · I · S · B · E) listas para pegar en la sábana de SWRE."
             footer={(
               <div className="flex items-center gap-2">
                 <span className="inline-flex items-center gap-1 rounded-full bg-accent-50 text-accent-700 dark:bg-accent-900/30 dark:text-accent-300 px-2 py-0.5 text-[11px] font-bold">

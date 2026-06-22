@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import BrandLogo from '../components/brand/BrandLogo'
 import MenuUsuario from '../components/dashboard/MenuUsuario'
+import SaldoCreditos from '../components/SaldoCreditos'
 import { cargarRegistro, promediosDeRegistro } from '../services/registro/datos'
 import { convertirGrupoSegmento, NIVELES_DEFAULT } from '../services/swre/conversion'
 import { extraerEstructuraDesdeImagen, cobrarConversionSWRE } from '../services/swre/extraccion'
@@ -14,7 +15,9 @@ const nombreParcial = p => (p === 'final' ? 'Acumulado (final)' : `Parcial ${p +
 const fechaCorta = iso => { try { return new Date(iso).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }) } catch { return '' } }
 
 export default function ConvertirSWREPage() {
-  const { user, logout, esAdmin, perfilDocente } = useAuth()
+  const { user, logout, esAdmin, creditos, perfilDocente } = useAuth()
+  const COSTO = 25
+  const saldoSuficiente = esAdmin || creditos == null || creditos >= COSTO
   const inicialAvatar = (perfilDocente?.nombre || user?.displayName || user?.email || '?').trim().charAt(0).toUpperCase()
 
   const { registros } = useMemo(cargarRegistro, [])
@@ -70,7 +73,7 @@ export default function ConvertirSWREPage() {
   // Ejecuta la conversión ya confirmada: cobra 25 cr y FIJA la selección de PF para ESTE registro/parcial.
   async function ejecutarConversion() {
     if (cobrando || !registroId) return
-    if (seleccion.filter(Boolean).length === 0) { setErrorIA('Marca al menos un PF/AE para convertir.'); return }
+    if (seleccion.filter(Boolean).length === 0) { setErrorIA('Marca al menos una AE para convertir.'); return }
     setCobrando(true); setErrorIA('')
     try {
       await cobrarConversionSWRE()
@@ -128,7 +131,10 @@ export default function ConvertirSWREPage() {
       <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-brand-100/60 dark:border-white/5">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
           <BrandLogo className="flex-shrink-0" markClassName="w-8 h-8" />
-          <MenuUsuario inicial={inicialAvatar} esAdmin={esAdmin} onLogout={logout} />
+          <div className="flex items-center gap-3">
+            <SaldoCreditos />
+            <MenuUsuario inicial={inicialAvatar} esAdmin={esAdmin} onLogout={logout} />
+          </div>
         </div>
       </header>
 
@@ -140,7 +146,16 @@ export default function ConvertirSWREPage() {
           </Link>
           <p className="text-xs font-black uppercase tracking-[0.18em] opacity-80 mb-1">Herramienta premium</p>
           <h1 className="font-display text-2xl sm:text-3xl font-bold leading-tight">Convertir a formato SWRE</h1>
-          <p className="mt-1 text-sm opacity-90 max-w-2xl">Toma los promedios finales del Registro y genera las letras (N/P · I · S · B · E) para copiar y pegar en la sábana de SWRE.</p>
+          <p className="mt-1 text-sm opacity-90 max-w-2xl">Toma los promedios de tu <strong>Registro de calificaciones</strong> y genera las letras (N/P · I · S · B · E) para copiar y pegar en la sábana de SWRE.</p>
+          <ol className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-semibold opacity-90">
+            <li className="inline-flex items-center gap-1.5"><span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-[10px]">1</span> Captura notas en el Registro</li>
+            <li aria-hidden="true" className="opacity-50">›</li>
+            <li className="inline-flex items-center gap-1.5"><span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-[10px]">2</span> Elige registro y parcial</li>
+            <li aria-hidden="true" className="opacity-50">›</li>
+            <li className="inline-flex items-center gap-1.5"><span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-[10px]">3</span> Escanea tu sábana (gratis)</li>
+            <li aria-hidden="true" className="opacity-50">›</li>
+            <li className="inline-flex items-center gap-1.5"><span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-[10px]">4</span> Convierte el parcial (25 cr)</li>
+          </ol>
         </div>
       </div>
 
@@ -183,11 +198,12 @@ export default function ConvertirSWREPage() {
                       Conversión guardada
                     </p>
                     <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                      {registro?.nombre} · {nombreParcial(parcial)} · PF: <strong className="text-slate-700 dark:text-slate-200">{pfConvertidos}</strong> ({sumaSel}% del año)
+                      {registro?.nombre} · {nombreParcial(parcial)} · AE: <strong className="text-slate-700 dark:text-slate-200">{pfConvertidos}</strong> ({sumaSel}% del año)
                     </p>
+                    <p className="mt-1 text-[11px] text-slate-400">Puedes copiar este resultado las veces que quieras sin volver a pagar.</p>
                   </div>
-                  <button onClick={() => setForzarFlujo(true)} className="btn-accent text-sm gap-2">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                  <button onClick={() => setForzarFlujo(true)} aria-label="Generar una nueva conversión (otro registro o parcial)" className="btn-accent text-sm gap-2">
+                    <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                     Generar nueva conversión
                   </button>
                 </section>
@@ -201,15 +217,18 @@ export default function ConvertirSWREPage() {
                     </button>
                   </div>
                   {!estructuraOk ? (
-                    <p className="p-6 text-sm text-slate-500 dark:text-slate-400">No hay alumnos con promedio en este parcial.</p>
+                    <div className="p-6 text-sm text-slate-600 dark:text-slate-300 space-y-1">
+                      <p>Este parcial aún no tiene calificaciones capturadas.</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Ve al <Link to="/registro-calificaciones" className="font-semibold text-brand-700 dark:text-brand-300 hover:underline">Registro de calificaciones</Link>, captura las notas de <strong>{registro?.nombre}</strong> en {nombreParcial(parcial)} y vuelve aquí.</p>
+                    </div>
                   ) : (
-                    <div className="overflow-auto max-h-[60vh]">
+                    <div className="overflow-auto max-h-[60vh]" tabIndex={0} role="region" aria-label={`Letras para SWRE — ${registro?.nombre} ${nombreParcial(parcial)}`}>
                       <table className="border-collapse text-sm">
                         <thead className="sticky top-0 z-10 bg-slate-50 dark:bg-slate-800">
                           <tr>
-                            <th className="sticky left-0 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-left text-xs font-bold text-slate-500 border-r border-b border-slate-200 dark:border-slate-700">Alumno</th>
-                            <th className="px-2 py-2 text-center text-xs font-bold text-slate-500 border-r border-b border-slate-200 dark:border-slate-700">Aprov.</th>
-                            {Array.from({ length: nIndicadores }, (_, k) => (<th key={k} className="px-1 py-2 text-center text-[10px] font-semibold text-slate-400 border-r border-b border-slate-100 dark:border-slate-800 min-w-[34px]">{k + 1}</th>))}
+                            <th scope="col" className="sticky left-0 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-left text-xs font-bold text-slate-600 dark:text-slate-300 border-r border-b border-slate-200 dark:border-slate-700">Alumno</th>
+                            <th scope="col" className="px-2 py-2 text-center text-xs font-bold text-slate-600 dark:text-slate-300 border-r border-b border-slate-200 dark:border-slate-700">Aprov.</th>
+                            {Array.from({ length: nIndicadores }, (_, k) => (<th scope="col" key={k} className="px-1 py-2 text-center text-[10px] font-semibold text-slate-500 border-r border-b border-slate-100 dark:border-slate-800 min-w-[34px]">{k + 1}</th>))}
                           </tr>
                         </thead>
                         <tbody>
@@ -225,7 +244,7 @@ export default function ConvertirSWREPage() {
                     </div>
                   )}
                   <div className="px-4 py-2 text-[11px] text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800">
-                    Valores: N/P=0 · I=50 · S=60 · B=80 · E=100. "Aprov." es lo que acumula el alumno en los PF convertidos ({sumaSel}% del año) según su promedio del parcial. En SWRE pega solo las columnas de indicadores.
+                    Valores: N/P=0 · I=50 · S=60 · B=80 · E=100. <strong>Aprov.</strong> = aprovechamiento: el % que estas AE aportan a la calificación SWRE del alumno ({sumaSel}% del año), según su promedio del parcial. En SWRE pega solo las columnas de indicadores.
                   </div>
                 </section>
               </>
@@ -233,7 +252,7 @@ export default function ConvertirSWREPage() {
               /* ===================== FLUJO: NUEVA CONVERSIÓN ===================== */
               <section className="card p-5 space-y-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100">Paso 2 · Estructura y PF a convertir</h2>
+                  <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100">Paso 2 · Estructura y AE a convertir</h2>
                   <label className={`btn-accent text-xs gap-1.5 cursor-pointer ${extrayendo ? 'opacity-60 pointer-events-none' : ''}`}>
                     {extrayendo
                       ? <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8z" /></svg>
@@ -249,10 +268,10 @@ export default function ConvertirSWREPage() {
                   </p>
                 ) : (
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Sube una <strong>captura de tu sábana en SWRE</strong> (la fila con las AE y sus % y pesos) para detectar tu estructura. Después eliges qué PF convertir; cada parcial cuesta 25 créditos.
+                    Sube una <strong>captura de tu sábana en SWRE</strong> (la fila con las AE y sus % y pesos). <strong>Escanear es gratis</strong>; solo pagas (25 créditos) cuando conviertes un parcial. La estructura se reutiliza en los 3 parciales.
                   </p>
                 )}
-                {errorIA && <p className="text-xs text-danger-600 dark:text-danger-400">{errorIA}</p>}
+                {errorIA && <p role="alert" className="text-xs text-danger-600 dark:text-danger-400">{errorIA}</p>}
 
                 {convertido ? (
                   <div className="rounded-xl border-2 border-dashed border-amber-200 dark:border-amber-800/40 bg-amber-50/40 dark:bg-amber-900/10 p-6 text-center space-y-2">
@@ -267,16 +286,17 @@ export default function ConvertirSWREPage() {
                 ) : (
                   <>
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-bold uppercase tracking-wide text-slate-400">¿Qué PF/RA conviertes en el {nombreParcial(parcial)}?</span>
-                      <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{nSel}/{aes.length} PF · {sumaSel}% del año · {nIndicadores} columnas</span>
+                      <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">¿Qué AE conviertes en el {nombreParcial(parcial)}?</span>
+                      <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{nSel}/{aes.length} AE · {sumaSel}% del año · {nIndicadores} columnas</span>
                     </div>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">Cada <strong>AE</strong> (Actividad de Evaluación) es un bloque de % de tu sábana SWRE.</p>
                     <div className="flex flex-wrap gap-2">
                       {aes.map((ae, i) => {
                         const marcado = !!seleccion[i]
                         return (
-                          <button key={i} onClick={() => toggleAE(i)}
+                          <button key={i} onClick={() => toggleAE(i)} role="checkbox" aria-checked={marcado} aria-label={`AE ${i + 1}, ${ae.porcentaje} por ciento`}
                             className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs transition-colors ${marcado ? 'border-brand-400 bg-brand-50 dark:border-brand-700 dark:bg-brand-900/20' : 'border-slate-200 dark:border-slate-700 opacity-50'}`}>
-                            <input type="checkbox" checked={marcado} readOnly className="h-3.5 w-3.5 rounded border-slate-300 text-brand-600 pointer-events-none" />
+                            <span aria-hidden="true" className={`flex h-3.5 w-3.5 items-center justify-center rounded border ${marcado ? 'border-brand-500 bg-brand-500 text-white' : 'border-slate-300'}`}>{marcado && <svg className="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}</span>
                             <span className="font-bold text-slate-700 dark:text-slate-200">AE {i + 1} · {ae.porcentaje}%</span>
                             <span className="text-slate-500 dark:text-slate-400 tabular-nums">{ae.pesos}</span>
                           </button>
@@ -284,13 +304,16 @@ export default function ConvertirSWREPage() {
                       })}
                     </div>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
-                      Marca <strong>solo los PF que se califican en este parcial</strong> ({sumaSel}% del año). Al convertir, esta selección <strong>queda fija</strong> y solo se llenan esas columnas. Ej.: en el Parcial 1 marca solo PF1 y PF2.
+                      Marca <strong>solo las AE que se califican en este parcial</strong> ({sumaSel}% del año). Al convertir guardamos este parcial para que puedas copiarlo cuando quieras <strong>sin volver a pagar</strong>; por eso la selección se fija. Ej.: en el Parcial 1 marca solo AE1 y AE2.
                     </p>
+                    {!saldoSuficiente && (
+                      <p role="alert" className="text-xs text-danger-600 dark:text-danger-400">Te faltan créditos (tienes {creditos} de {COSTO}). <Link to="/comprar-creditos" className="font-semibold underline">Carga créditos</Link> para convertir.</p>
+                    )}
                     <div className="flex items-center gap-3 pt-1">
-                      <button onClick={() => { setErrorIA(''); setConfirmar(true) }} disabled={cobrando || nSel === 0} className="btn-accent text-sm gap-2 disabled:opacity-50">
+                      <button onClick={() => { setErrorIA(''); setConfirmar(true) }} disabled={cobrando || nSel === 0 || !saldoSuficiente} className="btn-accent text-sm gap-2 disabled:opacity-50">
                         Convertir {nombreParcial(parcial)} · 25 créditos
                       </button>
-                      <span className="text-[11px] text-slate-400">Fija los {nSel} PF marcados para este parcial.</span>
+                      <span className="text-[11px] text-slate-400">Fija las {nSel} AE marcadas para este parcial.</span>
                     </div>
                   </>
                 )}
@@ -302,16 +325,19 @@ export default function ConvertirSWREPage() {
 
       {/* Confirmación de destino: el docente verifica registro + parcial antes de cobrar */}
       {confirmar && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm" onClick={() => !cobrando && setConfirmar(false)}>
-          <div className="card max-w-md w-full p-6 space-y-4" onClick={e => e.stopPropagation()}>
-            <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">Confirma qué vas a convertir</h3>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm" onClick={() => !cobrando && setConfirmar(false)} onKeyDown={e => { if (e.key === 'Escape' && !cobrando) setConfirmar(false) }}>
+          <div role="dialog" aria-modal="true" aria-labelledby="swre-confirm-title" className="card max-w-md w-full p-6 space-y-4" onClick={e => e.stopPropagation()}>
+            <h3 id="swre-confirm-title" className="text-base font-bold text-slate-800 dark:text-slate-100">Confirma qué vas a convertir</h3>
             <p className="text-sm text-slate-600 dark:text-slate-300">Revisa que el destino sea el correcto. Cada registro tiene su propia estructura.</p>
             <dl className="rounded-xl border border-slate-200 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-800 text-sm">
               <div className="flex justify-between px-4 py-2"><dt className="text-slate-500">Registro</dt><dd className="font-semibold text-slate-800 dark:text-slate-100">{registro?.nombre || '—'}</dd></div>
               <div className="flex justify-between px-4 py-2"><dt className="text-slate-500">Parcial</dt><dd className="font-semibold text-slate-800 dark:text-slate-100">{nombreParcial(parcial)}</dd></div>
-              <div className="flex justify-between px-4 py-2"><dt className="text-slate-500">PF a convertir</dt><dd className="font-semibold text-slate-800 dark:text-slate-100 text-right">{aes.map((_, i) => (seleccion[i] ? `AE ${i + 1}` : null)).filter(Boolean).join(', ')} · {sumaSel}%</dd></div>
+              <div className="flex justify-between px-4 py-2"><dt className="text-slate-500">AE a convertir</dt><dd className="font-semibold text-slate-800 dark:text-slate-100 text-right">{aes.map((_, i) => (seleccion[i] ? `AE ${i + 1}` : null)).filter(Boolean).join(', ')} · {sumaSel}%</dd></div>
             </dl>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Se cobrarán <strong>25 créditos</strong> y estos PF quedarán <strong>fijos</strong> para este parcial.</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Se cobrarán <strong>25 créditos</strong> y estas AE quedarán <strong>fijas</strong> para este parcial.
+              {!esAdmin && creditos != null && <> Tu saldo: <strong>{creditos}</strong> → quedarán <strong>{creditos - COSTO}</strong> créditos.</>}
+            </p>
             <div className="flex justify-end gap-2 pt-1">
               <button onClick={() => setConfirmar(false)} disabled={cobrando} className="text-sm font-semibold px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50">Cancelar</button>
               <button onClick={ejecutarConversion} disabled={cobrando} className="btn-accent text-sm gap-2 disabled:opacity-60">

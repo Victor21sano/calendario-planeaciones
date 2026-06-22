@@ -74,6 +74,12 @@ function semColor(v) {
   if (v < 8) return 'bg-warning-100 text-warning-700 dark:bg-warning-900/30 dark:text-warning-300'
   return 'bg-success-100 text-success-700 dark:bg-success-900/30 dark:text-success-300'
 }
+function semLabel(v) {
+  if (v == null) return ''
+  if (v < 6) return 'Reprobado'
+  if (v < 8) return 'En riesgo'
+  return 'Aprobado'
+}
 const fmt = v => (v == null ? '—' : v.toFixed(1))
 function fmtFecha(iso) {
   if (!iso) return ''
@@ -134,11 +140,11 @@ function AsistenteRegistro({ onCrear, onCerrar, puedeCerrar }) {
   const setCatC = (k, campo, v) => setCats(prev => ({ ...prev, [k]: { ...prev[k], [campo]: v } }))
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fade-in" onClick={() => puedeCerrar && onCerrar()}>
-      <div className="card w-full max-w-lg p-6 animate-scale-in max-h-[90vh] overflow-auto" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fade-in" onClick={() => puedeCerrar && onCerrar()} onKeyDown={e => { if (e.key === 'Escape' && puedeCerrar) onCerrar() }}>
+      <div role="dialog" aria-modal="true" aria-labelledby="asistente-title" className="card w-full max-w-lg p-6 animate-scale-in max-h-[90vh] overflow-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-1">
-          <h2 className="font-display text-xl font-bold text-slate-900 dark:text-white">Crear registro</h2>
-          {puedeCerrar && <button onClick={onCerrar} className="text-slate-400 hover:text-slate-600"><svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>}
+          <h2 id="asistente-title" className="font-display text-xl font-bold text-slate-900 dark:text-white">Crear registro</h2>
+          {puedeCerrar && <button onClick={onCerrar} aria-label="Cerrar" className="text-slate-400 hover:text-slate-600"><svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>}
         </div>
         {/* Stepper */}
         <div className="flex items-center gap-2 mb-5">
@@ -168,6 +174,7 @@ function AsistenteRegistro({ onCrear, onCerrar, puedeCerrar }) {
         {paso === 2 && (
           <div className="space-y-3">
             <p className="text-sm text-slate-500 dark:text-slate-400">Paso 2 — ¿Cómo calificas? (lo puedes ajustar después)</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Los <strong>ámbitos</strong> son las categorías con las que calificas (trabajos, proyectos, exámenes). Marca las que uses y reparte el peso para que sume 100%.</p>
             <div className="grid grid-cols-[1fr_auto_auto] gap-3 px-1 text-[11px] font-bold uppercase tracking-wide text-slate-400">
               <span>Ámbito</span><span className="text-center w-16">Columnas</span><span className="text-center w-16">Peso %</span>
             </div>
@@ -206,24 +213,25 @@ const Fila = memo(function Fila({ idx, nombre, datos, parcial, activas, onNombre
   const proms = {}
   for (const c of activas) proms[c.key] = promedio(grades[c.key])
   const acum = acumulado(proms, activas)
-  const tdInput = 'w-full px-0.5 py-1 text-center text-sm tabular-nums bg-transparent border-0 focus:outline-none focus:bg-brand-50 dark:focus:bg-brand-900/30 rounded'
+  const tdInput = 'w-full px-0.5 py-1 text-center text-sm tabular-nums bg-transparent border-0 rounded focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-brand-50 dark:focus:bg-brand-900/30'
+  const alumno = nombre?.trim() || `alumno ${idx + 1}`
   return (
     <tr className="border-b border-slate-100 dark:border-slate-800">
       <td className="sticky left-0 z-10 w-[40px] min-w-[40px] bg-white dark:bg-slate-900 px-2 py-1 text-center text-xs text-slate-500 border-r border-slate-200 dark:border-slate-700">{idx + 1}</td>
-      <td className="sticky left-[40px] z-10 bg-white dark:bg-slate-900 px-1 py-1 border-r border-slate-200 dark:border-slate-700">
-        <input type="text" value={nombre} placeholder="Nombre…" onChange={e => onNombre(idx, e.target.value)}
-          className="w-40 px-2 py-1 text-sm bg-transparent border-0 focus:outline-none focus:bg-brand-50 dark:focus:bg-brand-900/30 rounded text-slate-900 dark:text-slate-100" />
-      </td>
+      <th scope="row" className="sticky left-[40px] z-10 bg-white dark:bg-slate-900 px-1 py-1 border-r border-slate-200 dark:border-slate-700 font-normal">
+        <input type="text" value={nombre} placeholder="Nombre…" aria-label={`Nombre del alumno ${idx + 1}`} onChange={e => onNombre(idx, e.target.value)}
+          className="w-40 px-2 py-1 text-sm bg-transparent border-0 rounded focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-brand-50 dark:focus:bg-brand-900/30 text-slate-900 dark:text-slate-100" />
+      </th>
       {activas.map(c => grades[c.key].map((v, gi) => (
         <td key={`${c.key}-${gi}`} className="px-0 py-0 border-r border-slate-50 dark:border-slate-800/60">
-          <input type="number" min={0} max={10} step={0.1} value={v}
+          <input type="number" min={0} max={10} step={0.1} value={v} inputMode="decimal" aria-label={`${c.label} ${gi + 1}, ${alumno}`}
             onChange={e => onGrade(idx, parcial, c.key, gi, e.target.value)} className={tdInput + ' text-slate-800 dark:text-slate-200'} />
         </td>
       )))}
       {activas.map(c => (
-        <td key={`prom-${c.key}`} className={`px-2 py-1 text-center text-sm font-semibold tabular-nums border-r border-slate-200 dark:border-slate-700 ${semColor(proms[c.key])}`}>{fmt(proms[c.key])}</td>
+        <td key={`prom-${c.key}`} title={semLabel(proms[c.key])} className={`px-2 py-1 text-center text-sm font-semibold tabular-nums border-r border-slate-200 dark:border-slate-700 ${semColor(proms[c.key])}`}>{fmt(proms[c.key])}</td>
       ))}
-      <td className={`px-2 py-1 text-center text-sm font-bold tabular-nums ${semColor(acum)}`}>{fmt(acum)}</td>
+      <td title={semLabel(acum)} className={`px-2 py-1 text-center text-sm font-bold tabular-nums ${semColor(acum)}`}>{fmt(acum)}</td>
     </tr>
   )
 })
@@ -433,11 +441,11 @@ export default function RegistroCalificacionesPage() {
           <select value={registroActivoId} onChange={e => { setRegistroActivoId(e.target.value); setTab(0) }} className={selectCls}>
             {registros.map(r => <option key={r.id} value={r.id}>{r.nombre}</option>)}
           </select>
-          <button onClick={renombrarRegistro} title="Renombrar registro" className={iconBtn + ' hover:text-brand-600'}>
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+          <button onClick={renombrarRegistro} title="Renombrar registro" aria-label="Renombrar registro" className={iconBtn + ' hover:text-brand-600'}>
+            <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
           </button>
-          <button onClick={eliminarRegistro} title="Eliminar registro" className={iconBtn + ' hover:text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-900/20'}>
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+          <button onClick={eliminarRegistro} title="Eliminar registro" aria-label="Eliminar registro" className={iconBtn + ' hover:text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-900/20'}>
+            <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
           </button>
           <button onClick={() => setMostrarAsistente(true)} className="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 text-white px-3 py-1.5 text-sm font-semibold hover:bg-brand-500">
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" /></svg> Nuevo registro
@@ -505,7 +513,7 @@ export default function RegistroCalificacionesPage() {
 
         {tab !== 'resumen' ? (
           <section className="card overflow-hidden">
-            <div className="overflow-auto max-h-[70vh]">
+            <div className="overflow-auto max-h-[70vh]" tabIndex={0} role="region" aria-label={`Captura de calificaciones — ${registro.nombre}, ${TABS[tab].label}`}>
               <table className="border-collapse text-sm">
                 <thead className="sticky top-0 z-20">
                   <tr className="bg-slate-50 dark:bg-slate-800">
@@ -532,8 +540,8 @@ export default function RegistroCalificacionesPage() {
                       return (
                         <th key={`${c.key}-h-${k}`} className="group relative align-bottom border-r border-b border-slate-100 dark:border-slate-800 min-w-[44px] h-[126px] p-0">
                           {c.n > 1 && (
-                            <button type="button" onClick={() => eliminarColumna(c.key, k)} title="Eliminar columna" className="absolute top-0 right-0 z-20 hidden group-hover:flex h-4 w-4 items-center justify-center rounded-bl bg-danger-100 text-danger-600 hover:bg-danger-200 dark:bg-danger-900/40 dark:text-danger-300">
-                              <svg className="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
+                            <button type="button" onClick={() => eliminarColumna(c.key, k)} title="Eliminar columna" aria-label={`Eliminar columna ${m.t || base}`} className="absolute top-0 right-0 z-20 hidden group-hover:flex group-focus-within:flex focus:flex h-4 w-4 items-center justify-center rounded-bl bg-danger-100 text-danger-600 hover:bg-danger-200 dark:bg-danger-900/40 dark:text-danger-300">
+                              <svg aria-hidden="true" className="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
                             </button>
                           )}
                           {editId === id ? (
@@ -567,12 +575,12 @@ export default function RegistroCalificacionesPage() {
               </table>
             </div>
             <div className="px-4 py-2 text-[11px] text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800">
-              {registro.nombre} · {totalCols} columnas · 🔴 &lt;6 · 🟡 6–7 · 🟢 8–10 · guardado en este navegador.
+              {registro.nombre} · {totalCols} columnas · semáforo: 🔴 menos de 6 (reprobado) · 🟡 6–7 (en riesgo) · 🟢 8–10 (aprobado) · guardado en este navegador.
             </div>
           </section>
         ) : (
           <section className="card overflow-hidden">
-            <div className="overflow-auto max-h-[70vh]">
+            <div className="overflow-auto max-h-[70vh]" tabIndex={0} role="region" aria-label={`Resumen de promedios — ${registro.nombre}`}>
               <table className="w-full border-collapse text-sm">
                 <thead className="sticky top-0 z-20 bg-slate-50 dark:bg-slate-800">
                   <tr>
@@ -625,9 +633,9 @@ export default function RegistroCalificacionesPage() {
 
       {/* Pegar alumnos desde Excel */}
       {pegarTexto !== null && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fade-in" onClick={() => setPegarTexto(null)}>
-          <div className="card w-full max-w-lg p-6 animate-scale-in" onClick={e => e.stopPropagation()}>
-            <h2 className="font-display text-xl font-bold text-slate-900 dark:text-white">Pegar alumnos</h2>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fade-in" onClick={() => setPegarTexto(null)} onKeyDown={e => { if (e.key === 'Escape') setPegarTexto(null) }}>
+          <div role="dialog" aria-modal="true" aria-labelledby="pegar-title" className="card w-full max-w-lg p-6 animate-scale-in" onClick={e => e.stopPropagation()}>
+            <h2 id="pegar-title" className="font-display text-xl font-bold text-slate-900 dark:text-white">Pegar alumnos</h2>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               Copia la columna de nombres en Excel y pégala aquí (un nombre por línea). Reemplazará la lista de <strong>{registro?.nombre}</strong> y ajustará el número de alumnos.
             </p>

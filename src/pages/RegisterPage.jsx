@@ -80,7 +80,7 @@ export default function RegisterPage() {
         </div>
 
         {error && (
-          <div className="mb-6 p-3 rounded-xl bg-danger-50 dark:bg-danger-900/20 border border-danger-200 dark:border-danger-800/40 text-danger-600 dark:text-danger-400 text-sm text-center font-medium">
+          <div role="alert" className="mb-6 p-3 rounded-xl bg-danger-50 dark:bg-danger-900/20 border border-danger-200 dark:border-danger-800/40 text-danger-600 dark:text-danger-400 text-sm text-center font-medium">
             {error}
           </div>
         )}
@@ -187,13 +187,15 @@ export default function RegisterPage() {
               type="checkbox"
               checked={aceptaTerminos}
               onChange={e => setAceptaTerminos(e.target.checked)}
+              aria-invalid={!aceptaTerminos}
               className="mt-0.5 h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-accent-600 focus:ring-accent-500/30"
             />
             <span className="text-xs leading-relaxed text-slate-600 dark:text-slate-400">
               He leído y acepto los{' '}
-              <Link to="/terminos" target="_blank" className="font-semibold text-primary-600 dark:text-primary-400 hover:underline">Términos y Condiciones</Link>
+              <Link to="/terminos" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary-600 dark:text-primary-400 hover:underline">Términos y Condiciones</Link>
               {' '}y el{' '}
-              <Link to="/aviso-de-privacidad" target="_blank" className="font-semibold text-primary-600 dark:text-primary-400 hover:underline">Aviso de Privacidad</Link>.
+              <Link to="/aviso-de-privacidad" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary-600 dark:text-primary-400 hover:underline">Aviso de Privacidad</Link>
+              {' '}<span className="text-slate-400">(se abren en una pestaña nueva)</span>.
             </span>
           </label>
 
