@@ -63,6 +63,7 @@ const GEMINI_2023_MODELS = new Set([
 // Límites de entrada (para evitar abuso y exceso de costos)
 const MAX_PROMPT_CHARS = 100_000   // ~25 k tokens sistema+usuario, margen generoso
 const MAX_PDF_B64_LEN  = 50_000_000 // ~37.5 MB en base64 ≈ ~28 MB de PDF original
+const MAX_IMG_B64_LEN  = 15_000_000 // ~11 MB en base64 ≈ ~8 MB de imagen (captura SWRE)
 
 // ── Sistema de créditos ────────────────────────────────────────
 // 1 crédito = 1 peso. El costo depende del tipo de flujo.
@@ -72,7 +73,7 @@ const CREDITOS_POR_GENERACION = 1 // legacy (modo sin sesión / compatibilidad)
 //   completa → planeación didáctica completa (100)
 //   horario  → solo planificador de horarios / estructura (25)
 //   regenRA  → regeneración de 1 RA individual (gratis)
-const COSTO_POR_FLUJO = { completa: 100, horario: 25, regenRA: 0 }
+const COSTO_POR_FLUJO = { completa: 100, horario: 25, regenRA: 0, swre: 25, swreScan: 0 }
 // El horario (25) funciona como anticipo: si el docente ya pagó el horario de una
 // materia, la planeación completa solo cobra la diferencia (100 - 25 = 75).
 const DESCUENTO_HORARIO_PREVIO = 25
@@ -92,6 +93,8 @@ const LIMITES_POR_FLUJO = {
   completa: 60,
   horario:  8,  // solo extrae la estructura (pocas llamadas)
   regenRA:  8,
+  swre:     3,  // lectura de 1 captura SWRE (+ reintentos)
+  swreScan: 3,  // lectura GRATIS de la estructura SWRE (el cobro va al convertir el parcial)
 }
 const DEFAULT_MAX_LLAMADAS = LIMITES_POR_FLUJO.completa
 const SESION_TTL_MS        = 30 * 60_000 // 30 min: ventana de vida de una sesión activa
@@ -350,7 +353,7 @@ exports.iniciarGeneracion = onCall({ cors: true }, async (request) => {
   const sessionRef = userRef.collection('sesionesGeneracion').doc()
 
   // Tipo de flujo declarado por el cliente → fija el límite de llamadas y el costo.
-  const tiposValidos = ['completa', 'horario', 'regenRA']
+  const tiposValidos = ['completa', 'horario', 'regenRA', 'swre', 'swreScan']
   const tipoFlujo    = tiposValidos.includes(request.data?.tipoFlujo) ? request.data.tipoFlujo : 'completa'
   const materiaId    = typeof request.data?.materiaId === 'string' ? request.data.materiaId : null
   const maxLlamadas  = LIMITES_POR_FLUJO[tipoFlujo] ?? DEFAULT_MAX_LLAMADAS
@@ -592,6 +595,104 @@ exports.generarGemini2023 = onCall(
   }
 )
 
+// ── extraerEstructuraSWRE: lee la captura de la sábana SWRE con IA ──
+const PROMPT_SWRE = `Eres un extractor de la estructura de evaluación de la sábana CONALEP (sistema SWRE).
+Recibes una CAPTURA DE PANTALLA del encabezado de la sábana ("Vista Sabana") de evaluacion.conalep.edu.mx.
+
+En la sábana, cada Propósito Formativo (PF) o Resultado de Aprendizaje contiene una o más
+Actividades de Evaluación (AE). Cada AE muestra su PORCENTAJE entre paréntesis, por ejemplo
+"AE 1 (15%)". Debajo de cada AE hay varias columnas de INDICADORES; en una fila aparece el
+PESO numérico de cada indicador (por ejemplo 20, 40, 20, 10, 10). Esos pesos suman 100 dentro
+de cada AE.
+
+Tu tarea: extraer, EN ORDEN de izquierda a derecha, cada AE con su porcentaje y la lista de
+pesos de sus indicadores.
+
+Reglas:
+- "porcentaje" = el número del paréntesis del AE (ej. 15 para "AE 1 (15%)").
+- "pesos" = los números de los indicadores de ESE AE, en orden, tal como aparecen.
+- Incluye TODAS las AE visibles, aunque pertenezcan a distintos PF.
+- Solo números; ignora flechas, encabezados de alumnos o columnas de la izquierda (matrícula, nombre, 1.1.1, etc.).
+- Si un peso no es legible, omítelo (no inventes).
+
+Responde EXCLUSIVAMENTE con JSON válido, sin texto ni markdown, con esta forma:
+{
+  "aes": [
+    { "porcentaje": 15, "pesos": [20, 40, 20, 10, 10] },
+    { "porcentaje": 5,  "pesos": [25, 25, 25, 25] }
+  ]
+}`
+
+const GEMINI_SWRE_MODEL = 'gemini-2.5-flash'
+
+exports.extraerEstructuraSWRE = onCall(
+  { timeoutSeconds: 120, memory: '512MiB', secrets: [GEMINI_API_KEY_SECRET], cors: true },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError('unauthenticated', 'Debes iniciar sesion para usar esta funcion.')
+    }
+    const { sessionId, imagenBase64, imagenMime } = request.data || {}
+    if (!sessionId || typeof sessionId !== 'string') {
+      throw new HttpsError('invalid-argument', 'Falta el identificador de sesión.')
+    }
+    const sessionRef = db.collection('users').doc(request.auth.uid)
+      .collection('sesionesGeneracion').doc(sessionId)
+    await consumirLlamadaSesion(sessionRef, ['swre', 'swreScan'])
+
+    if (!imagenBase64 || typeof imagenBase64 !== 'string') {
+      throw new HttpsError('invalid-argument', 'Falta la imagen de la captura.')
+    }
+    if (imagenBase64.length > MAX_IMG_B64_LEN) {
+      throw new HttpsError('invalid-argument', 'La imagen supera el tamaño máximo.')
+    }
+    const mimesOk = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp']
+    const mime = mimesOk.includes(imagenMime) ? imagenMime : 'image/png'
+
+    const geminiKey = GEMINI_API_KEY_SECRET.value() || process.env.GEMINI_API_KEY
+    if (!geminiKey) {
+      throw new HttpsError('failed-precondition', 'No hay API key de Gemini configurada.')
+    }
+
+    try {
+      const text = await callGemini({
+        geminiKey,
+        systemPrompt: null,
+        userPrompt: PROMPT_SWRE,
+        imagenBase64,
+        imagenMime: mime,
+        temperature: 0.1,
+        model: GEMINI_SWRE_MODEL,
+        maxOutputTokens: 4096,
+      })
+      await marcarExitoSesion(sessionRef)
+      return { text }
+    } catch (err) {
+      console.error('SWRE extract error (uid=%s):', request.auth.uid, err.message)
+      throw new HttpsError('internal', err.message || 'Error al leer la captura.')
+    }
+  }
+)
+
+// ── confirmarReusoSWRE: cobra 25 cr al REUTILIZAR un escaneo guardado ──────
+// El docente ya escaneó su sábana (estructura guardada en el cliente). Para el
+// Parcial 2/3 no se vuelve a llamar a la IA, pero igual se cobra el flujo 'swre'
+// (25 cr). Marca la sesión como exitosa (exitos≥1) para que finalizarGeneracion
+// NO la reembolse. No hay salida de IA: solo valida la sesión y la consume.
+exports.confirmarReusoSWRE = onCall({ cors: true }, async (request) => {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Debes iniciar sesion para usar esta funcion.')
+  }
+  const { sessionId } = request.data || {}
+  if (!sessionId || typeof sessionId !== 'string') {
+    throw new HttpsError('invalid-argument', 'Falta el identificador de sesión.')
+  }
+  const sessionRef = db.collection('users').doc(request.auth.uid)
+    .collection('sesionesGeneracion').doc(sessionId)
+  await consumirLlamadaSesion(sessionRef, ['swre'])
+  await marcarExitoSesion(sessionRef)   // evita el reembolso: el cobro de 25 cr es definitivo
+  return { ok: true }
+})
+
 // ── acreditarCreditoManual (solo admin) ───────────────────────
 exports.acreditarCreditoManual = onCall(
   { region: 'us-central1' },
@@ -806,6 +907,8 @@ async function callGemini({
   userPrompt,
   pdfPEBase64,
   pdfGPEBase64,
+  imagenBase64,
+  imagenMime,
   temperature,
   model = GEMINI_MODEL,
   maxOutputTokens = 65536,
@@ -816,6 +919,7 @@ async function callGemini({
   const parts = []
   if (pdfPEBase64)  parts.push({ inline_data: { mime_type: 'application/pdf', data: pdfPEBase64 } })
   if (pdfGPEBase64) parts.push({ inline_data: { mime_type: 'application/pdf', data: pdfGPEBase64 } })
+  if (imagenBase64) parts.push({ inline_data: { mime_type: imagenMime || 'image/png', data: imagenBase64 } })
   parts.push({ text: userPrompt })
 
   const body = {

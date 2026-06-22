@@ -10,6 +10,8 @@ import ResetPasswordPage   from './pages/ResetPasswordPage'
 import PlaneacionesConalep       from './pages/PlaneacionesConalep'
 import GeneradorPlaneacionesIA   from './pages/GeneradorPlaneacionesIA'
 import HorarioDocenteConalep     from './pages/HorarioDocenteConalep'
+import AvisoPrivacidadPage       from './pages/AvisoPrivacidadPage'
+import TerminosPage              from './pages/TerminosPage'
 
 // Páginas principales — carga diferida (pesadas: Firebase, date-fns, IA)
 const DashboardPage    = lazy(() => import('./pages/DashboardPage'))
@@ -20,6 +22,8 @@ const CompraCancelada  = lazy(() => import('./pages/CompraCancelada'))
 const AdminPage            = lazy(() => import('./pages/AdminPage'))
 const PerfilPage           = lazy(() => import('./pages/PerfilPage'))
 const EstimuloDocentePage  = lazy(() => import('./pages/EstimuloDocentePage'))
+const RegistroCalificacionesPage = lazy(() => import('./pages/RegistroCalificacionesPage'))
+const ConvertirSWREPage = lazy(() => import('./pages/ConvertirSWREPage'))
 
 function PageLoader() {
   return (
@@ -48,6 +52,8 @@ export default function App() {
           <Route path="/planeaciones-conalep"       element={<PlaneacionesConalep />} />
           <Route path="/generador-planeaciones-ia"  element={<GeneradorPlaneacionesIA />} />
           <Route path="/horario-docente-conalep"    element={<HorarioDocenteConalep />} />
+          <Route path="/aviso-de-privacidad"        element={<AvisoPrivacidadPage />} />
+          <Route path="/terminos"                   element={<TerminosPage />} />
 
           {/* Rutas protegidas — todos los usuarios autenticados */}
           <Route element={<ProtectedRoute />}>
@@ -58,6 +64,8 @@ export default function App() {
             <Route path="/compra-cancelada"  element={<CompraCancelada />} />
             <Route path="/perfil"              element={<PerfilPage />} />
             <Route path="/asistente-estimulo" element={<EstimuloDocentePage />} />
+            <Route path="/registro-calificaciones" element={<RegistroCalificacionesPage />} />
+            <Route path="/convertir-swre" element={<ConvertirSWREPage />} />
           </Route>
 
           {/* Rutas protegidas — solo admin */}

@@ -7,6 +7,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [aceptaTerminos, setAceptaTerminos] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -15,7 +16,11 @@ export default function RegisterPage() {
 
   async function handleSubmit(e) {
     e.preventDefault()
-    
+
+    if (!aceptaTerminos) {
+      return setError('Debes aceptar los Términos y el Aviso de Privacidad para continuar.')
+    }
+
     if (password !== confirmPassword) {
       return setError('Las contraseñas no coinciden')
     }
@@ -38,6 +43,9 @@ export default function RegisterPage() {
   }
 
   async function handleGoogleSignup() {
+    if (!aceptaTerminos) {
+      return setError('Debes aceptar los Términos y el Aviso de Privacidad para continuar.')
+    }
     try {
       setError('')
       setLoading(true)
@@ -174,10 +182,25 @@ export default function RegisterPage() {
             </div>
           </div>
 
+          <label className="flex items-start gap-2.5 mt-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={aceptaTerminos}
+              onChange={e => setAceptaTerminos(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-accent-600 focus:ring-accent-500/30"
+            />
+            <span className="text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+              He leído y acepto los{' '}
+              <Link to="/terminos" target="_blank" className="font-semibold text-primary-600 dark:text-primary-400 hover:underline">Términos y Condiciones</Link>
+              {' '}y el{' '}
+              <Link to="/aviso-de-privacidad" target="_blank" className="font-semibold text-primary-600 dark:text-primary-400 hover:underline">Aviso de Privacidad</Link>.
+            </span>
+          </label>
+
           <button
             type="submit"
-            disabled={loading}
-            className="btn-accent w-full justify-center py-2.5 mt-4 text-base"
+            disabled={loading || !aceptaTerminos}
+            className="btn-accent w-full justify-center py-2.5 mt-4 text-base disabled:opacity-50"
           >
             {loading ? 'Creando cuenta...' : 'Crear Cuenta'}
           </button>

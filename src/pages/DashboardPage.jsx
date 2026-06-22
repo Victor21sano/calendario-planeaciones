@@ -134,7 +134,46 @@ function MateriaCard({ materia, idx, onNavigate, onDuplicate, onDelete }) {
   )
 }
 
-// ─── Tarjeta Asistente Estímulo ──────────────────────────────
+// ─── Badges reutilizables ────────────────────────────────────
+const BadgeGratuito = (
+  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300">
+    <svg aria-hidden="true" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+    Gratuito
+  </span>
+)
+const BadgeProximamente = (
+  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-500 dark:bg-slate-700/60 dark:text-slate-400">
+    <svg aria-hidden="true" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+    Próximamente
+  </span>
+)
+const BadgeNuevo = (
+  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-accent-50 text-accent-700 dark:bg-accent-900/30 dark:text-accent-300">
+    <svg aria-hidden="true" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
+    Nuevo
+  </span>
+)
+
+// ─── Tarjeta de herramienta (mismo estilo que las de planeaciones) ──
+function ToolCard({ to, disabled = false, badge, titulo, desc, footer, idx = 0 }) {
+  const { ref, onMouseMove } = useSpotlight()
+  const cls = `card card-spotlight group relative min-h-[176px] animate-scale-in ${disabled ? 'cursor-not-allowed select-none opacity-95' : 'cursor-pointer'}`
+  const style = { animationDelay: `${Math.min(idx * 50, 250)}ms` }
+  const inner = (
+    <>
+      <div className="absolute top-4 right-4 z-10">{badge}</div>
+      <div className="relative z-[1] p-5 flex flex-col h-full">
+        <h3 className="text-base font-bold text-slate-900 dark:text-slate-50 leading-snug pr-24 mb-2 line-clamp-2">{titulo}</h3>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">{desc}</p>
+        <div className="mt-auto">{footer}</div>
+      </div>
+    </>
+  )
+  if (to && !disabled) return <Link to={to} ref={ref} onMouseMove={onMouseMove} className={`${cls} block`} style={style}>{inner}</Link>
+  return <div ref={ref} onMouseMove={onMouseMove} className={cls} style={style}>{inner}</div>
+}
+
+// ─── Sección de herramientas (gratuitas + premium) ───────────
 function EstimuloCard() {
   const stored = (() => {
     try { return JSON.parse(localStorage.getItem('asistente-estimulo-docente-v1') || '{}') } catch { return {} }
@@ -146,58 +185,75 @@ function EstimuloCard() {
   const hasProgress = done > 0
 
   return (
-    <section className="mt-10" aria-labelledby="herramientas-title">
-      <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-brand-700 dark:text-brand-300" id="herramientas-title">
-        Herramientas gratuitas
-      </p>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        <Link
-          to="/asistente-estimulo"
-          className="card card-spotlight group relative cursor-pointer animate-scale-in border-t-2 border-brand-400 dark:border-brand-500 block"
-        >
-          {/* Badge top-right */}
-          <div className="absolute top-4 right-4 z-10">
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300">
-              <svg aria-hidden="true" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-              </svg>
-              Gratuito
-            </span>
-          </div>
-
-          <div className="relative z-[1] p-5 flex flex-col h-full">
-            <h3 className="font-display text-base font-bold text-slate-900 dark:text-slate-50 leading-snug pr-20 mb-1">
-              Estímulo Docente 2-2526
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
-              Checklist + estimador de puntaje para el trámite semestral CONALEP.
-            </p>
-
-            <div className="mt-auto space-y-1.5">
-              <div className="flex items-center justify-between">
-                {hasProgress ? (
-                  <>
-                    <span className="flex items-center gap-1.5 text-[11px] font-medium text-brand-600 dark:text-brand-400">
-                      <span className="w-1.5 h-1.5 rounded-full bg-brand-500" />
-                      En progreso
-                    </span>
-                    <span className="text-[11px] text-slate-400 dark:text-slate-500">{done} / {TOTAL} requisitos</span>
-                  </>
-                ) : (
-                  <span className="text-[11px] text-slate-400 dark:text-slate-500 italic">Sin iniciar</span>
-                )}
+    <>
+      <section className="mt-10" aria-labelledby="herramientas-title">
+        <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-brand-700 dark:text-brand-300" id="herramientas-title">
+          Herramientas gratuitas
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <ToolCard
+            to="/asistente-estimulo" idx={0} badge={BadgeGratuito}
+            titulo="Estímulo Docente 2-2526"
+            desc="Checklist + estimador de puntaje para el trámite semestral CONALEP."
+            footer={(
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  {hasProgress ? (
+                    <>
+                      <span className="flex items-center gap-1.5 text-[11px] font-medium text-brand-600 dark:text-brand-400">
+                        <span className="w-1.5 h-1.5 rounded-full bg-brand-500" /> En progreso
+                      </span>
+                      <span className="text-[11px] text-slate-400 dark:text-slate-500">{done} / {TOTAL} requisitos</span>
+                    </>
+                  ) : (
+                    <span className="text-[11px] text-slate-400 dark:text-slate-500 italic">Sin iniciar</span>
+                  )}
+                </div>
+                <div className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-slate-700/60 overflow-hidden">
+                  <div className="h-full rounded-full bg-brand-500 transition-[width] duration-700 ease-out-strong" style={{ width: `${pct}%` }} />
+                </div>
               </div>
-              <div className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-slate-700/60 overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-brand-500 transition-[width] duration-700 ease-out-strong"
-                  style={{ width: `${pct}%` }}
-                />
+            )}
+          />
+          <ToolCard
+            to="/registro-calificaciones" idx={1} badge={BadgeGratuito}
+            titulo="Registro de calificaciones"
+            desc="Captura en vivo trabajos, proyectos y exámenes con promedio acumulado y semáforo automático. Exporta a Excel cuando quieras."
+            footer={(
+              <div className="flex items-center gap-1.5 text-[11px] font-medium text-brand-600 dark:text-brand-400">
+                <svg aria-hidden="true" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6M5 21h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                Abrir registro
               </div>
-            </div>
-          </div>
-        </Link>
-      </div>
-    </section>
+            )}
+          />
+        </div>
+      </section>
+
+      <section className="mt-10" aria-labelledby="premium-title">
+        <p id="premium-title" className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-accent-700 dark:text-accent-300">
+          Herramientas premium
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <ToolCard
+            to="/convertir-swre" idx={0} badge={BadgeNuevo}
+            titulo="Convertir a formato SWRE"
+            desc="Toma los promedios de tu Registro de calificaciones y genera las letras (N/P · I · S · B · E) listas para pegar en la sábana de SWRE."
+            footer={(
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1 rounded-full bg-accent-50 text-accent-700 dark:bg-accent-900/30 dark:text-accent-300 px-2 py-0.5 text-[11px] font-bold">
+                  <svg aria-hidden="true" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  25 créditos por parcial
+                </span>
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-700 dark:text-brand-300">
+                  Abrir
+                  <svg aria-hidden="true" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                </span>
+              </div>
+            )}
+          />
+        </div>
+      </section>
+    </>
   )
 }
 
@@ -448,7 +504,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* ── Herramientas ── */}
+        {/* ── Herramientas (gratuitas + premium) ── */}
         <EstimuloCard />
       </main>
 

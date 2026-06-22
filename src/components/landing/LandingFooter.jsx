@@ -13,6 +13,11 @@ const ENLACES_CUENTA = [
   ['Recuperar contraseña', '/reset-password'],
 ]
 
+const ENLACES_LEGAL = [
+  ['Aviso de Privacidad', '/aviso-de-privacidad'],
+  ['Términos y Condiciones', '/terminos'],
+]
+
 function ColumnaEnlaces({ titulo, enlaces }) {
   return (
     <nav aria-label={titulo}>
@@ -36,7 +41,7 @@ function ColumnaEnlaces({ titulo, enlaces }) {
 export default function LandingFooter() {
   return (
     <footer className="mt-20 bg-brand-900 dark:bg-[#0b1513]">
-      <div className="mx-auto grid max-w-4xl gap-10 px-4 py-12 sm:grid-cols-[1.3fr_1fr_0.8fr]">
+      <div className="mx-auto grid max-w-5xl gap-10 px-4 py-12 sm:grid-cols-[1.3fr_1fr_0.8fr_0.9fr]">
         <div>
           <div className="flex items-center gap-3" translate="no">
             <BrandMark className="w-9 h-9" compact />
@@ -48,6 +53,7 @@ export default function LandingFooter() {
         </div>
         <ColumnaEnlaces titulo="Producto" enlaces={ENLACES_PRODUCTO} />
         <ColumnaEnlaces titulo="Cuenta" enlaces={ENLACES_CUENTA} />
+        <ColumnaEnlaces titulo="Legal" enlaces={ENLACES_LEGAL} />
       </div>
       <div className="border-t border-white/10">
         <p className="mx-auto max-w-4xl px-4 py-5 text-xs text-brand-100/60">
